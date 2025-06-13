@@ -42,29 +42,9 @@ def create_mcp_server():
         
         # Convert FastAPI app to MCP server using FastMCP.from_fastapi()
         # This works as a pure wrapper - no backend services needed during conversion
-        mcp = FastMCP.from_fastapi(
-            app=app,
-            # name="Advanced RAG MCP Server",
-            # tags={"rag", "retrieval", "langchain", "fastapi", "production"},
-            # # Custom component names for better MCP tool naming
-            # mcp_names={
-            #     "naive_retriever": "naive_search",
-            #     "bm25_retriever": "keyword_search", 
-            #     "contextual_compression_retriever": "compressed_search",
-            #     "multi_query_retriever": "enhanced_search",
-            #     "ensemble_retriever": "hybrid_search",
-            #     "semantic_retriever": "semantic_search"
-            # }
-        )
+        mcp = FastMCP.from_fastapi(app=app)
         
         logger.info("FastMCP server created successfully from FastAPI app")
-        logger.info("MCP tools available with improved names:")
-        logger.info("- naive_search: Basic similarity search")
-        logger.info("- keyword_search: BM25 keyword-based search") 
-        logger.info("- compressed_search: Contextual compression retrieval")
-        logger.info("- enhanced_search: Multi-query expansion")
-        logger.info("- hybrid_search: Combined retrieval strategies")
-        logger.info("- semantic_search: Advanced semantic search")
         
         return mcp
         

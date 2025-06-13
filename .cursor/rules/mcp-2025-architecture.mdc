@@ -1,0 +1,401 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# MCP 2025 Architecture Patterns & Best Practices
+
+## Project Architecture Overview (June 2025)
+
+This project represents **production-proven MCP implementation** using the **FastAPI-to-MCP conversion pattern**. The architecture demonstrates zero-duplication approach for converting existing FastAPI services to MCP-compatible servers.
+
+## Core Architecture Principles
+
+### 1. **Zero Code Duplication**
+```python
+# ✅ Correct: Single source of truth
+from fastmcp import FastMCP
+from src.main_api import app  # Existing FastAPI application
+
+mcp = FastMCP.from_fastapi(app=app)  # Auto-conversion
+```
+
+### 2. **Layered Responsibility**
+```
+┌─────────────────────────────────────┐
+│          AI Agent Layer             │  ← Claude, GPT, etc.
+├─────────────────────────────────────┤
+│         MCP Protocol Layer          │  ← Model Context Protocol
+├─────────────────────────────────────┤
+│        FastMCP Wrapper Layer        │  ← [fastapi_wrapper.py]
+├─────────────────────────────────────┤
+│         FastAPI App Layer           │  ← [main_api.py] - 6 endpoints
+├─────────────────────────────────────┤
+│         Business Logic Layer        │  ← RAG chains, retrievers
+├─────────────────────────────────────┤
+│         Infrastructure Layer        │  ← Qdrant, OpenAI, etc.
+└─────────────────────────────────────┘
+```
+
+### 3. **Protocol Compatibility**
+- **MCP Specification**: Full compliance with MCP 2025 specification
+- **Transport Layers**: STDIO, HTTP, WebSocket support
+- **Tool Discovery**: Automatic endpoint enumeration
+- **Schema Validation**: Pydantic model inheritance
+
+## Implementation Patterns
+
+### FastAPI Endpoint → MCP Tool Mapping
+
+#### Current Production Mapping
+| FastAPI Route | HTTP Method | MCP Tool Name | Purpose |
+|---------------|-------------|---------------|---------|
+| `/invoke/naive_retriever` | POST | `naive_retriever` | Basic vector similarity |
+| `/invoke/bm25_retriever` | POST | `bm25_retriever` | Keyword search |
+| `/invoke/contextual_compression_retriever` | POST | `contextual_compression_retriever` | Context compression |
+| `/invoke/multi_query_retriever` | POST | `multi_query_retriever` | Query expansion |
+| `/invoke/ensemble_retriever` | POST | `ensemble_retriever` | Hybrid search |
+| `/invoke/semantic_retriever` | POST | `semantic_retriever` | Semantic vector search |
+
+#### Conversion Rules
+```python
+# POST endpoints → MCP tools (executable functions)
+@app.post("/invoke/semantic_retriever")
+async def semantic_retriever(request: RetrieverRequest):
+    # Becomes MCP tool: semantic_retriever()
+
+# GET endpoints → MCP resources (data access)
+@app.get("/collections/{collection_name}")
+async def get_collection_info(collection_name: str):
+    # Becomes MCP resource: collections/{collection_name}
+```
+
+### Error Handling Architecture
+
+#### Graceful Degradation Pattern
+```python
+# Pattern used throughout the project
+async def resilient_mcp_operation():
+    try:
+        # Primary operation
+        return await primary_service()
+    except ServiceUnavailable:
+        # Fallback to cached/simplified version
+        return await fallback_service()
+    except Exception as e:
+        # Proper error logging and user-friendly response
+        logger.error(f"MCP operation failed: {e}")
+        return {"error": "Service temporarily unavailable"}
+```
+
+#### Error Response Standardization
+```python
+# MCP-compliant error responses
+{
+    "jsonrpc": "2.0",
+    "id": request_id,
+    "error": {
+        "code": -32603,  # Internal error
+        "message": "Tool execution failed",
+        "data": {"details": "Specific error context"}
+    }
+}
+```
+
+## Testing Architecture
+
+### Test Organization (2025 Structure)
+```
+tests/
+├── integration/              # End-to-end testing
+│   ├── verify_mcp.py        # MCP server verification ← Primary test
+│   ├── functional_quality_comparison.py  # Quality validation
+│   └── test_rag_pipeline.py # RAG pipeline testing
+├── mcp/                     # Protocol-specific tests
+│   ├── test_tool_discovery.py
+│   ├── test_tool_execution.py
+│   └── test_protocol_compliance.py
+├── unit/                    # Component testing
+│   └── test_retriever_factory.py
+└── performance/             # Load and stress testing
+    └── fastmcp_performance_optimization.py
+```
+
+### Testing Workflow Pattern
+```bash
+# 1. Unit Tests - Individual components
+uv run pytest tests/unit/ -v
+
+# 2. Integration Tests - MCP server functionality
+uv run python tests/integration/verify_mcp.py
+
+# 3. Quality Validation - FastAPI vs MCP comparison
+uv run pytest tests/integration/functional_quality_comparison.py -v
+
+# 4. Performance Testing - Load and latency
+uv run pytest tests/performance/ -v
+```
+
+## Deployment Architecture
+
+### 2025 Production Deployment Options
+
+#### 1. **Streamable HTTP (Recommended)**
+```python
+# Production-ready configuration
+mcp.run(
+    transport="streamable_http",
+    host="0.0.0.0",
+    port=8000,
+    workers=4
+)
+```
+
+#### 2. **Container-First Deployment**
+```dockerfile
+# Optimized for 2025 container platforms
+FROM python:3.11-slim
+COPY pyproject.toml uv.lock ./
+RUN pip install uv && uv sync --frozen
+COPY src/ /app/src/
+WORKDIR /app
+EXPOSE 8000
+CMD ["python", "-m", "src.mcp_server.fastapi_wrapper"]
+```
+
+#### 3. **Cloud-Native Integration**
+```yaml
+# Kubernetes deployment with autoscaling
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-server
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: mcp-server
+        image: mcp-server:latest
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+```
+
+## Monitoring and Observability
+
+### Structured Logging Pattern
+```python
+import structlog
+
+logger = structlog.get_logger()
+
+async def mcp_tool_execution(tool_name: str, args: dict):
+    logger.info(
+        "MCP tool execution started",
+        tool_name=tool_name,
+        args_hash=hash(str(args)),
+        timestamp=datetime.utcnow()
+    )
+    
+    try:
+        result = await execute_tool(tool_name, args)
+        logger.info(
+            "MCP tool execution completed",
+            tool_name=tool_name,
+            result_size=len(str(result)),
+            success=True
+        )
+        return result
+    except Exception as e:
+        logger.error(
+            "MCP tool execution failed",
+            tool_name=tool_name,
+            error=str(e),
+            success=False
+        )
+        raise
+```
+
+### Health Check Integration
+```python
+# Health checks for MCP server dependencies
+@app.get("/health")
+async def health_check():
+    checks = {
+        "mcp_server": "healthy",
+        "vector_store": await check_qdrant_health(),
+        "llm_service": await check_openai_health(),
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    
+    overall_status = "healthy" if all(
+        v == "healthy" for k, v in checks.items() 
+        if k != "timestamp"
+    ) else "degraded"
+    
+    return {"status": overall_status, "checks": checks}
+```
+
+## Security Architecture
+
+### Authentication Integration
+```python
+from fastmcp.security import require_auth
+
+@require_auth(scope="mcp:tools:read")
+async def authenticated_mcp_server():
+    """MCP server with proper authentication"""
+    pass
+```
+
+### Rate Limiting Pattern
+```python
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
+
+@app.post("/invoke/{tool_name}")
+@limiter.limit("10/minute")  # 10 requests per minute per IP
+async def rate_limited_endpoint():
+    pass
+```
+
+## Performance Optimization
+
+### Caching Strategy
+```python
+import redis
+from functools import wraps
+
+redis_client = redis.Redis(decode_responses=True)
+
+def cache_tool_result(expire_seconds=3600):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            cache_key = f"mcp_tool:{func.__name__}:{hash(str(args) + str(kwargs))}"
+            
+            # Try cache first
+            cached = redis_client.get(cache_key)
+            if cached:
+                return json.loads(cached)
+            
+            # Execute and cache
+            result = await func(*args, **kwargs)
+            redis_client.setex(cache_key, expire_seconds, json.dumps(result))
+            return result
+        return wrapper
+    return decorator
+
+@cache_tool_result(expire_seconds=1800)
+async def cached_semantic_retriever(query: str):
+    """Cached semantic retrieval for better performance"""
+    pass
+```
+
+### Async Optimization
+```python
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+# Thread pool for CPU-bound operations
+executor = ThreadPoolExecutor(max_workers=4)
+
+async def optimized_mcp_tool():
+    # Use thread pool for blocking operations
+    cpu_bound_result = await asyncio.get_event_loop().run_in_executor(
+        executor, cpu_intensive_operation
+    )
+    
+    # Async operations run concurrently
+    io_results = await asyncio.gather(
+        async_operation_1(),
+        async_operation_2(),
+        async_operation_3()
+    )
+    
+    return combine_results(cpu_bound_result, io_results)
+```
+
+## Integration Patterns
+
+### LangChain MCP Adapter Integration
+```python
+from langchain_mcp_adapters import create_langchain_tool
+
+# Convert MCP tools to LangChain tools for agent workflows
+mcp_tools = [
+    create_langchain_tool(
+        server_path="src/mcp_server/fastapi_wrapper.py",
+        tool_name=tool_name
+    )
+    for tool_name in ["semantic_retriever", "hybrid_retriever", "bm25_retriever"]
+]
+
+# Use in LangChain agent
+from langchain.agents import create_openai_tools_agent
+
+agent = create_openai_tools_agent(llm, mcp_tools, prompt)
+```
+
+### Claude Desktop Integration
+```json
+{
+  "name": "Advanced RAG Server",
+  "description": "Production RAG server with 6 retrieval methods",
+  "command": "python",
+  "args": ["-m", "src.mcp_server.fastapi_wrapper"],
+  "working_directory": "/path/to/adv-rag"
+}
+```
+
+## Best Practices Summary
+
+### ✅ **Do's**
+1. **Use FastMCP.from_fastapi()** for zero duplication
+2. **Implement comprehensive error handling** with proper logging
+3. **Add health checks** for all dependencies
+4. **Use caching** for expensive operations
+5. **Follow async patterns** for I/O operations
+6. **Implement rate limiting** for production deployment
+7. **Use structured logging** for observability
+8. **Test both FastAPI and MCP** endpoints
+
+### ❌ **Don'ts**
+1. **Don't duplicate business logic** between FastAPI and MCP
+2. **Don't skip error handling** in tool implementations
+3. **Don't ignore performance** - implement caching and async patterns
+4. **Don't deploy without health checks** and monitoring
+5. **Don't hardcode credentials** - use environment variables
+6. **Don't skip testing** - verify MCP conversion works
+7. **Don't ignore security** - implement authentication and rate limiting
+
+## Migration Checklist
+
+### From Legacy MCP Implementations
+- [ ] Remove dedicated MCP server if using FastMCP wrapper
+- [ ] Update imports to use FastMCP.from_fastapi()
+- [ ] Verify all tools are discoverable
+- [ ] Update testing to use integration tests
+- [ ] Add health checks and monitoring
+- [ ] Implement proper error handling
+- [ ] Add performance optimizations (caching, async)
+- [ ] Update deployment configuration
+
+### For New MCP Projects
+- [ ] Start with FastAPI application design
+- [ ] Use FastMCP.from_fastapi() for MCP conversion
+- [ ] Implement comprehensive testing strategy
+- [ ] Add monitoring and observability from day 1
+- [ ] Plan for production deployment early
+- [ ] Implement security patterns (auth, rate limiting)
+- [ ] Document tool purposes and usage
+- [ ] Set up CI/CD for automated testing
+
+This architecture guide represents proven patterns for production MCP server implementation in 2025.

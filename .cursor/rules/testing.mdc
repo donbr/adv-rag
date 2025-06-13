@@ -55,10 +55,35 @@ alwaysApply: true
   ```bash
   python -m pytest tests/ -v
   # or for a specific test file:
-  python -m pytest tests/functional_quality_comparison.py -v
+  python -m pytest tests/integration/functional_quality_comparison.py -v
   ```
 - If you see `ModuleNotFoundError` or missing dependency errors, ensure the environment is activated and all dependencies are installed.
 - For async tests, ensure `pytest-asyncio` is installed (it is in [pyproject.toml](mdc:pyproject.toml)).
+
+## MCP-Specific Testing (June 2025)
+- **MCP Server Verification**: Use [verify_mcp.py](mdc:tests/integration/verify_mcp.py)
+  ```bash
+  uv run python tests/integration/verify_mcp.py
+  ```
+- **FastAPI-MCP Quality Comparison**: 
+  ```bash
+  uv run pytest tests/integration/functional_quality_comparison.py -v
+  ```
+- **MCP Protocol Tests**: 
+  ```bash
+  uv run pytest tests/mcp/ -v
+  ```
+- **Integration Test Suite**:
+  ```bash
+  # Full integration test suite
+  uv run pytest tests/integration/ -v
+  
+  # Performance tests
+  uv run pytest tests/performance/ -v
+  
+  # Unit tests
+  uv run pytest tests/unit/ -v
+  ```
 
 ## Best Practices
 - Always activate the environment before running or debugging tests.

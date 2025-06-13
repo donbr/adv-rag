@@ -3,15 +3,23 @@ description:
 globs: 
 alwaysApply: true
 ---
-# FastMCP Migration & Comparison Guide
+# FastMCP Migration & Comparison Guide (Updated June 2025)
 
 ## Project Overview
 
-Migrate existing FastAPI services to Model Context Protocol (MCP) using two implementations:
-- **Official MCP SDK** ([`mcp`](https://pypi.org/project/mcp/)) - Anthropic's official Python SDK
-- **FastMCP 2.0** ([`fastmcp`](https://pypi.org/project/fastmcLowin's high-level framework
+This guide compares two approaches for creating MCP servers from FastAPI applications:
+- **Official MCP SDK** ([`mcp`](mdc:https:/pypi.org/project/mcp)) - Anthropic's official Python SDK
+- **FastMCP 2.0** ([`fastmcp`](mdc:https:/pypi.org/project/fastmcp)) - Marvin Lowin's high-level framework
 
-Evaluate performance, LangChainproduction readiness.
+This project uses FastMCP 2.0 with `FastMCP.from_fastapi()` to convert existing FastAPI endpoints to MCP tools.
+
+## Current Architecture (June 2025)
+
+**Implementation Details:**
+- **Approach**: FastMCP automatic conversion via [fastapi_wrapper.py](mdc:src/mcp_server/fastapi_wrapper.py)
+- **Conversion Result**: 6 FastAPI endpoints become MCP tools
+- **Trade-off**: Convenience of automatic conversion vs. reduced control over MCP implementation
+- **Transport**: Uses streamable HTTP for deployment
 
 ## Prerequisites
 
@@ -326,18 +334,43 @@ export default function() {
 // Run: k6 run performance_test.js
 ```
 
-## Decision Framework
+## Architecture Comparison
 
-### Recommendation: **FastMCP 2.0** for most migrations
-**Justification**: Lower learning curve with FastAPI-style syntax while maintaining MCP protocol compliance.
+| Comparison Point | Official MCP SDK (`mcp`) | FastMCP 2.0 (`fastmcp`) |
+|---|-----|-----|
+| **Protocol Compliance** | Full specification ✅ | Core features ✅ |
+| **FastAPI Integration** | Manual tool creation | Automatic conversion ✅ |
+| **Code Duplication** | Requires rewriting endpoints | Zero duplication ✅ |
+| **Learning Curve** | Moderate (new concepts) | Low (FastAPI-like) ✅ |
+| **Production Ready** | Full control ✅ | High-level abstractions ✅ |
+| **License** | Apache 2.0 ✅ | MIT ✅ |
+
+## Decision Framework (June 2025)
+
+### **This Project's Choice: FastMCP.from_fastapi()**
+**Rationale**: Project had existing FastAPI endpoints that needed MCP exposure
+**Results**: 
+- Automatic conversion of 6 endpoints to MCP tools
+- Reduced implementation time vs. manual MCP tool creation
+- Added dependency on FastMCP library
 
 ### When to Choose Official MCP SDK:
 - Full protocol specification compliance required
-- Streaming capabilities essential
--opic ecosystem integration
+- Custom transport implementations needed
+- Maximum control over MCP protocol features
+- Complex tool orchestration requirements
 
-### When to Choose Fastigration from FastAPI
-- Team familiar with FastAPI po production pipeline
+### When to Choose FastMCP 2.0:
+- **FastAPI-first workflow** (like this project)
+- Rapid prototyping and development
+- Team familiar with FastAPI patterns
+- Automatic endpoint-to-tool conversion preferred
+
+### Implementation Notes:
+- **Scope**: 6 FastAPI endpoints converted to MCP tools
+- **Verification**: Functional comparison tests confirm equivalent behavior
+- **Deployment**: Supports streamable HTTP transport
+- **Testing**: Integration test suite validates MCP protocol compliance
 
 ## 3-Step Rollback Plan
 
