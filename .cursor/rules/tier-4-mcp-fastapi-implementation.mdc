@@ -1,0 +1,243 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# MCP-FastAPI Implementation (Tier 4) - Respects RAG Foundation
+
+## Implementation Constraint
+
+**This tier must preserve all RAG patterns and interfaces from Tier 3.** MCP serves as an interface layer that exposes existing RAG functionality without modifying core business logic.
+
+## Core Implementation Pattern: FastMCP.from_fastapi()
+
+The [fastapi_wrapper.py](mdc:src/mcp_server/fastapi_wrapper.py) implements zero-duplication FastAPI-to-MCP conversion:
+
+```python
+from fastmcp import FastMCP
+from src.main_api import app  # Existing FastAPI app
+
+# Convert FastAPI app to MCP server (zero duplication)
+mcp = FastMCP.from_fastapi(app=app)
+```
+
+## Architecture Benefits
+
+- ✅ **Zero Code Duplication**: No need to rewrite business logic
+- ✅ **Schema Inheritance**: Automatic Pydantic model conversion
+- ✅ **Consistent API**: Single source of truth for endpoints
+- ✅ **Preserves RAG Patterns**: MCP wraps existing functionality
+
+## Endpoint-to-Tool Mapping
+
+### Current Production Mapping
+The [main_api.py](mdc:src/main_api.py) FastAPI endpoints automatically become MCP tools:
+
+| FastAPI Endpoint | MCP Tool Name | Purpose |
+|---|---|---|
+| `/invoke/naive_retriever` | `naive_retriever` | Basic vector search |
+| `/invoke/bm25_retriever` | `bm25_retriever` | Keyword-based search |
+| `/invoke/contextual_compression_retriever` | `contextual_compression_retriever` | Compressed retrieval |
+| `/invoke/multi_query_retriever` | `multi_query_retriever` | Multi-query expansion |
+| `/invoke/ensemble_retriever` | `ensemble_retriever` | Hybrid search method |
+| `/invoke/semantic_retriever` | `semantic_retriever` | Semantic vector search |
+
+### Conversion Rules
+```python
+# POST endpoints → MCP tools (executable functions)
+@app.post("/invoke/semantic_retriever")
+async def semantic_retriever(request: RetrieverRequest):
+    # Becomes MCP tool: semantic_retriever()
+
+# GET endpoints → MCP resources (data access)
+@app.get("/collections/{collection_name}")
+async def get_collection_info(collection_name: str):
+    # Becomes MCP resource: collections/{collection_name}
+```
+
+## MCP SDK Guidelines (≥ 1.9)
+
+When extending the server, keep these SDK rules in mind:
+
+1. **Imports** – Do **not** import internal symbols that no longer exist (e.g. `ContentChunk`). Stick to public entry-points such as `mcp.server.fastmcp.FastMCP` and decorators in `mcp`.
+2. **Tool return values** – `@mcp.tool()` functions should return plain Python types (`str`, `dict`, `list`, etc.). FastMCP handles JSON-RPC serialisation; no custom wrapper classes are required.
+3. **Transport** – The server starts via `mcp.run(transport="stdio")` so it can be discovered by MCP-aware clients like Claude Desktop.
+4. **SDK version** – The project pins `"mcp[cli] >= 1.9.3"` in [pyproject.toml](mdc:pyproject.toml). Ensure any new code or dependencies are compatible with this version range.
+
+## Verification and Testing
+
+### Primary Verification
+Always verify MCP conversion with [verify_mcp.py](mdc:tests/integration/verify_mcp.py):
+
+```bash
+# Verify FastAPI-MCP conversion works correctly
+uv run python tests/integration/verify_mcp.py
+```
+
+### Testing Workflow
+```bash
+# 1. Test FastAPI endpoints directly
+uv run bash tests/integration/test_api_endpoints.sh
+
+# 2. Verify MCP conversion
+uv run python tests/integration/verify_mcp.py
+
+# 3. Compare FastAPI vs MCP quality
+uv run pytest tests/integration/functional_quality_comparison.py
+```
+
+## Deployment Options
+
+### 1. Streamable HTTP (Recommended)
+```python
+# Production-ready HTTP transport
+mcp.run(
+    transport="streamable_http",
+    host="0.0.0.0", 
+    port=8000
+)
+```
+
+### 2. Container Deployment
+```dockerfile
+# Dockerfile for MCP server
+FROM python:3.11-slim
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY src/ /app/src/
+WORKDIR /app
+CMD ["python", "-m", "src.mcp_server.fastapi_wrapper"]
+```
+
+### 3. Claude Desktop Integration
+```bash
+# Install for Claude Desktop usage
+fastmcp install src/mcp_server/fastapi_wrapper.py --name "Advanced RAG"
+```
+
+## Error Handling and Logging
+
+### Robust Error Handling
+```python
+# Pattern used in fastapi_wrapper.py
+def create_mcp_server():
+    try:
+        from src.main_api import app
+        mcp = FastMCP.from_fastapi(app=app)
+        return mcp
+    except Exception as e:
+        logger.error(f"Failed to create MCP server: {e}")
+        raise
+```
+
+### Health Check Integration
+```python
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.utcnow()}
+
+@app.get("/ready")
+async def readiness_check():
+    # Check dependencies (Qdrant, etc.)
+    try:
+        # Verify vector store connection
+        await vectorstore.asimilarity_search("health", k=1)
+        return {"status": "ready"}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Not ready: {e}")
+```
+
+## Transport-Based Performance Considerations
+
+### Performance Context
+Performance optimization becomes **critical when moving from stdio to JSON-RPC transports**:
+
+**STDIO Transport (Claude Desktop):**
+- Single-user, in-process communication
+- No serialization overhead
+- Performance focus: RAG pipeline optimization
+
+**JSON-RPC Transports (Production):**
+- HTTP/WebSocket for multi-user scenarios
+- JSON serialization/deserialization overhead
+- Network latency and connection management
+- **Logging verbosity becomes user-facing issue**
+
+### Production Transport Configuration
+```python
+# HTTP JSON-RPC for web applications
+mcp.run(
+    transport="streamable_http",
+    host="0.0.0.0", 
+    port=8000,
+    # Optimize for production
+    log_level="WARNING"  # Reduce MCP protocol verbosity
+)
+
+# Structured logging with filtering
+import logging
+logging.getLogger("mcp.server").setLevel(logging.WARNING)
+logging.getLogger("fastmcp").setLevel(logging.INFO)
+```
+
+### Authentication and Security
+```python
+from fastmcp.auth import bearer_auth
+import os
+
+# Production authentication for HTTP transport
+@bearer_auth(os.getenv("MCP_API_KEY"))
+async def secured_mcp_server():
+    # Secured MCP endpoints for multi-user scenarios
+    pass
+```
+
+## Integration with LangChain
+
+For LangChain integration, use the MCP tools via langchain-mcp-adapters:
+
+```python
+from langchain_mcp_adapters import create_langchain_tool
+
+# Convert MCP tools to LangChain tools
+mcp_tool = create_langchain_tool(
+    server_path="src/mcp_server/fastapi_wrapper.py",
+    tool_name="semantic_retriever"
+)
+```
+
+## Best Practices Summary
+
+### ✅ **Do's**
+1. **Use FastMCP.from_fastapi()** for zero duplication
+2. **Preserve RAG patterns** from Tier 2 - never modify core business logic
+3. **Verify with tests** after any changes
+4. **Handle errors gracefully** with proper logging
+5. **Test both FastAPI and MCP** endpoints
+6. **Use proper path resolution** for imports
+
+### ❌ **Don'ts**
+1. **Don't modify RAG pipeline** - MCP is interface only
+2. **Don't duplicate business logic** between FastAPI and MCP
+3. **Don't skip error handling** in tool implementations
+4. **Don't ignore performance** - implement caching at FastAPI level
+5. **Don't skip testing** - verify MCP conversion works
+
+## Common Patterns and Solutions
+
+### Path Resolution
+```python
+# Proper path resolution for imports
+current_file = Path(__file__).resolve()
+project_root = current_file.parent.parent.parent
+sys.path.insert(0, str(project_root))
+```
+
+### Environment Dependencies
+```python
+# MCP server creation doesn't require backend services
+# Services only needed when tools execute
+logger.info("FastMCP acts as wrapper - backend services only needed when tools execute")
+```
+
+**Remember: MCP implementation serves as an interface layer that exposes existing RAG functionality without modifying the core business logic defined in Tier 2.**

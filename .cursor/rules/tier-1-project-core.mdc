@@ -1,0 +1,51 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Core Standards (Tier 1) - Non-Negotiable
+
+## Model Pinning (IMMUTABLE)
+
+The application must **always** instantiate:
+
+* `ChatOpenAI` with `model="gpt-4.1-mini"`
+* `OpenAIEmbeddings` with `model="text-embedding-3-small"`
+
+These values are considered part of the public contract of the server (to reproduce answers deterministically and keep embedding dimensions stable). **Do not** change, override, or wrap these model identifiers elsewhere in the codebase without first updating this rule and performing a coordinated version bump across documentation and tests.
+
+## Essential Project Structure
+
+### Core Application Files
+- **[main_api.py](mdc:src/main_api.py)**: FastAPI application with RAG endpoints
+- **[settings.py](mdc:src/settings.py)**: Environment configuration using Pydantic settings
+- **[llm_models.py](mdc:src/llm_models.py)**: LLM model instantiation (must use `gpt-4.1-mini`)
+- **[embeddings.py](mdc:src/embeddings.py)**: Embedding models (must use `text-embedding-3-small`)
+
+### MCP Implementation
+- **[fastapi_wrapper.py](mdc:src/mcp_server/fastapi_wrapper.py)**: FastMCP wrapper for FastAPI app
+- **[verify_mcp.py](mdc:tests/integration/verify_mcp.py)**: MCP server verification
+
+### RAG Pipeline Components  
+- **[vectorstore_setup.py](mdc:src/vectorstore_setup.py)**: Qdrant vector database configuration
+- **[retriever_factory.py](mdc:src/retriever_factory.py)**: Retrieval strategies and hybrid search
+- **[chain_factory.py](mdc:src/chain_factory.py)**: LangChain LCEL chain assembly
+- **[ingest.py](mdc:scripts/data_ingestion/ingest.py)**: Primary data ingestion (populates vector stores)
+- **[data_loader.py](mdc:src/data_loader.py)**: Real-time document loading (BM25 support)
+
+## Import Conventions
+
+Use absolute imports from the `src` package:
+```python
+from src.llm_models import get_chat_openai
+from src.embeddings import get_openai_embeddings
+from src.vectorstore_setup import setup_qdrant
+```
+
+## Configuration Management
+
+All configuration flows through **[settings.py](mdc:src/settings.py)** using Pydantic BaseSettings:
+- Environment variables loaded from `.env`
+- Type validation and defaults
+- MCP server configuration
+- LLM and embedding model settings

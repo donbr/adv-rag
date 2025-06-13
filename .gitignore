@@ -130,3 +130,6 @@ wandb/
 .Trashes
 ehthumbs.db
 Thumbs.db
+# Test logs
+tests/**/logs/
+tests/**/*.log

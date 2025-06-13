@@ -1,0 +1,281 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# RAG & LangChain Patterns (Tier 3) - Immutable Foundation
+
+## RAG Pipeline Architecture (IMMUTABLE)
+
+This project implements a sophisticated RAG pipeline with hybrid search, LangChain LCEL chains, and production-ready patterns. All RAG components follow standardized interfaces for maintainability and testability. **MCP implementation must respect these patterns.**
+
+## Core RAG Components
+
+### Retrieval Factory Pattern
+**[retriever_factory.py](mdc:src/retriever_factory.py)** implements the factory pattern for retrieval strategies:
+
+```python
+# Standard retrieval interface
+def create_retriever(
+    retrieval_type: str,
+    vectorstore: VectorStore,
+    search_kwargs: dict = None
+) -> BaseRetriever:
+    """Factory function for consistent retriever creation"""
+```
+
+**Supported Retrieval Types:**
+- `similarity`: Basic vector similarity search
+- `mmr`: Maximum Marginal Relevance for diversity
+- `hybrid`: BM25 + vector search combination
+- `contextual`: Context-aware retrieval with metadata filtering
+
+### Chain Factory Pattern
+**[chain_factory.py](mdc:src/chain_factory.py)** assembles LangChain LCEL chains with standardized interfaces:
+
+```python
+# LCEL chain construction
+def create_rag_chain(
+    retriever: BaseRetriever,
+    llm: BaseChatModel,
+    prompt_template: str = None
+) -> RunnableSequence:
+    """Creates production-ready RAG chain with LCEL"""
+```
+
+## LangChain LCEL Architecture
+
+This project leverages LangChain Expression Language (LCEL) for composable, asynchronous RAG chains. All chain construction follows LCEL patterns for streaming, parallelization, and observability.
+
+### Basic RAG Chain Construction
+```python
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+
+def create_rag_chain(
+    retriever: BaseRetriever,
+    llm: BaseChatModel,
+    prompt_template: str = None
+) -> Runnable:
+    """Create LCEL RAG chain with proper composition"""
+    
+    # Default RAG prompt
+    if not prompt_template:
+        prompt_template = """Answer the question based on the context below.
+        
+Context: {context}
+Question: {question}
+Answer:"""
+    
+    prompt = ChatPromptTemplate.from_template(prompt_template)
+    
+    # LCEL chain with parallel retrieval and context formatting
+    rag_chain = (
+        RunnableParallel({
+            "context": retriever | format_docs,
+            "question": RunnablePassthrough()
+        })
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+    
+    return rag_chain
+```
+
+### Hybrid Retrieval Chain
+```python
+def create_hybrid_retrieval_chain(
+    vector_retriever: BaseRetriever,
+    bm25_retriever: BaseRetriever,
+    reranker: Optional[BaseRetriever] = None
+) -> Runnable:
+    """Hybrid retrieval combining vector and keyword search"""
+    
+    # Parallel retrieval from multiple sources
+    parallel_retrieval = RunnableParallel({
+        "vector_docs": vector_retriever,
+        "bm25_docs": bm25_retriever,
+        "query": RunnablePassthrough()
+    })
+    
+    # Document fusion and deduplication
+    fusion_chain = (
+        parallel_retrieval
+        | RunnableLambda(fuse_and_deduplicate_docs)
+    )
+    
+    # Optional reranking step
+    if reranker:
+        return fusion_chain | reranker
+    
+    return fusion_chain
+```
+
+## Vector Store Management
+
+### Qdrant Configuration
+**[vectorstore_setup.py](mdc:src/vectorstore_setup.py)** manages vector database lifecycle:
+
+```python
+# Production Qdrant setup
+def setup_qdrant(
+    collection_name: str,
+    embeddings: Embeddings,
+    url: str = None,
+    api_key: str = None
+) -> QdrantVectorStore:
+    """Initialize Qdrant with proper indexing and configuration"""
+```
+
+**Best Practices:**
+- Collection naming conventions: `{project}_{environment}_{version}`
+- Index configuration for optimal retrieval performance
+- Connection pooling for production workloads
+- Backup and recovery strategies
+
+## Document Processing Pipeline
+
+### Data Architecture
+The project uses a **dual-loading approach** for different use cases:
+
+**Primary Data Ingestion:**
+- **[ingest.py](mdc:scripts/data_ingestion/ingest.py)**: Main data source that populates vector stores
+- Handles bulk ingestion with semantic chunking
+- Sets up baseline and semantic collections in Qdrant
+
+**Real-Time Processing:**
+- **[data_loader.py](mdc:src/data_loader.py)**: Supports real-time BM25 ingestion
+- Provides interface for on-demand document loading
+- Some duplication with ingest.py but serves specific runtime needs
+
+```python
+# Standard document processing interface (data_loader.py)
+def load_documents(
+    source_path: str,
+    loader_type: str,
+    chunk_size: int = 1000,
+    chunk_overlap: int = 200
+) -> List[Document]:
+    """Load and chunk documents with metadata preservation"""
+```
+
+**Supported Document Types:**
+- CSV files (John Wick movie reviews via ingest.py)
+- PDF files (with layout preservation)
+- Text files and Markdown
+- Web scraping (with rate limiting)
+- Structured data (JSON, CSV)
+
+## Streaming and Async Patterns
+
+### Streaming RAG Responses
+```python
+async def create_streaming_rag_chain(
+    retriever: BaseRetriever,
+    llm: BaseChatModel
+) -> Runnable:
+    """RAG chain with streaming support for real-time responses"""
+    
+    prompt = ChatPromptTemplate.from_template("""
+    Answer based on the context. Stream your response naturally.
+    
+    Context: {context}
+    Question: {question}
+    Answer:
+    """)
+    
+    # Async retrieval with context preparation
+    async def retrieve_and_format(question: str) -> dict:
+        docs = await retriever.aget_relevant_documents(question)
+        return {
+            "context": format_docs(docs),
+            "question": question
+        }
+    
+    # Streaming chain
+    streaming_chain = (
+        RunnableLambda(retrieve_and_format)
+        | prompt
+        | llm.with_config({"tags": ["streaming"]})
+        | StrOutputParser()
+    )
+    
+    return streaming_chain
+```
+
+## Error Handling and Observability
+
+### LCEL Chain Error Handling
+```python
+from langchain_core.runnables import RunnableWithFallbacks
+
+def create_resilient_rag_chain(
+    primary_retriever: BaseRetriever,
+    fallback_retriever: BaseRetriever,
+    llm: BaseChatModel
+) -> Runnable:
+    """RAG chain with fallback mechanisms"""
+    
+    # Primary chain
+    primary_chain = create_rag_chain(primary_retriever, llm)
+    
+    # Fallback chain with simpler retrieval
+    fallback_chain = create_rag_chain(fallback_retriever, llm)
+    
+    # Chain with fallbacks
+    resilient_chain = RunnableWithFallbacks(
+        runnable=primary_chain,
+        fallbacks=[fallback_chain],
+        exception_key="error"
+    )
+    
+    return resilient_chain
+```
+
+## Performance Optimization
+
+### Retrieval Optimization
+```python
+# Hybrid search with score normalization
+def hybrid_search(
+    query: str,
+    vector_weight: float = 0.7,
+    bm25_weight: float = 0.3,
+    top_k: int = 10
+) -> List[Document]:
+    """Optimized hybrid search with configurable weights"""
+```
+
+### Caching Strategies
+- **Embedding Cache**: LRU cache for repeated queries
+- **Retrieval Cache**: Redis-based result caching
+- **Chain Cache**: LangChain built-in caching
+
+## Testing Patterns
+
+### RAG Pipeline Testing
+```python
+# Test retrieval quality
+def test_retrieval_relevance():
+    retriever = create_retriever("hybrid", vectorstore)
+    results = retriever.get_relevant_documents("test query")
+    assert len(results) > 0
+    assert all(result.metadata for result in results)
+
+# Test chain end-to-end
+def test_rag_chain_response():
+    chain = create_rag_chain(retriever, llm)
+    response = chain.invoke({"question": "test question"})
+    assert "answer" in response
+    assert len(response["answer"]) > 0
+```
+
+**Integration Testing:**
+- **Retrieval Quality**: Measure precision@k and recall@k
+- **Response Quality**: LLM-as-a-judge evaluation
+- **Latency Testing**: P95 response times under load
+- **Data Pipeline**: End-to-end document ingestion validation
+
+Follow these patterns to maintain consistency across the RAG pipeline and ensure production readiness. **Any MCP implementation must preserve these RAG patterns and interfaces.**

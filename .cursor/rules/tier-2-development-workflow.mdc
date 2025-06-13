@@ -1,0 +1,119 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Workflow (Tier 2) - Primary Development
+
+## Environment Activation (REQUIRED)
+
+**Always activate the Python virtual environment before running any code or tests:**
+
+```bash
+# If using .venv directory
+source .venv/bin/activate
+
+# If using uv
+uv venv .venv
+source .venv/bin/activate
+```
+
+## Quick Start
+
+```bash
+# Install dependencies with UV (recommended)
+uv sync
+
+# Environment configuration
+cp .env.example .env
+# Edit .env with your API keys and configurations
+
+# Start development server
+python run.py
+# OR
+uvicorn src.main_api:app --reload --port 8000
+```
+
+## Dependency Management
+
+Install the appropriate dependency group for your workflow:
+
+```bash
+# Base dependencies
+uv pip install .
+
+# Development dependencies  
+uv pip install .[dev]
+
+# Test dependencies
+uv pip install .[test]
+
+# All dependencies
+uv pip install .[dev,test]
+```
+
+## Container Development
+```bash
+# Full stack with Qdrant
+docker-compose up -d
+
+# Development mode with hot reload
+docker-compose -f docker-compose.dev.yml up
+```
+
+## Testing Commands
+
+### Essential Test Commands
+```bash
+# All tests
+python -m pytest tests/ -v
+
+# MCP Server Verification (Primary)
+uv run python tests/integration/verify_mcp.py
+
+# FastAPI-MCP Quality Comparison
+uv run pytest tests/integration/functional_quality_comparison.py -v
+
+# Integration Test Suite
+uv run pytest tests/integration/ -v
+
+# Unit tests
+uv run pytest tests/unit/ -v
+
+# Performance tests
+uv run pytest tests/performance/ -v
+```
+
+### Coverage and Quality
+```bash
+# Coverage report
+pytest --cov=src --cov-report=html
+
+# Linting with ruff
+ruff check src/ tests/
+
+# Type checking with mypy
+mypy src/
+```
+
+## Troubleshooting
+
+### Common Issues
+- **ModuleNotFoundError**: Ensure environment is activated and dependencies installed
+- **Import errors**: Check `PYTHONPATH` and use absolute imports
+- **Test discovery issues**: Verify test file naming (`test_*.py`, `Test*` classes, `test_*` functions)
+- **Missing dependencies**: Use `uv pip list | grep <package-name>` to verify installation
+
+### Environment Validation
+```bash
+# Check if package is installed
+uv pip list | grep <package-name>
+
+# Verify environment activation
+which python
+
+# Check project dependencies
+uv pip check
+```
+
+All configuration flows through **[settings.py](mdc:src/settings.py)** using Pydantic BaseSettings with environment variables loaded from `.env`.
