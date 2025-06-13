@@ -1,0 +1,176 @@
+{
+  "list_resources_response": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "resources": [
+        {
+          "uri": "collections://{collection}/documents",
+          "name": "Collection Documents",
+          "description": "Access documents within a specific collection",
+          "mimeType": "application/json"
+        },
+        {
+          "uri": "documents://{category}/{path*}",
+          "name": "Hierarchical Document Access",
+          "description": "Access documents using hierarchical paths",
+          "mimeType": "text/markdown"
+        },
+        {
+          "uri": "search://{query}/results/{limit}",
+          "name": "Search Results",
+          "description": "Parameterized search results as a resource",
+          "mimeType": "application/json"
+        },
+        {
+          "uri": "context://{user_id}/session/{session_id}/documents",
+          "name": "User Context Documents",
+          "description": "User-specific contextual documents",
+          "mimeType": "application/json"
+        },
+        {
+          "uri": "analytics://collection/{collection}/timeframe/{timeframe}/metric/{metric}",
+          "name": "Collection Analytics",
+          "description": "Analytics data for collections over time periods",
+          "mimeType": "application/json"
+        },
+        {
+          "uri": "similarity://{doc_id}/threshold/{threshold}/limit/{limit}",
+          "name": "Semantic Similarity",
+          "description": "Documents similar to a given document",
+          "mimeType": "application/json"
+        }
+      ]
+    }
+  },
+  "document_collection_response": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "contents": [
+        {
+          "uri": "collections://movie-reviews/documents",
+          "mimeType": "application/json",
+          "text": "{\"total_documents\": 1247, \"last_updated\": \"2024-12-15T10:30:00Z\", \"categories\": [\"action\", \"drama\", \"comedy\", \"sci-fi\"], \"document_ids\": [\"doc_001\", \"doc_002\", \"doc_003\"]}"
+        }
+      ]
+    }
+  },
+  "hierarchical_document_response": {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": {
+      "contents": [
+        {
+          "uri": "documents://reviews/action/john-wick/metadata",
+          "mimeType": "application/json",
+          "text": "{\"title\": \"John Wick Review Analysis\", \"rating\": 8.7, \"genre\": \"action\", \"year\": 2014, \"sentiment\": \"positive\", \"word_count\": 2341, \"key_themes\": [\"revenge\", \"cinematography\", \"action choreography\"]}"
+        }
+      ]
+    }
+  },
+  "search_results_response": {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": {
+      "contents": [
+        {
+          "uri": "search://best action movies/results/10",
+          "mimeType": "application/json",
+          "text": "{\"query\": \"best action movies\", \"total_results\": 847, \"top_results\": [{\"doc_id\": \"doc_123\", \"title\": \"Mad Max: Fury Road Review\", \"score\": 0.94}, {\"doc_id\": \"doc_456\", \"title\": \"John Wick Analysis\", \"score\": 0.91}]}"
+        }
+      ]
+    }
+  },
+  "user_context_response": {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "result": {
+      "contents": [
+        {
+          "uri": "context://user123/session/current/documents",
+          "mimeType": "application/json",
+          "text": "{\"user_id\": \"user123\", \"session_id\": \"sess_789\", \"active_documents\": [\"doc_001\", \"doc_002\"], \"preferences\": {\"genres\": [\"action\", \"sci-fi\"], \"min_rating\": 7.5}}"
+        }
+      ]
+    }
+  },
+  "document_annotations_response": {
+    "jsonrpc": "2.0",
+    "id": 6,
+    "result": {
+      "contents": [
+        {
+          "uri": "metadata://doc_456/annotations",
+          "mimeType": "application/json",
+          "text": "{\"document_id\": \"doc_456\", \"annotations\": [{\"type\": \"highlight\", \"text\": \"exceptional cinematography\", \"position\": 234}, {\"type\": \"note\", \"content\": \"Key turning point in the narrative\", \"position\": 567}]}"
+        }
+      ]
+    }
+  },
+  "filtered_collection_response": {
+    "jsonrpc": "2.0",
+    "id": 7,
+    "result": {
+      "contents": [
+        {
+          "uri": "collections://movie-reviews/filter/rating-above-8",
+          "mimeType": "application/json",
+          "text": "{\"filter_criteria\": \"rating > 8.0\", \"matching_documents\": 234, \"top_rated\": [{\"doc_id\": \"doc_789\", \"title\": \"Blade Runner 2049\", \"rating\": 9.2}, {\"doc_id\": \"doc_456\", \"title\": \"Mad Max: Fury Road\", \"rating\": 8.9}]}"
+        }
+      ]
+    }
+  },
+  "temporal_document_response": {
+    "jsonrpc": "2.0",
+    "id": 8,
+    "result": {
+      "contents": [
+        {
+          "uri": "documents://reviews/recent/7days",
+          "mimeType": "application/json",
+          "text": "{\"timeframe\": \"last_7_days\", \"document_count\": 42, \"recent_additions\": [{\"doc_id\": \"doc_999\", \"title\": \"Dune: Part Two Review\", \"added\": \"2024-12-14T15:30:00Z\"}, {\"doc_id\": \"doc_998\", \"title\": \"Oppenheimer Analysis\", \"added\": \"2024-12-13T09:15:00Z\"}]}"
+        }
+      ]
+    }
+  },
+  "wildcard_path_response": {
+    "jsonrpc": "2.0",
+    "id": 9,
+    "result": {
+      "contents": [
+        {
+          "uri": "files://reviews/action/sci-fi/blade-runner/analysis.md",
+          "mimeType": "text/markdown",
+          "text": "# Blade Runner: A Cinematic Masterpiece\n\n## Visual Aesthetics\nThe film's neo-noir aesthetic perfectly captures the dystopian future...\n\n## Thematic Analysis\nExplores questions of humanity, consciousness, and what it means to be alive...\n\n## Technical Excellence\nRidley Scott's direction combined with Vangelis's iconic score..."
+        }
+      ]
+    }
+  },
+  "multi_parameter_analytics_response": {
+    "jsonrpc": "2.0",
+    "id": 10,
+    "result": {
+      "contents": [
+        {
+          "uri": "analytics://collection/movie-reviews/timeframe/2024/metric/sentiment",
+          "mimeType": "application/json",
+          "text": "{\"collection\": \"movie-reviews\", \"timeframe\": \"2024\", \"metric\": \"sentiment\", \"data\": {\"positive\": 0.72, \"neutral\": 0.18, \"negative\": 0.10}, \"trending_themes\": [\"cinematography\", \"storytelling\", \"character development\"]}"
+        }
+      ]
+    }
+  },
+  "semantic_similarity_response": {
+    "jsonrpc": "2.0",
+    "id": 11,
+    "result": {
+      "contents": [
+        {
+          "uri": "similarity://doc_123/threshold/0.8/limit/5",
+          "mimeType": "application/json",
+          "text": "{\"source_document\": \"doc_123\", \"similarity_threshold\": 0.8, \"similar_documents\": [{\"doc_id\": \"doc_456\", \"similarity\": 0.94, \"title\": \"Mad Max: Fury Road Review\"}, {\"doc_id\": \"doc_789\", \"similarity\": 0.87, \"title\": \"John Wick Analysis\"}, {\"doc_id\": \"doc_321\", \"similarity\": 0.83, \"title\": \"The Matrix Retrospective\"}]}"
+        }
+      ]
+    }
+  }
+} 

@@ -1,0 +1,172 @@
+{
+  "semantic_retriever_response": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Based on the movie review data, here are some action movies with exceptional cinematography:\n\n**Mad Max: Fury Road** - Praised for its stunning practical effects and desert cinematography that creates a visceral, post-apocalyptic world.\n\n**John Wick series** - Notable for its clean, precise action choreography and urban cinematography that emphasizes the assassin's world.\n\n**Blade Runner 2049** - Combines action with breathtaking visual design, using lighting and color to create a neo-noir aesthetic.\n\nThese films consistently receive high ratings for both their action sequences and visual excellence."
+        }
+      ],
+      "isError": false
+    }
+  },
+  "naive_retriever_response": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "John Wick movie reviews consistently highlight several key aspects:\n\n**Positive Reviews:**\n- Exceptional action choreography and fight scenes\n- Keanu Reeves' committed performance\n- Stylish cinematography and world-building\n- Innovative \"gun-fu\" action style\n\n**Common Praise:**\n- Revenge plot is simple but effective\n- Continental Hotel world-building\n- Practical effects over CGI\n- Tight pacing and direction\n\n**Critical Reception:**\n- High ratings across the series (8.0+ average)\n- Praised for revitalizing the action genre\n- Noted for its mythology and consistent tone"
+        }
+      ],
+      "isError": false
+    }
+  },
+  "bm25_retriever_response": {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Movies with outstanding action choreography based on keyword matching:\n\n**John Wick (2014)** - Revolutionary \"gun-fu\" style combining martial arts with firearms\n**Mad Max: Fury Road** - Practical stunts and vehicle choreography\n**The Matrix** - Groundbreaking wire-fu and bullet-time sequences\n**Mission: Impossible** series - Tom Cruise's practical stunt work\n**The Raid** - Indonesian martial arts (Pencak Silat) choreography\n\nThese films are frequently mentioned for their innovative approach to action sequences and choreographed combat."
+        }
+      ],
+      "isError": false
+    }
+  },
+  "contextual_compression_retriever_response": {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Movies achieve visual stunning effects through several key elements:\n\n**Cinematography Excellence:**\n- Blade Runner 2049: Masterful use of lighting and color palettes\n- Mad Max: Fury Road: Practical effects and desert landscapes\n- Dune (2021): Epic scale and atmospheric visuals\n\n**Technical Innovation:**\n- Advanced color grading and contrast\n- Practical effects combined with selective CGI\n- Thoughtful composition and framing\n\n**Artistic Vision:**\n- Consistent visual themes and motifs\n- Integration of visuals with narrative\n- Attention to production design details"
+        }
+      ],
+      "isError": false
+    }
+  },
+  "multi_query_retriever_response": {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Critics rate sci-fi movies based on multiple expanded queries:\n\n**Technical Achievement:**\n- Visual effects quality and innovation\n- Production design and world-building\n- Scientific accuracy and plausibility\n\n**Narrative Elements:**\n- Originality of concepts and themes\n- Character development within sci-fi settings\n- Exploration of philosophical questions\n\n**Recent Highly Rated Sci-Fi:**\n- Dune (2021): 8.0/10 - Epic scope and faithful adaptation\n- Blade Runner 2049: 8.0/10 - Visual masterpiece and thematic depth\n- Arrival: 7.9/10 - Intelligent storytelling and emotional core\n\n**Rating Trends:**\n- Critics value practical effects over CGI\n- Preference for character-driven narratives\n- Appreciation for films that explore contemporary issues through sci-fi lens"
+        }
+      ],
+      "isError": false
+    }
+  },
+  "ensemble_retriever_response": {
+    "jsonrpc": "2.0",
+    "id": 6,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Common themes in highly rated movies (using hybrid retrieval):\n\n**Universal Themes:**\n- Redemption and personal transformation\n- Good vs. evil moral conflicts\n- Human resilience and perseverance\n- Love and sacrifice\n\n**Character Archetypes:**\n- The reluctant hero's journey\n- Mentor-student relationships\n- Complex antagonists with understandable motivations\n\n**Narrative Elements:**\n- Clear stakes and consequences\n- Well-paced character development\n- Satisfying resolution of conflicts\n- Balance of action and emotional depth\n\n**Technical Excellence:**\n- Strong cinematography and visual storytelling\n- Effective use of music and sound design\n- Practical effects enhancing believability\n\nThese patterns appear consistently across genres in movies rated 8.0+ by critics and audiences."
+        }
+      ],
+      "isError": false
+    }
+  },
+  "list_tools_response": {
+    "jsonrpc": "2.0",
+    "id": 7,
+    "result": {
+      "tools": [
+        {
+          "name": "semantic_retriever",
+          "description": "Semantic vector search retrieval for finding relevant documents based on meaning and context",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "The question or query to search for"
+              }
+            },
+            "required": ["question"]
+          }
+        },
+        {
+          "name": "naive_retriever",
+          "description": "Basic similarity search retriever for straightforward document matching",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "The question or query to search for"
+              }
+            },
+            "required": ["question"]
+          }
+        },
+        {
+          "name": "bm25_retriever",
+          "description": "BM25 keyword-based retrieval for exact term matching and ranking",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "The question or query to search for"
+              }
+            },
+            "required": ["question"]
+          }
+        },
+        {
+          "name": "contextual_compression_retriever",
+          "description": "Contextual compression retrieval that filters and compresses results for relevance",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "The question or query to search for"
+              }
+            },
+            "required": ["question"]
+          }
+        },
+        {
+          "name": "multi_query_retriever",
+          "description": "Multi-query retrieval that expands the query into multiple variations for comprehensive search",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "The question or query to search for"
+              }
+            },
+            "required": ["question"]
+          }
+        },
+        {
+          "name": "ensemble_retriever",
+          "description": "Ensemble retrieval combining multiple retrieval strategies for hybrid search results",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "The question or query to search for"
+              }
+            },
+            "required": ["question"]
+          }
+        }
+      ]
+    }
+  }
+} 

@@ -1,3 +1,215 @@
+"""
+📈 Telemetry-Driven Retrieval Strategy Evaluation - Complete Bootstrap Walkthrough
+
+This script demonstrates sophisticated evaluation of 6 retrieval strategies using Phoenix telemetry 
+rather than manual code-centric evaluation. Perfect for comparing MCP vs FastAPI performance and 
+optimizing RAG pipeline performance through observability.
+
+## 🎯 STEP 1: Prerequisites (Must Complete First)
+
+### Complete Data & Server Stack:
+```bash
+# 1. Data foundation
+python scripts/ingestion/csv_ingestion_pipeline.py
+
+# 2. FastAPI server running
+python run.py &
+
+# 3. MCP server integration
+python src/mcp_server/fastapi_wrapper.py &
+
+# 4. Verify stack health
+curl http://localhost:8000/health
+curl http://localhost:6006  # Phoenix UI
+```
+
+### Environment Requirements:
+```bash
+# API Keys for all retrievers
+export OPENAI_API_KEY="your-key"        # LLM + embeddings
+export COHERE_API_KEY="your-key"        # Reranking
+
+# Phoenix telemetry endpoint
+export PHOENIX_COLLECTOR_ENDPOINT="http://localhost:6006"
+```
+
+## 📊 STEP 2: Telemetry-First Evaluation Architecture
+
+### Why Telemetry Over Manual Evaluation:
+- **Real-time performance monitoring** during actual usage
+- **Automatic instrumentation** of LLM calls, embeddings, vector searches
+- **Cost tracking** (token usage, API calls) across strategies
+- **A/B testing** capabilities with minimal code changes
+- **Production-ready metrics** that scale beyond development
+
+### Phoenix Auto-Instrumentation Coverage:
+```python
+# Automatically tracked without manual code:
+- OpenAI API calls (tokens, latency, cost)
+- Vector store operations (search time, relevance scores)  
+- LangChain chain execution (step-by-step tracing)
+- Embedding generation (batch efficiency)
+- Retrieval document quality (content analysis)
+```
+
+## 🔄 STEP 3: 6 Retrieval Strategies Evaluated
+
+### Strategy Comparison Matrix:
+```
+Strategy                 | Speed | Accuracy | Cost  | Use Case
+-------------------------|-------|----------|-------|------------------
+naive_retriever         | Fast  | Baseline | Low   | Simple similarity
+bm25_retriever          | Fast  | Keyword  | None  | Exact term matching  
+compression_retriever   | Slow  | High     | High  | Quality-first
+multiquery_retriever    | Med   | Better   | Med   | Query expansion
+ensemble_retriever      | Slow  | Best     | High  | Hybrid approach
+semantic_retriever      | Med   | Good     | Low   | Context-aware
+```
+
+### Telemetry Metrics Automatically Collected:
+- **Latency**: P50, P95, P99 response times per strategy
+- **Cost**: Token consumption and API call costs
+- **Quality**: Document relevance scores and user feedback
+- **Throughput**: Requests per second under load
+- **Error Rates**: Failures and retry patterns
+
+## 📈 STEP 4: Phoenix Telemetry Dashboard Setup
+
+### Project Organization:
+```python
+project_name = f"retrieval-evaluation-{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+# Creates timestamped experiments for comparison
+```
+
+### Key Dashboard Views:
+1. **Strategy Comparison** - Side-by-side latency/cost analysis
+2. **LLM Token Usage** - Cost optimization insights  
+3. **Vector Search Performance** - Retrieval speed optimization
+4. **Error Tracking** - Failure pattern analysis
+5. **A/B Testing** - Statistical significance testing
+
+### Real-time Monitoring URLs:
+```bash
+# Phoenix main dashboard
+http://localhost:6006
+
+# Project-specific metrics
+http://localhost:6006/projects/{project_name}
+
+# Trace search and filtering
+http://localhost:6006/traces?filter=retriever:semantic_retriever
+```
+
+## 🎯 STEP 5: MCP vs FastAPI Performance Comparison
+
+### Instrumentation Strategy:
+```python
+# Same RAG chains used for both FastAPI and MCP
+# Phoenix automatically tracks both call paths:
+
+# FastAPI Direct Call:
+POST /invoke/semantic_retriever → traced as "fastapi_semantic_retriever"
+
+# MCP Tool Call:
+semantic_retriever() → traced as "mcp_semantic_retriever"
+
+# Compare in Phoenix dashboard with retriever tag filtering
+```
+
+### Key Comparison Metrics:
+- **Protocol Overhead**: JSON-RPC vs HTTP serialization time
+- **Transport Efficiency**: STDIO vs HTTP network latency  
+- **Schema Validation**: Pydantic overhead comparison
+- **Tool Discovery**: MCP tools/list vs FastAPI /docs performance
+
+## 🔬 STEP 6: Advanced Evaluation Patterns
+
+### A/B Testing Setup:
+```python
+# Randomly assign retrieval strategies for comparison
+strategies = ["semantic", "ensemble", "compression"]
+strategy = random.choice(strategies)
+
+# Phoenix automatically segments metrics by strategy
+chain = create_rag_chain(retrievers[strategy], llm, strategy)
+```
+
+### Cost Optimization Analysis:
+```python
+# Token usage tracking per strategy
+# Automatically captured in Phoenix:
+- Input tokens (question + context)
+- Output tokens (generated response)
+- Cost per query (strategy comparison)
+- Cost per quality unit (value analysis)
+```
+
+### Quality vs Speed Trade-offs:
+```python
+# Phoenix spans tagged with retriever method
+# Enable filtering and comparison:
+chain.with_config({
+    "run_name": f"rag_chain_{method_name}",
+    "span_attributes": {"retriever": method_name}
+})
+```
+
+## 🎯 STEP 7: Production Insights & Optimization
+
+### Performance Optimization Workflow:
+1. **Run evaluation script** → Generate telemetry data
+2. **Analyze Phoenix dashboard** → Identify bottlenecks
+3. **Optimize slow strategies** → Code improvements
+4. **Re-run evaluation** → Measure improvements
+5. **Production deployment** → Monitor real usage
+
+### Key Optimization Areas:
+- **Embedding cache** for repeated queries
+- **Vector search parameter tuning** (k, score thresholds)
+- **LLM prompt optimization** for token efficiency
+- **Retrieval strategy selection** based on query type
+
+## 🚨 Troubleshooting Telemetry
+
+### Common Phoenix Issues:
+- **No traces appearing**: Check PHOENIX_COLLECTOR_ENDPOINT
+- **Missing LLM data**: Verify OpenAI key and auto-instrumentation
+- **Incomplete spans**: Ensure all chains use .with_config()
+- **Performance overhead**: Disable auto-instrumentation in production
+
+### Debug Commands:
+```bash
+# Check Phoenix connectivity
+curl http://localhost:6006/health
+
+# Verify auto-instrumentation
+python -c "from phoenix.otel import register; print('Phoenix ready')"
+
+# Test trace generation
+python scripts/evaluation/retrieval_method_comparison.py
+```
+
+## 🎯 Expected Outcomes
+
+After successful telemetry evaluation:
+- ✅ **Performance rankings** of all 6 retrieval strategies
+- ✅ **Cost analysis** showing token usage per strategy
+- ✅ **Quality metrics** with statistical significance
+- ✅ **MCP vs FastAPI** overhead analysis
+- ✅ **Production-ready insights** for strategy selection
+
+## 🔗 Next Steps
+
+1. **Analyze Phoenix dashboard** - Compare strategy performance
+2. **Optimize slow retrievers** - Focus on bottlenecks identified
+3. **A/B test in production** - Deploy best strategies
+4. **Monitor real usage** - Continuous improvement cycle
+5. **Scale evaluation** - Test with larger datasets and query volumes
+
+This telemetry-driven approach provides production-ready insights that manual evaluation cannot match,
+especially for comparing the performance impact of MCP integration vs direct FastAPI usage.
+"""
+
 import os
 import asyncio
 import logging

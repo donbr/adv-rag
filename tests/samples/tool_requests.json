@@ -1,0 +1,74 @@
+{
+  "semantic_retriever_request": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "semantic_retriever",
+      "arguments": {
+        "question": "What are the best action movies with exceptional cinematography?"
+      }
+    }
+  },
+  "naive_retriever_request": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "naive_retriever",
+      "arguments": {
+        "question": "Tell me about John Wick movie reviews"
+      }
+    }
+  },
+  "bm25_retriever_request": {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "bm25_retriever",
+      "arguments": {
+        "question": "best action choreography in movies"
+      }
+    }
+  },
+  "contextual_compression_retriever_request": {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tools/call",
+    "params": {
+      "name": "contextual_compression_retriever",
+      "arguments": {
+        "question": "What makes a movie visually stunning?"
+      }
+    }
+  },
+  "multi_query_retriever_request": {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "method": "tools/call",
+    "params": {
+      "name": "multi_query_retriever",
+      "arguments": {
+        "question": "How do critics rate sci-fi movies?"
+      }
+    }
+  },
+  "ensemble_retriever_request": {
+    "jsonrpc": "2.0",
+    "id": 6,
+    "method": "tools/call",
+    "params": {
+      "name": "ensemble_retriever",
+      "arguments": {
+        "question": "What are the common themes in highly rated movies?"
+      }
+    }
+  },
+  "list_tools_request": {
+    "jsonrpc": "2.0",
+    "id": 7,
+    "method": "tools/list",
+    "params": {}
+  }
+} 

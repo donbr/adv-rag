@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # RAG & LangChain Patterns (Tier 3) - Immutable Foundation
 

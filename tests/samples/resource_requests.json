@@ -1,0 +1,88 @@
+{
+  "list_resources_request": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "resources/list",
+    "params": {}
+  },
+  "document_collection_access": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "resources/read",
+    "params": {
+      "uri": "collections://movie-reviews/documents"
+    }
+  },
+  "hierarchical_document_access": {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "resources/read",
+    "params": {
+      "uri": "documents://reviews/action/john-wick/metadata"
+    }
+  },
+  "search_results_as_resource": {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "resources/read",
+    "params": {
+      "uri": "search://best action movies/results/10"
+    }
+  },
+  "user_context_documents": {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "method": "resources/read",
+    "params": {
+      "uri": "context://user123/session/current/documents"
+    }
+  },
+  "document_annotations": {
+    "jsonrpc": "2.0",
+    "id": 6,
+    "method": "resources/read",
+    "params": {
+      "uri": "metadata://doc_456/annotations"
+    }
+  },
+  "filtered_collection_by_rating": {
+    "jsonrpc": "2.0",
+    "id": 7,
+    "method": "resources/read",
+    "params": {
+      "uri": "collections://movie-reviews/filter/rating-above-8"
+    }
+  },
+  "temporal_document_access": {
+    "jsonrpc": "2.0",
+    "id": 8,
+    "method": "resources/read",
+    "params": {
+      "uri": "documents://reviews/recent/7days"
+    }
+  },
+  "wildcard_path_access": {
+    "jsonrpc": "2.0",
+    "id": 9,
+    "method": "resources/read",
+    "params": {
+      "uri": "files://reviews/action/sci-fi/blade-runner/analysis.md"
+    }
+  },
+  "multi_parameter_resource": {
+    "jsonrpc": "2.0",
+    "id": 10,
+    "method": "resources/read",
+    "params": {
+      "uri": "analytics://collection/movie-reviews/timeframe/2024/metric/sentiment"
+    }
+  },
+  "semantic_similarity_resource": {
+    "jsonrpc": "2.0",
+    "id": 11,
+    "method": "resources/read",
+    "params": {
+      "uri": "similarity://doc_123/threshold/0.8/limit/5"
+    }
+  }
+} 
