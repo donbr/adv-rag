@@ -1,15 +1,12 @@
 {
-  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/specification/main/schema/server.json",
-  "$id": "https://github.com/donbr/advanced-rag/mcp-server.json",
-  "name": "advanced-rag-fastapi",
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/specification/refs/heads/main/schema/2025-03-26/schema.json",
+  "$id": "https://github.com/donbr/adv-rag/mcp-server.json",
+  "name": "Advanced RAG Retriever API",
   "version": "1.0.0",
-  "description": "Advanced RAG with FastAPI → MCP Integration. Provides 6 retrieval strategies for semantic search across John Wick movie reviews.",
-  "author": "Advanced RAG Team",
-  "license": "MIT",
-  "homepage": "https://github.com/donbr/advanced-rag",
+  "description": "API for invoking various LangChain retrieval chains for John Wick movie reviews.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/donbr/advanced-rag.git"
+    "url": "https://github.com/donbr/adv-rag.git"
   },
   "categories": [
     "RAG",
@@ -23,7 +20,8 @@
     "langchain",
     "fastapi",
     "semantic-search",
-    "bm25"
+    "bm25",
+    "vector-search"
   ],
   "capabilities": {
     "tools": {
@@ -36,9 +34,12 @@
     "prompts": {
       "listChanged": false
     },
-    "logging": {}
+    "logging": {},
+    "completions": {
+      "enabled": false
+    }
   },
-  "protocolVersion": "2024-11-05",
+  "protocolVersion": "2025-03-26",
   "tools": [
     {
       "name": "naive_retriever",
@@ -54,7 +55,117 @@
         "required": [
           "question"
         ]
-      }
+      },
+      "annotations": {
+        "audience": [
+          "human",
+          "llm"
+        ],
+        "cachePolicy": {
+          "ttl": 300
+        },
+        "governance": {
+          "dataAccess": "public",
+          "aiEnabled": true,
+          "category": "search",
+          "requiresApproval": false,
+          "isReadOnly": true,
+          "isDestructive": false,
+          "hasNetworkAccess": true,
+          "dataClassification": "public"
+        },
+        "resources": {
+          "isIntensive": false,
+          "estimatedDuration": "medium",
+          "memoryUsage": "low",
+          "networkUsage": "medium",
+          "storageAccess": "read"
+        },
+        "trustAndSafety": {
+          "contentFiltering": true,
+          "rateLimited": true,
+          "auditLogged": true,
+          "requiresHumanInLoop": false
+        }
+      },
+      "examples": [
+        {
+          "id": "naive_retriever_example_1",
+          "description": "Example naive retriever search for: What makes a good action movie?",
+          "input": {
+            "question": "What makes a good action movie?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about what makes a good action movie?"
+          }
+        },
+        {
+          "id": "naive_retriever_example_2",
+          "description": "Example naive retriever search for: How does John Wick compare to other action heroes?",
+          "input": {
+            "question": "How does John Wick compare to other action heroes?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about how does john wick compare to other action heroes?"
+          }
+        }
+      ]
     },
     {
       "name": "bm25_retriever",
@@ -70,7 +181,117 @@
         "required": [
           "question"
         ]
-      }
+      },
+      "annotations": {
+        "audience": [
+          "human",
+          "llm"
+        ],
+        "cachePolicy": {
+          "ttl": 300
+        },
+        "governance": {
+          "dataAccess": "public",
+          "aiEnabled": true,
+          "category": "search",
+          "requiresApproval": false,
+          "isReadOnly": true,
+          "isDestructive": false,
+          "hasNetworkAccess": true,
+          "dataClassification": "public"
+        },
+        "resources": {
+          "isIntensive": false,
+          "estimatedDuration": "medium",
+          "memoryUsage": "low",
+          "networkUsage": "medium",
+          "storageAccess": "read"
+        },
+        "trustAndSafety": {
+          "contentFiltering": true,
+          "rateLimited": true,
+          "auditLogged": true,
+          "requiresHumanInLoop": false
+        }
+      },
+      "examples": [
+        {
+          "id": "bm25_retriever_example_1",
+          "description": "Example bm25 retriever search for: What makes a good action movie?",
+          "input": {
+            "question": "What makes a good action movie?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about what makes a good action movie?"
+          }
+        },
+        {
+          "id": "bm25_retriever_example_2",
+          "description": "Example bm25 retriever search for: How does John Wick compare to other action heroes?",
+          "input": {
+            "question": "How does John Wick compare to other action heroes?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about how does john wick compare to other action heroes?"
+          }
+        }
+      ]
     },
     {
       "name": "contextual_compression_retriever",
@@ -86,7 +307,117 @@
         "required": [
           "question"
         ]
-      }
+      },
+      "annotations": {
+        "audience": [
+          "human",
+          "llm"
+        ],
+        "cachePolicy": {
+          "ttl": 600
+        },
+        "governance": {
+          "dataAccess": "public",
+          "aiEnabled": true,
+          "category": "search",
+          "requiresApproval": false,
+          "isReadOnly": true,
+          "isDestructive": false,
+          "hasNetworkAccess": true,
+          "dataClassification": "public"
+        },
+        "resources": {
+          "isIntensive": true,
+          "estimatedDuration": "medium",
+          "memoryUsage": "high",
+          "networkUsage": "medium",
+          "storageAccess": "read"
+        },
+        "trustAndSafety": {
+          "contentFiltering": true,
+          "rateLimited": true,
+          "auditLogged": true,
+          "requiresHumanInLoop": false
+        }
+      },
+      "examples": [
+        {
+          "id": "contextual_compression_retriever_example_1",
+          "description": "Example contextual compression retriever search for: What makes a good action movie?",
+          "input": {
+            "question": "What makes a good action movie?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about what makes a good action movie?"
+          }
+        },
+        {
+          "id": "contextual_compression_retriever_example_2",
+          "description": "Example contextual compression retriever search for: How does John Wick compare to other action heroes?",
+          "input": {
+            "question": "How does John Wick compare to other action heroes?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about how does john wick compare to other action heroes?"
+          }
+        }
+      ]
     },
     {
       "name": "multi_query_retriever",
@@ -102,7 +433,117 @@
         "required": [
           "question"
         ]
-      }
+      },
+      "annotations": {
+        "audience": [
+          "human",
+          "llm"
+        ],
+        "cachePolicy": {
+          "ttl": 600
+        },
+        "governance": {
+          "dataAccess": "public",
+          "aiEnabled": true,
+          "category": "search",
+          "requiresApproval": false,
+          "isReadOnly": true,
+          "isDestructive": false,
+          "hasNetworkAccess": true,
+          "dataClassification": "public"
+        },
+        "resources": {
+          "isIntensive": true,
+          "estimatedDuration": "medium",
+          "memoryUsage": "high",
+          "networkUsage": "medium",
+          "storageAccess": "read"
+        },
+        "trustAndSafety": {
+          "contentFiltering": true,
+          "rateLimited": true,
+          "auditLogged": true,
+          "requiresHumanInLoop": false
+        }
+      },
+      "examples": [
+        {
+          "id": "multi_query_retriever_example_1",
+          "description": "Example multi query retriever search for: What makes a good action movie?",
+          "input": {
+            "question": "What makes a good action movie?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about what makes a good action movie?"
+          }
+        },
+        {
+          "id": "multi_query_retriever_example_2",
+          "description": "Example multi query retriever search for: How does John Wick compare to other action heroes?",
+          "input": {
+            "question": "How does John Wick compare to other action heroes?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about how does john wick compare to other action heroes?"
+          }
+        }
+      ]
     },
     {
       "name": "ensemble_retriever",
@@ -118,7 +559,117 @@
         "required": [
           "question"
         ]
-      }
+      },
+      "annotations": {
+        "audience": [
+          "human",
+          "llm"
+        ],
+        "cachePolicy": {
+          "ttl": 600
+        },
+        "governance": {
+          "dataAccess": "public",
+          "aiEnabled": true,
+          "category": "search",
+          "requiresApproval": false,
+          "isReadOnly": true,
+          "isDestructive": false,
+          "hasNetworkAccess": true,
+          "dataClassification": "public"
+        },
+        "resources": {
+          "isIntensive": true,
+          "estimatedDuration": "medium",
+          "memoryUsage": "high",
+          "networkUsage": "medium",
+          "storageAccess": "read"
+        },
+        "trustAndSafety": {
+          "contentFiltering": true,
+          "rateLimited": true,
+          "auditLogged": true,
+          "requiresHumanInLoop": false
+        }
+      },
+      "examples": [
+        {
+          "id": "ensemble_retriever_example_1",
+          "description": "Example ensemble retriever search for: What makes a good action movie?",
+          "input": {
+            "question": "What makes a good action movie?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about what makes a good action movie?"
+          }
+        },
+        {
+          "id": "ensemble_retriever_example_2",
+          "description": "Example ensemble retriever search for: How does John Wick compare to other action heroes?",
+          "input": {
+            "question": "How does John Wick compare to other action heroes?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about how does john wick compare to other action heroes?"
+          }
+        }
+      ]
     },
     {
       "name": "semantic_retriever",
@@ -134,9 +685,121 @@
         "required": [
           "question"
         ]
-      }
+      },
+      "annotations": {
+        "audience": [
+          "human",
+          "llm"
+        ],
+        "cachePolicy": {
+          "ttl": 300
+        },
+        "governance": {
+          "dataAccess": "public",
+          "aiEnabled": true,
+          "category": "search",
+          "requiresApproval": false,
+          "isReadOnly": true,
+          "isDestructive": false,
+          "hasNetworkAccess": true,
+          "dataClassification": "public"
+        },
+        "resources": {
+          "isIntensive": false,
+          "estimatedDuration": "medium",
+          "memoryUsage": "low",
+          "networkUsage": "medium",
+          "storageAccess": "read"
+        },
+        "trustAndSafety": {
+          "contentFiltering": true,
+          "rateLimited": true,
+          "auditLogged": true,
+          "requiresHumanInLoop": false
+        }
+      },
+      "examples": [
+        {
+          "id": "semantic_retriever_example_1",
+          "description": "Example semantic retriever search for: What makes a good action movie?",
+          "input": {
+            "question": "What makes a good action movie?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about what makes a good action movie?"
+          }
+        },
+        {
+          "id": "semantic_retriever_example_2",
+          "description": "Example semantic retriever search for: How does John Wick compare to other action heroes?",
+          "input": {
+            "question": "How does John Wick compare to other action heroes?"
+          },
+          "output": {
+            "contentTypes": [
+              "text"
+            ],
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "isError": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Returns relevant movie review excerpts about how does john wick compare to other action heroes?"
+          }
+        }
+      ]
     }
   ],
   "resources": [],
-  "prompts": []
+  "prompts": [],
+  "license": "MIT",
+  "author": "Advanced RAG Team"
 }

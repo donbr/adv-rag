@@ -1,15 +1,66 @@
 {
   "_note": "This is a LEGACY/COMMUNITY format. Use mcp_server_official.json for production.",
-  "_official_schema": "See mcp_server_official.json for the official MCP-compliant schema",
-  "_differences": [
-    "Official format uses 'inputSchema' (camelCase), this uses 'input_schema' (snake_case)",
-    "Official format includes $schema and $id fields for JSON Schema validation",
-    "Official format includes capabilities, protocolVersion, and other MCP-specific fields",
-    "Official format follows https://raw.githubusercontent.com/modelcontextprotocol/specification/main/schema/server.json"
-  ],
+  "_extracted_metadata": {
+    "project_meta": {
+      "name": "adv-rag",
+      "version": "0.1.0",
+      "description": "Add your description here",
+      "readme": "README.md",
+      "requires-python": ">=3.13",
+      "dependencies": [
+        "jupyter>=1.1.1",
+        "langchain-experimental>=0.3.4",
+        "langchain>=0.3.19",
+        "langchain-cohere>=0.4.2",
+        "langchain-openai>=0.3.7",
+        "qdrant-client>=1.13.2",
+        "rank-bm25>=0.2.2",
+        "langchain-qdrant>=0.2.0",
+        "fastapi>=0.115.12",
+        "uvicorn>=0.34.2",
+        "python-dotenv>=0.21.0",
+        "mcp[cli]>=1.9.3",
+        "fastmcp>=2.0.0",
+        "tenacity>=9.0.0",
+        "arize-phoenix",
+        "arize-phoenix-otel",
+        "openinference-instrumentation-langchain",
+        "langchain-mcp-adapters",
+        "langgraph>=0.4.8",
+        "pytest>=8.0.0",
+        "pytest-asyncio>=0.21.0",
+        "pytest-cov>=4.0.0",
+        "pytest-timeout>=2.2.0"
+      ],
+      "optional-dependencies": {
+        "dev": [
+          "ruff>=0.1.0",
+          "mypy>=1.8.0",
+          "black>=23.0.0",
+          "isort>=5.12.0"
+        ],
+        "test": [
+          "pytest-benchmark>=4.0.0",
+          "pytest-mock>=3.12.0",
+          "httpx>=0.24.0"
+        ]
+      },
+      "scripts": {
+        "adv-rag-server": "src.mcp_server.main:main"
+      }
+    },
+    "fastapi_meta": {
+      "title": "Advanced RAG Retriever API",
+      "description": "API for invoking various LangChain retrieval chains for John Wick movie reviews.",
+      "version": "1.0.0"
+    },
+    "mcp_meta": {
+      "name": "Advanced RAG Retriever API"
+    }
+  },
   "server_info": {
-    "name": "advanced-rag-fastapi",
-    "description": "Advanced RAG with FastAPI → MCP Integration. Provides 6 retrieval strategies for semantic search across John Wick movie reviews.",
+    "name": "Advanced RAG Retriever API",
+    "description": "API for invoking various LangChain retrieval chains for John Wick movie reviews.",
     "repo_url": "https://github.com/donbr/advanced-rag",
     "server_type": "FastAPI Integration",
     "server_category": [

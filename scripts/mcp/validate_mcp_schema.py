@@ -7,6 +7,36 @@ import requests
 from pathlib import Path
 import sys
 
+def validate_with_json_schema(our_schema):
+    """Validate against official MCP JSON schema using jsonschema library."""
+    try:
+        import jsonschema
+        
+        # Get the official schema URL
+        schema_url = our_schema.get("$schema")
+        if not schema_url:
+            return False, "No $schema URL found in document"
+        
+        print(f"🔍 Fetching official schema: {schema_url}")
+        response = requests.get(schema_url, timeout=10)
+        
+        if response.status_code != 200:
+            return False, f"Could not fetch official schema (HTTP {response.status_code})"
+        
+        official_schema = response.json()
+        print(f"✅ Official schema fetched successfully")
+        
+        # Validate our schema against the official one
+        jsonschema.validate(our_schema, official_schema)
+        return True, "Schema validation passed"
+        
+    except ImportError:
+        return False, "jsonschema library not installed. Run: pip install jsonschema"
+    except jsonschema.ValidationError as e:
+        return False, f"Schema validation failed: {e.message}"
+    except Exception as e:
+        return False, f"Validation error: {str(e)}"
+
 def validate_mcp_schema():
     """Validate our MCP schema against the official specification."""
     
@@ -50,7 +80,7 @@ def validate_mcp_schema():
     
     # Check $schema URL
     schema_url = our_schema.get("$schema", "")
-    schema_valid = "modelcontextprotocol" in schema_url and "server.json" in schema_url
+    schema_valid = "modelcontextprotocol" in schema_url and ("server.json" in schema_url or "schema.json" in schema_url)
     format_checks.append(("$schema URL", schema_valid, "Points to official MCP server schema"))
     
     # Check tools format
@@ -97,6 +127,13 @@ def validate_mcp_schema():
         tool_valid = has_schema and has_properties and has_required
         print(f"  • {tool_name}: {'✅' if tool_valid else '❌'}")
     
+    # NEW: JSON Schema Validation
+    print(f"\n🔍 JSON Schema Validation:")
+    schema_valid, validation_message = validate_with_json_schema(our_schema)
+    print(f"  • Official schema validation: {'✅' if schema_valid else '❌'} ({validation_message})")
+    if not schema_valid:
+        all_required_present = False
+    
     # Summary
     print(f"\n📊 Validation Summary:")
     print(f"  • Schema compliance: {'✅ PASS' if all_required_present else '❌ FAIL'}")
@@ -111,22 +148,13 @@ def validate_mcp_schema():
         print(f"\n⚠️  Schema has compliance issues.")
         print(f"   Fix the issues above before production deployment.")
     
-    # Optional: Try to fetch official schema for comparison
-    print(f"\n🌐 Official Schema Check:")
-    try:
-        official_url = our_schema.get("$schema")
-        if official_url:
-            response = requests.get(official_url, timeout=10)
-            if response.status_code == 200:
-                print(f"  • Official schema accessible: ✅")
-                official_schema = response.json()
-                print(f"  • Official schema version: {official_schema.get('$id', 'Unknown')}")
-            else:
-                print(f"  • Official schema accessible: ❌ (HTTP {response.status_code})")
-        else:
-            print(f"  • No $schema URL provided: ❌")
-    except Exception as e:
-        print(f"  • Official schema check failed: ❌ ({e})")
+    # Enhanced recommendations
+    if schema_valid:
+        print(f"\n💡 Enhancement Opportunities:")
+        print(f"   • Add tool annotations for governance/security")
+        print(f"   • Add tool examples for better LLM understanding") 
+        print(f"   • Consider adding resource contentSchema fields")
+        print(f"   • Update protocolVersion to latest MCP spec")
     
     return all_required_present
 

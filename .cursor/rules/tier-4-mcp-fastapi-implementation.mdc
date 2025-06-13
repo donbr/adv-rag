@@ -74,6 +74,21 @@ Always verify MCP conversion with [verify_mcp.py](mdc:tests/integration/verify_m
 uv run python tests/integration/verify_mcp.py
 ```
 
+### Schema Export and Validation (NEW)
+Generate and validate MCP-compliant schemas with [export_mcp_schema.py](mdc:scripts/mcp/export_mcp_schema.py):
+
+```bash
+# Export official MCP schemas from live server
+python scripts/mcp/export_mcp_schema.py
+
+# Validate against MCP 2025-03-26 specification
+python scripts/mcp/validate_mcp_schema.py
+```
+
+**Outputs:**
+- `mcp_server_official.json` - Official MCP format (RECOMMENDED for production)
+- `mcp_server_schema.json` - Legacy/community format
+
 ### Testing Workflow
 ```bash
 # 1. Test FastAPI endpoints directly
@@ -82,36 +97,139 @@ uv run bash tests/integration/test_api_endpoints.sh
 # 2. Verify MCP conversion
 uv run python tests/integration/verify_mcp.py
 
-# 3. Compare FastAPI vs MCP quality
+# 3. Export and validate schemas
+python scripts/mcp/export_mcp_schema.py
+python scripts/mcp/validate_mcp_schema.py
+
+# 4. Compare FastAPI vs MCP quality
 uv run pytest tests/integration/functional_quality_comparison.py
 ```
 
-## Deployment Options
+## Schema Discovery via Streamable HTTP (RECOMMENDED)
 
-### 1. Streamable HTTP (Recommended)
+### Enhanced Schema Discovery
+With `transport="streamable-http"`, schema discovery becomes a single HTTP call using the native MCP `rpc.discover` method:
+
 ```python
-# Production-ready HTTP transport
-mcp.run(
-    transport="streamable_http",
-    host="0.0.0.0", 
-    port=8000
+# Updated FastMCP server configuration
+from fastmcp.server.fastmcp import FastMCP
+
+mcp = FastMCP(
+    name="Advanced RAG Retriever API",
+    stateless_http=True,  # No session persistence needed
 )
+
+if __name__ == "__main__":
+    # Mounts streaming HTTP endpoint at http://127.0.0.1:8000/mcp
+    mcp.run(
+        transport="streamable-http",
+        host="127.0.0.1",
+        port=8000,
+        path="/mcp",
+    )
 ```
 
-### 2. Container Deployment
+### Native Schema Retrieval Methods
+
+**1. Via curl (for CI/CD and automation):**
+```bash
+curl -X POST http://127.0.0.1:8000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+        "jsonrpc":"2.0",
+        "id":1,
+        "method":"rpc.discover",
+        "params": {}
+      }'
+```
+
+**2. Via FastMCP Python Client:**
+```python
+import asyncio
+from fastmcp import Client
+
+async def fetch_full_schema():
+    async with Client(
+        url="http://127.0.0.1:8000/mcp",
+        transport="streamable-http"
+    ) as client:
+        # Native MCP discovery - returns complete OpenRPC document
+        openrpc_doc = await client.discover()
+        return openrpc_doc
+
+schema = asyncio.run(fetch_full_schema())
+```
+
+**3. Via MCP CLI:**
+```bash
+# Using standard MCP tooling
+mcp discover http://127.0.0.1:8000/mcp
+```
+
+### Benefits of Streamable HTTP for Schema Discovery
+
+- ✅ **Single HTTP endpoint** (`/mcp`) for everything - no separate export routes
+- ✅ **Native MCP compliance** - uses `rpc.discover` per specification  
+- ✅ **Streaming support** - handles large schemas without chunking
+- ✅ **Standard tooling** - works with any HTTP client or MCP CLI
+- ✅ **Built-in client convenience** - `Client.discover()` hides JSON-RPC boilerplate
+- ✅ **CI/CD friendly** - easy integration into automation pipelines
+
+## Deployment Options
+
+### 1. Streamable HTTP (RECOMMENDED)
+**Primary deployment method** - combines FastMCP.from_fastapi() with native schema discovery:
+
+```python
+# src/mcp_server/fastapi_wrapper.py - Updated for streamable HTTP
+from fastmcp import FastMCP
+from src.main_api import app  # Existing FastAPI app
+
+# Convert FastAPI app to MCP server (zero duplication)
+mcp = FastMCP.from_fastapi(
+    app=app,
+    name="Advanced RAG Retriever API",
+    stateless_http=True  # Optimal for production
+)
+
+if __name__ == "__main__":
+    # Production-ready HTTP transport with native schema discovery
+    mcp.run(
+        transport="streamable-http",
+        host="0.0.0.0", 
+        port=8000,
+        path="/mcp"  # Schema available at GET /mcp with rpc.discover
+    )
+```
+
+**Key Advantages:**
+- ✅ **Native MCP schema discovery** via `rpc.discover`
+- ✅ **Production HTTP transport** for multi-user scenarios
+- ✅ **Zero duplication** with FastMCP.from_fastapi()
+- ✅ **CI/CD integration** via curl/HTTP clients
+- ✅ **Standard tooling compatibility** (MCP CLI, clients)
+
+### 2. STDIO Transport (Development/Claude Desktop)
+```python
+# For local development and Claude Desktop integration
+mcp.run(transport="stdio")
+```
+
+### 3. Container Deployment (Streamable HTTP)
 ```dockerfile
-# Dockerfile for MCP server
+# Dockerfile for streamable HTTP MCP server
 FROM python:3.11-slim
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY src/ /app/src/
 WORKDIR /app
+EXPOSE 8000
 CMD ["python", "-m", "src.mcp_server.fastapi_wrapper"]
 ```
 
-### 3. Claude Desktop Integration
+### 4. Claude Desktop Integration (Legacy)
 ```bash
-# Install for Claude Desktop usage
+# For STDIO-based Claude Desktop usage (legacy approach)
 fastmcp install src/mcp_server/fastapi_wrapper.py --name "Advanced RAG"
 ```
 

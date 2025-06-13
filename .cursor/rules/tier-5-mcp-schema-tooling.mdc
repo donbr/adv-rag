@@ -1,0 +1,211 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# MCP Schema Management (Tier 5) - Schema Export & Validation
+
+## Overview
+
+This tier manages MCP server schema export, validation, and compliance tooling. It provides automated generation of MCP-compliant server descriptors from live server introspection.
+
+## Core Components
+
+### Schema Export Script
+**[export_mcp_schema.py](mdc:scripts/mcp/export_mcp_schema.py)** - Production-ready schema export utility:
+
+```bash
+# Generate both legacy and official MCP schemas
+python scripts/mcp/export_mcp_schema.py
+
+# Outputs:
+# - mcp_server_schema.json (legacy/community format)
+# - mcp_server_official.json (official MCP format - RECOMMENDED)
+```
+
+### Configuration Management
+**[mcp_config.toml](mdc:scripts/mcp/mcp_config.toml)** - Central configuration eliminating hardcoded values:
+
+```toml
+[server]
+protocol_version = "2025-03-26"  # Latest MCP spec
+schema_url = "https://raw.githubusercontent.com/modelcontextprotocol/specification/refs/heads/main/schema/2025-03-26/schema.json"
+
+[annotations.governance]
+data_access = "public"
+ai_enabled = true
+category = "search"
+```
+
+### Schema Validation
+**[validate_mcp_schema.py](mdc:scripts/mcp/validate_mcp_schema.py)** - JSON Schema validation against official MCP spec:
+
+```bash
+# Validate generated schemas
+python scripts/mcp/validate_mcp_schema.py
+```
+
+## MCP 2025-03-26 Features
+
+### Enhanced Tool Annotations
+- **Governance & Compliance**: AI-enabled identification, data classification
+- **Resource Management**: Memory usage, network requirements, execution intensity  
+- **Trust & Safety**: Content filtering, rate limiting, audit logging
+- **User Experience**: Progress indicators, categorization
+
+### Strict Validation
+- **JSON Schema Compliance**: Validates against official MCP specification
+- **Dynamic Metadata**: Extracts from pyproject.toml, FastAPI app, git repository
+- **Git Integration**: Automatic repository URL detection and template generation
+
+## Usage Workflow
+
+### 1. Development Schema Export (Legacy Method)
+```bash
+# During development - export updated schemas
+source .venv/bin/activate
+python scripts/mcp/export_mcp_schema.py
+```
+
+### 2. Native Schema Discovery (RECOMMENDED)
+**With streamable HTTP transport, use native MCP discovery:**
+
+```bash
+# Start server with streamable HTTP
+python src/mcp_server/fastapi_wrapper.py
+
+# Native schema discovery via HTTP
+curl -X POST http://127.0.0.1:8000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
+
+# Or via FastMCP client
+python -c "
+import asyncio
+from fastmcp import Client
+
+async def get_schema():
+    async with Client('http://127.0.0.1:8000/mcp', transport='streamable-http') as client:
+        return await client.discover()
+
+print(asyncio.run(get_schema()))
+"
+```
+
+### 3. CI/CD Integration
+```bash
+# Legacy approach - validate schema compliance
+python scripts/mcp/validate_mcp_schema.py
+
+# Native approach - discover schema via HTTP in CI
+curl -X POST http://server:8000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}' \
+  | jq '.result'  # Parse and validate JSON response
+```
+
+### 4. Configuration Updates
+Edit **[mcp_config.toml](mdc:scripts/mcp/mcp_config.toml)** when:
+- MCP specification version changes
+- New tool annotations needed
+- Governance policies change
+- Schema validation requirements evolve
+
+## Architecture Principles
+
+### Server-Side Introspection
+The export utility runs **on the MCP server side** and uses local introspection:
+
+```python
+# Local client connecting to local server
+async with Client(mcp) as client:
+    tools = await client.list_tools()
+    resources = await client.list_resources()
+    prompts = await client.list_prompts()
+```
+
+### Configuration-Driven Design
+All formerly hardcoded values now live in configuration:
+- Protocol versions and schema URLs
+- Repository templates and metadata
+- Tool annotations and examples
+- Validation settings
+
+### Multi-Transport Support
+While designed for server-side use, the utility can work with:
+- **STDIO transport**: Local development and Claude Desktop
+- **HTTP/SSE transport**: Remote server schema export
+- **WebSocket transport**: Real-time schema monitoring
+
+## Best Practices
+
+### ✅ **Do's**
+1. **Always run export after tool changes** to keep schemas current
+2. **Use official MCP format** for production deployments
+3. **Configure tool-specific annotations** in mcp_config.toml
+4. **Validate schemas in CI/CD** to catch compliance issues early
+5. **Keep protocol version updated** with latest MCP releases
+
+### ❌ **Don'ts**
+1. **Don't hardcode metadata** - use configuration and dynamic extraction
+2. **Don't skip validation** - always verify against official schema
+3. **Don't ignore tool annotations** - they're critical for governance
+4. **Don't use legacy format in production** - official format only
+5. **Don't manually edit generated schemas** - they're auto-generated
+
+## Integration with Other Tiers
+
+### Tier 4 (MCP-FastAPI) Integration
+- Export script introspects live FastMCP server created from FastAPI app
+- Preserves zero-duplication architecture
+- Automatically detects tools from FastAPI endpoints
+
+### Tier 3 (RAG Pipeline) Compliance
+- Tool annotations reflect RAG-specific characteristics
+- Resource usage annotations based on retrieval complexity
+- Security annotations appropriate for search operations
+
+### Tier 2 (Development Workflow) Enhancement
+- Integrates into development and CI/CD workflows
+- Provides validation commands for quality assurance
+- Supports iterative schema development
+
+## MCP Specification Compliance
+
+### Current Specification: 2025-03-26
+- **Enhanced tool annotations** for governance and UX
+- **Content type support** for text, image, audio, resource
+- **Trust and safety annotations** for organizational policies
+- **Resource management metadata** for system optimization
+
+### Validation Requirements
+```bash
+# Schema compliance checks
+✅ $schema field pointing to official specification
+✅ $id field with unique server identifier  
+✅ camelCase inputSchema (not snake_case)
+✅ Capabilities definition with protocol features
+✅ Protocol version matching specification
+```
+
+## Troubleshooting
+
+### Common Issues
+- **Import errors**: Ensure MCP server can be imported (check paths)
+- **Schema validation failures**: Verify configuration matches spec version
+- **Git repository detection**: Run from git repository root
+- **JSON Schema download**: Check network access to specification URLs
+
+### Debug Commands
+```bash
+# Check MCP server can be imported
+python -c "from src.mcp_server.fastapi_wrapper import mcp; print('✅ MCP import success')"
+
+# Verify git repository info
+git remote get-url origin
+
+# Test TOML configuration loading
+python -c "import tomllib; print(tomllib.load(open('scripts/mcp/mcp_config.toml', 'rb')))"
+```
+
+**Remember: This tier provides the foundation for MCP compliance and schema governance across the entire project.**

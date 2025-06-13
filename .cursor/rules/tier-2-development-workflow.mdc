@@ -84,6 +84,27 @@ uv run pytest tests/unit/ -v
 uv run pytest tests/performance/ -v
 ```
 
+### MCP Schema Management (NEW)
+```bash
+# Legacy approach - export MCP server schemas (run after tool changes)
+python scripts/mcp/export_mcp_schema.py
+
+# Validate MCP schema compliance
+python scripts/mcp/validate_mcp_schema.py
+
+# Combined schema export and validation
+python scripts/mcp/export_mcp_schema.py && python scripts/mcp/validate_mcp_schema.py
+
+# RECOMMENDED - Native schema discovery via streamable HTTP
+# Start server
+python src/mcp_server/fastapi_wrapper.py &
+
+# Discover schema via HTTP
+curl -X POST http://127.0.0.1:8000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
+```
+
 ### Coverage and Quality
 ```bash
 # Coverage report
@@ -103,6 +124,7 @@ mypy src/
 - **Import errors**: Check `PYTHONPATH` and use absolute imports
 - **Test discovery issues**: Verify test file naming (`test_*.py`, `Test*` classes, `test_*` functions)
 - **Missing dependencies**: Use `uv pip list | grep <package-name>` to verify installation
+- **MCP schema validation failures**: Check [mcp_config.toml](mdc:scripts/mcp/mcp_config.toml) and ensure schema URL is accessible
 
 ### Environment Validation
 ```bash
@@ -114,6 +136,33 @@ which python
 
 # Check project dependencies
 uv pip check
+
+# Verify MCP server can be imported
+python -c "from src.mcp_server.fastapi_wrapper import mcp; print('✅ MCP import success')"
+```
+
+## Schema Management Workflow
+
+### After Tool Changes
+```bash
+# 1. Export updated schemas
+python scripts/mcp/export_mcp_schema.py
+
+# 2. Validate compliance
+python scripts/mcp/validate_mcp_schema.py
+
+# 3. Review generated files
+# - mcp_server_official.json (use this for production)
+# - mcp_server_schema.json (legacy format)
+```
+
+### CI/CD Integration
+Include schema validation in your CI pipeline:
+```bash
+# Schema compliance check (exit code 0 = pass, 1 = fail)
+python scripts/mcp/validate_mcp_schema.py
 ```
 
 All configuration flows through **[settings.py](mdc:src/settings.py)** using Pydantic BaseSettings with environment variables loaded from `.env`.
+
+MCP schema configuration is managed via **[mcp_config.toml](mdc:scripts/mcp/mcp_config.toml)** for protocol compliance and governance settings.
