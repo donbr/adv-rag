@@ -1,0 +1,129 @@
+{
+  "_note": "This is a LEGACY/COMMUNITY format. Use mcp_server_official.json for production.",
+  "_official_schema": "See mcp_server_official.json for the official MCP-compliant schema",
+  "_differences": [
+    "Official format uses 'inputSchema' (camelCase), this uses 'input_schema' (snake_case)",
+    "Official format includes $schema and $id fields for JSON Schema validation",
+    "Official format includes capabilities, protocolVersion, and other MCP-specific fields",
+    "Official format follows https://raw.githubusercontent.com/modelcontextprotocol/specification/main/schema/server.json"
+  ],
+  "server_info": {
+    "name": "advanced-rag-fastapi",
+    "description": "Advanced RAG with FastAPI → MCP Integration. Provides 6 retrieval strategies for semantic search across John Wick movie reviews.",
+    "repo_url": "https://github.com/donbr/advanced-rag",
+    "server_type": "FastAPI Integration",
+    "server_category": [
+      "RAG",
+      "Search",
+      "AI",
+      "LangChain"
+    ],
+    "server_version": "1.0.0"
+  },
+  "tools": [
+    {
+      "name": "naive_retriever",
+      "description": "Invokes the Naive Retriever chain for basic similarity search.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "annotations": null
+    },
+    {
+      "name": "bm25_retriever",
+      "description": "Invokes the BM25 Retriever chain for keyword-based search.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "annotations": null
+    },
+    {
+      "name": "contextual_compression_retriever",
+      "description": "Invokes the Contextual Compression Retriever chain for compressed context.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "annotations": null
+    },
+    {
+      "name": "multi_query_retriever",
+      "description": "Invokes the Multi-Query Retriever chain for enhanced query expansion.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "annotations": null
+    },
+    {
+      "name": "ensemble_retriever",
+      "description": "Invokes the Ensemble Retriever chain combining multiple retrieval strategies.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "annotations": null
+    },
+    {
+      "name": "semantic_retriever",
+      "description": "Invokes the Semantic Retriever chain for advanced semantic search.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "annotations": null
+    }
+  ],
+  "resources": [],
+  "prompts": []
+}
