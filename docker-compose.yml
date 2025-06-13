@@ -1,0 +1,68 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: langchain_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - langchain_network
+
+  redis:
+    image: redis:latest
+    container_name: langchain_redis
+    ports:
+      - "6379:6379"
+    command: [
+      "redis-server",
+      "--save", "60", "1",
+      "--loglevel", "warning",
+      "--maxmemory", "1gb",
+      "--maxmemory-policy", "allkeys-lru"
+    ]
+    volumes:
+      - redis_data:/data
+    networks:
+      - langchain_network
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: langchain_phoenix
+    ports:
+      - "6006:6006"
+      - "4317:4317"
+    environment:
+      - PHOENIX_WORKING_DIR=/mnt/data
+    volumes:
+      - phoenix_data:/mnt/data
+    networks:
+      - langchain_network
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: langchain_redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    networks:
+      - langchain_network
+    depends_on:
+      - redis
+    # When connecting to Redis from RedisInsight, use host 'redis' and port '6379' (the service name, not 'localhost')
+
+volumes:
+  qdrant_data:
+    driver: local
+  redis_data:
+    driver: local
+  phoenix_data:
+    driver: local
+  redisinsight_data:
+    driver: local
+
+networks:
+  langchain_network:
+    driver: bridge

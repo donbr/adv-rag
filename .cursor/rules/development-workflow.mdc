@@ -1,0 +1,381 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Workflow & Testing Guide
+
+## Development Environment Setup
+
+### Prerequisites
+- Python 3.13+ (required by [pyproject.toml](mdc:pyproject.toml))
+- UV package manager for dependency management
+- Docker and Docker Compose for containerized development
+- Qdrant vector database (local or cloud)
+
+### Quick Start
+```bash
+# Clone and setup
+git clone <repository>
+cd adv-rag
+
+# Install dependencies with UV (recommended)
+uv sync
+
+# Environment configuration
+cp .env.example .env
+# Edit .env with your API keys and configurations
+
+# Start development server
+python run.py
+# OR
+uvicorn src.main_api:app --reload --port 8000
+```
+
+### Container Development
+```bash
+# Full stack with Qdrant
+docker-compose up -d
+
+# Development mode with hot reload
+docker-compose -f docker-compose.dev.yml up
+```
+
+## Testing Strategy
+
+### Test Structure
+```
+tests/
+├── unit/                    # Unit tests for individual components
+│   ├── test_retriever_factory.py
+│   ├── test_chain_factory.py
+│   ├── test_vectorstore_setup.py
+│   └── test_data_loader.py
+├── integration/             # Integration tests for full pipeline
+│   ├── test_rag_pipeline.py
+│   ├── test_mcp_integration.py
+│   └── test_api_endpoints.py
+├── performance/             # Load and performance tests
+│   ├── test_retrieval_latency.py
+│   └── test_concurrent_requests.py
+└── fixtures/                # Test data and mock objects
+    ├── sample_documents/
+    └── mock_responses/
+```
+
+### Running Tests
+```bash
+# All tests
+pytest
+
+# Unit tests only
+pytest tests/unit/
+
+# Integration tests with live services
+pytest tests/integration/ --integration
+
+# Performance tests
+pytest tests/performance/ --benchmark
+
+# Coverage report
+pytest --cov=src --cov-report=html
+```
+
+### Test Patterns
+
+#### RAG Pipeline Testing
+```python
+# tests/unit/test_retriever_factory.py
+def test_retriever_creation():
+    """Test retriever factory with different strategies"""
+    vectorstore = mock_vectorstore()
+    
+    # Test similarity retriever
+    retriever = create_retriever("similarity", vectorstore)
+    assert isinstance(retriever, VectorStoreRetriever)
+    
+    # Test hybrid retriever
+    retriever = create_retriever("hybrid", vectorstore)
+    assert hasattr(retriever, "vectorstore")
+    assert hasattr(retriever, "bm25_retriever")
+
+# tests/integration/test_rag_pipeline.py
+async def test_end_to_end_rag():
+    """Test complete RAG pipeline from query to response"""
+    # Setup test data
+    await load_test_documents()
+    
+    # Test retrieval
+    retriever = create_retriever("hybrid", vectorstore)
+    docs = retriever.get_relevant_documents("test query")
+    assert len(docs) > 0
+    
+    # Test chain
+    chain = create_rag_chain(retriever, llm)
+    response = await chain.ainvoke({"question": "test question"})
+    assert "answer" in response
+    assert len(response["answer"]) > 10
+```
+
+#### MCP Server Testing
+```python
+# tests/integration/test_mcp_integration.py
+from mcp.server.fastmcp import FastMCP
+from mcp.client import ClientSession
+
+async def test_mcp_tool_execution():
+    """Test MCP tool functionality"""
+    # Start test MCP server
+    server = create_test_mcp_server()
+    
+    async with ClientSession() as session:
+        # Test tool listing
+        tools = await session.list_tools()
+        assert "semantic_search" in [tool.name for tool in tools]
+        
+        # Test tool execution
+        result = await session.call_tool(
+            "semantic_search",
+            {"query": "test query", "top_k": 3}
+        )
+        assert result.isError is False
+        assert len(result.content) > 0
+```
+
+### Quality Assurance
+
+#### Code Quality Tools
+```bash
+# Linting with ruff
+ruff check src/ tests/
+
+# Type checking with mypy
+mypy src/
+
+# Security scanning
+bandit -r src/
+
+# Dependency vulnerability check
+safety check
+```
+
+#### Performance Benchmarking
+```python
+# tests/performance/test_retrieval_latency.py
+import pytest
+from concurrent.futures import ThreadPoolExecutor
+
+@pytest.mark.benchmark
+def test_retrieval_performance():
+    """Benchmark retrieval latency under load"""
+    retriever = create_retriever("hybrid", vectorstore)
+    queries = generate_test_queries(100)
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        start_time = time.time()
+        futures = [
+            executor.submit(retriever.get_relevant_documents, query)
+            for query in queries
+        ]
+        results = [future.result() for future in futures]
+        end_time = time.time()
+    
+    avg_latency = (end_time - start_time) / len(queries)
+    assert avg_latency < 0.1  # 100ms SLA
+    assert all(len(result) > 0 for result in results)
+```
+
+## Development Practices
+
+### Code Organization
+
+#### Import Standards
+```python
+# Standard library imports
+import asyncio
+import logging
+from typing import List, Dict, Optional
+
+# Third-party imports
+from langchain.schema import Document
+from langchain_openai import ChatOpenAI
+from fastapi import FastAPI, HTTPException
+
+# Local imports
+from src.settings import get_settings
+from src.llm_models import get_chat_openai
+from src.vectorstore_setup import setup_qdrant
+```
+
+#### Error Handling Patterns
+```python
+# Graceful error handling with proper logging
+async def safe_retrieval(query: str) -> List[Document]:
+    """Retrieval with comprehensive error handling"""
+    try:
+        retriever = create_retriever("hybrid", vectorstore)
+        return retriever.get_relevant_documents(query)
+    except VectorStoreConnectionError as e:
+        logger.error(f"Vector store connection failed: {e}")
+        # Fallback to cached results or empty list
+        return []
+    except Exception as e:
+        logger.exception(f"Unexpected error in retrieval: {e}")
+        raise HTTPException(status_code=500, detail="Retrieval service unavailable")
+```
+
+### Configuration Management
+
+#### Environment Configuration
+```python
+# src/settings.py pattern
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    # LLM Configuration (see model-pinning.mdc)
+    openai_api_key: str
+    llm_model: str = "gpt-4.1-mini"
+    embedding_model: str = "text-embedding-3-small"
+    
+    # Vector Store Configuration
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_api_key: Optional[str] = None
+    collection_name: str = "adv_rag_dev"
+    
+    # MCP Configuration
+    mcp_server_name: str = "adv-rag-server"
+    mcp_version: str = "1.0.0"
+    
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+```
+
+#### Feature Flags
+```python
+# Feature flags for gradual rollouts
+class FeatureFlags:
+    ENABLE_HYBRID_SEARCH: bool = True
+    ENABLE_STREAMING_RESPONSES: bool = False
+    ENABLE_QUERY_CACHING: bool = True
+    MAX_RETRIEVAL_RESULTS: int = 10
+```
+
+### Observability and Monitoring
+
+#### Structured Logging
+```python
+# Use the configured logger from logging_config.py
+from src.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+async def process_query(query: str) -> str:
+    """Process query with comprehensive logging"""
+    logger.info(
+        "Processing query",
+        extra={
+            "query_length": len(query),
+            "user_id": get_current_user_id(),
+            "session_id": get_session_id()
+        }
+    )
+    
+    start_time = time.time()
+    try:
+        result = await rag_chain.ainvoke({"question": query})
+        
+        logger.info(
+            "Query processed successfully",
+            extra={
+                "query_latency": time.time() - start_time,
+                "response_length": len(result["answer"]),
+                "documents_retrieved": len(result.get("source_documents", []))
+            }
+        )
+        return result["answer"]
+        
+    except Exception as e:
+        logger.error(
+            "Query processing failed",
+            extra={
+                "error": str(e),
+                "query_latency": time.time() - start_time
+            },
+            exc_info=True
+        )
+        raise
+```
+
+#### Health Checks
+```python
+# Health check endpoints for monitoring
+@app.get("/health")
+async def health_check():
+    """Basic health check"""
+    return {"status": "healthy", "timestamp": datetime.utcnow()}
+
+@app.get("/health/detailed")
+async def detailed_health_check():
+    """Detailed health check including dependencies"""
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.utcnow(),
+        "services": {}
+    }
+    
+    # Check vector store
+    try:
+        await vectorstore.asimilarity_search("health check", k=1)
+        health_status["services"]["vectorstore"] = "healthy"
+    except Exception as e:
+        health_status["services"]["vectorstore"] = f"unhealthy: {e}"
+        health_status["status"] = "degraded"
+    
+    # Check LLM
+    try:
+        await llm.agenerate([["Hello"]])
+        health_status["services"]["llm"] = "healthy"
+    except Exception as e:
+        health_status["services"]["llm"] = f"unhealthy: {e}"
+        health_status["status"] = "degraded"
+    
+    return health_status
+```
+
+## Deployment Workflow
+
+### Staging Environment
+```bash
+# Deploy to staging
+docker build -t adv-rag:staging .
+docker-compose -f docker-compose.staging.yml up -d
+
+# Run integration tests against staging
+pytest tests/integration/ --env=staging
+```
+
+### Production Deployment
+```bash
+# Production build with optimizations
+docker build -t adv-rag:production -f Dockerfile.prod .
+
+# Zero-downtime deployment
+kubectl apply -f k8s/
+kubectl rollout status deployment/adv-rag-api
+```
+
+### Rollback Procedures
+```bash
+# Quick rollback for production issues
+kubectl rollout undo deployment/adv-rag-api
+
+# Database migration rollback
+alembic downgrade -1
+
+# Container rollback
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up -d --scale api=3
+```
+
+Follow these patterns to maintain development velocity while ensuring production reliability.

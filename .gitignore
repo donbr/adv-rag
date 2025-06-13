@@ -1,0 +1,132 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.envrc
+.venv
+.venvs
+.environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables and secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Allow env.example template file
+!env.example
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Jupyter Notebook
+.ipynb_checkpoints
+Untitled*.ipynb
+
+# Testing and coverage
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.tox/
+.nox/
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+nosetests.xml
+
+# Logs
+*.log
+*.log.*
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Data directory - ignore content but preserve structure
+data/*
+!data/.gitkeep
+!data/**/.gitkeep
+*.pkl
+*.bin
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite3-journal
+
+# MCP specific
+.langgraph/
+.langgraph_api/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Package managers
+uv.lock
+Pipfile.lock
+poetry.lock
+yarn.lock
+package-lock.json
+.pnpm-lock.yaml
+
+# Monitoring and profiling
+.profiler/
+wandb/
+
+# Temporary and backup files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.temp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

@@ -1,0 +1,61 @@
+{
+  "jsonrpc": "2.0",
+  "id": "tools-001",
+  "result": {
+    "tools": [
+      {
+        "name": "semantic_search",
+        "description": "Perform semantic search across the document collection.\n    \n    Returns relevant documents based on the query using hybrid search\n    combining vector similarity and BM25 keyword matching.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Search query"
+            },
+            "top_k": {
+              "type": "integer",
+              "description": "Number of results to return",
+              "default": 5
+            },
+            "retrieval_type": {
+              "type": "string",
+              "description": "Type of retrieval to use",
+              "default": "hybrid",
+              "enum": ["hybrid", "vector", "keyword"]
+            }
+          },
+          "required": ["query"]
+        }
+      },
+      {
+        "name": "document_query",
+        "description": "Query the document collection with a natural language question.\n    \n    Uses the full RAG pipeline to provide comprehensive answers\n    based on retrieved relevant documents.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string",
+              "description": "Natural language question about the documents"
+            },
+            "document_filter": {
+              "type": "object",
+              "description": "Optional filter for document selection",
+              "default": null
+            }
+          },
+          "required": ["question"]
+        }
+      },
+      {
+        "name": "get_collection_stats",
+        "description": "Get statistics about the document collection.\n    \n    Returns information about the number of documents, collection health,\n    and other metadata useful for understanding the knowledge base.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      }
+    ]
+  }
+} 

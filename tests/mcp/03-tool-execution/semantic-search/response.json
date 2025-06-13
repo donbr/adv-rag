@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "semantic-search-001",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"rank\": 1,\n    \"content\": \"Machine learning algorithms for document retrieval have evolved significantly...\",\n    \"metadata\": {\n      \"doc_id\": \"ml_retrieval_001\",\n      \"title\": \"Advanced ML Techniques in Information Retrieval\",\n      \"source\": \"academic_papers\"\n    },\n    \"relevance_score\": 0.94\n  },\n  {\n    \"rank\": 2,\n    \"content\": \"Vector embeddings and semantic similarity measures play crucial roles...\",\n    \"metadata\": {\n      \"doc_id\": \"embeddings_002\",\n      \"title\": \"Vector Embeddings for Document Search\",\n      \"source\": \"technical_docs\"\n    },\n    \"relevance_score\": 0.87\n  },\n  {\n    \"rank\": 3,\n    \"content\": \"Hybrid search approaches combining traditional keyword matching...\",\n    \"metadata\": {\n      \"doc_id\": \"hybrid_search_003\",\n      \"title\": \"Hybrid Search Methodologies\",\n      \"source\": \"research_papers\"\n    },\n    \"relevance_score\": 0.82\n  }\n]"
+      }
+    ],
+    "isError": false
+  }
+} 

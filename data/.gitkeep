@@ -1,0 +1,2 @@
+# This file ensures the data/ directory is preserved in version control
+# Directory structure is maintained while actual data files are ignored 

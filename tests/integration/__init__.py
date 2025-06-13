@@ -1,0 +1,1 @@
+# Integration tests for full RAG pipeline and MCP server 

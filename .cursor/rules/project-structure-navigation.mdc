@@ -1,0 +1,109 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Advanced RAG Project Structure & Navigation Guide
+
+## Project Architecture Overview
+
+This advanced RAG (Retrieval-Augmented Generation) project implements MCP (Model Context Protocol) integration with LangChain, Qdrant vector storage, and FastAPI. The codebase follows a modular architecture pattern optimized for scalability and maintainability.
+
+## Directory Structure
+
+```
+adv-rag/
+├── src/                           # Core application source code
+│   ├── main_api.py               # FastAPI application entry point
+│   ├── settings.py               # Configuration and environment settings
+│   ├── llm_models.py            # LLM model configurations (pinned to gpt-4.1-mini)
+│   ├── embeddings.py            # Embedding models (pinned to text-embedding-3-small)
+│   ├── vectorstore_setup.py     # Qdrant vector database setup
+│   ├── retriever_factory.py     # Retrieval chain factory and configuration
+│   ├── chain_factory.py         # LangChain LCEL chain construction
+│   ├── data_loader.py           # Document loading and preprocessing
+│   └── logging_config.py        # Structured logging configuration
+├── tests/                        # Test suite (pytest-based)
+├── data/                         # Document storage and datasets
+├── docs/                         # Project documentation
+├── logs/                         # Application logs and traces
+├── script/                       # Automation and deployment scripts
+├── main.py                       # Application entry point (delegates to src/main_api.py)
+├── run.py                        # Development server launcher
+├── docker-compose.yml           # Container orchestration
+└── pyproject.toml               # Dependencies and project metadata
+```
+
+## Key File Responsibilities
+
+### Core Application Files
+- **[main_api.py](mdc:src/main_api.py)**: FastAPI application with RAG endpoints
+- **[settings.py](mdc:src/settings.py)**: Environment configuration using Pydantic settings
+- **[llm_models.py](mdc:src/llm_models.py)**: LLM model instantiation (must use `gpt-4.1-mini`)
+- **[embeddings.py](mdc:src/embeddings.py)**: Embedding models (must use `text-embedding-3-small`)
+
+### RAG Pipeline Components
+- **[vectorstore_setup.py](mdc:src/vectorstore_setup.py)**: Qdrant vector database configuration
+- **[retriever_factory.py](mdc:src/retriever_factory.py)**: Retrieval strategies and hybrid search
+- **[chain_factory.py](mdc:src/chain_factory.py)**: LangChain LCEL chain assembly
+- **[data_loader.py](mdc:src/data_loader.py)**: Document ingestion and preprocessing
+
+### Infrastructure Files
+- **[logging_config.py](mdc:src/logging_config.py)**: Structured logging with OpenTelemetry
+- **[docker-compose.yml](mdc:docker-compose.yml)**: Multi-service container setup
+- **[pyproject.toml](mdc:pyproject.toml)**: Dependencies pinned for reproducibility
+
+## Navigation Patterns
+
+### For RAG Pipeline Development
+1. Start with **[retriever_factory.py](mdc:src/retriever_factory.py)** for retrieval logic
+2. Modify **[chain_factory.py](mdc:src/chain_factory.py)** for chain composition
+3. Test via **[main_api.py](mdc:src/main_api.py)** endpoints
+
+### For MCP Integration
+1. Refer to existing MCP server implementation (see mcp-sdk-guidelines.mdc)
+2. Use **[settings.py](mdc:src/settings.py)** for MCP-specific configuration
+3. Follow FastMCP 2.0 patterns (see fastmcp-migration-comparison.mdc)
+
+### For Data Pipeline Work
+1. Use **[data_loader.py](mdc:src/data_loader.py)** for new document types
+2. Configure **[vectorstore_setup.py](mdc:src/vectorstore_setup.py)** for storage
+3. Test ingestion via development endpoints
+
+## Development Workflow
+
+### Local Development
+```bash
+# Start with development server
+python run.py
+
+# Or via main entry point
+python main.py
+
+# Container-based development
+docker-compose up -d
+```
+
+### Testing Strategy
+- Unit tests in `tests/` directory
+- Integration tests for RAG pipeline end-to-end
+- MCP server testing via Inspector (see mcp-server-best-practices.mdc)
+
+## Import Conventions
+
+Use absolute imports from the `src` package:
+```python
+from src.llm_models import get_chat_openai
+from src.embeddings import get_openai_embeddings
+from src.vectorstore_setup import setup_qdrant
+```
+
+## Configuration Management
+
+All configuration flows through **[settings.py](mdc:src/settings.py)** using Pydantic BaseSettings:
+- Environment variables loaded from `.env`
+- Type validation and defaults
+- MCP server configuration
+- LLM and embedding model settings
+
+This structure supports both FastAPI development and MCP server deployment while maintaining clear separation of concerns.

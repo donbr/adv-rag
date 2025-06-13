@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# MCP Python SDK (≥ 1.9) – Usage Guidelines
+
+This codebase exposes retrieval chains as **MCP tools** in [src/mcp_server.py](mdc:src/mcp_server.py).  When extending the server, keep these SDK rules in mind:
+
+1. **Imports**  – Do **not** import internal symbols that no longer exist (e.g. `ContentChunk`).  Stick to public entry-points such as `mcp.server.fastmcp.FastMCP` and decorators in `mcp`.
+2. **Tool return values**  – `@mcp.tool()` functions should return plain Python types (`str`, `dict`, `list`, etc.).  FastMCP handles JSON-RPC serialisation; no custom wrapper classes are required.
+3. **Transport**  – The server starts via `mcp.run(transport="stdio")` (see the `__main__` block) so it can be discovered by MCP-aware clients like Claude Desktop.
+4. **SDK version**  – The project pins `"mcp[cli] >= 1.9.3"` in [pyproject.toml](mdc:pyproject.toml).  Ensure any new code or dependencies are compatible with this version range.
+5. **Documentation grounding**  – When adding new tools or troubleshooting, always consult:
+   * Official quick-start: <https://modelcontextprotocol.io/quickstart/server>
+   * Latest specification: <https://modelcontextprotocol.io/specification/2025-03-26>
+
+Follow these guidelines to keep the MCP integration robust and standards-compliant.
