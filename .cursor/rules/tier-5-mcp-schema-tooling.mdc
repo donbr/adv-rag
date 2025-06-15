@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # MCP Schema Management (Tier 5) - Schema Export & Validation
 

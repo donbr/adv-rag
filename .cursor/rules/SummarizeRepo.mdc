@@ -1,0 +1,29 @@
+---
+description: "Generate a high-level overview of the repository using the extracted architecture diagram and enriched metadata."
+globs: 
+alwaysApply: false
+---
+# SummarizeRepo
+
+When asked for a **repo summary**, **high-level overview**, or **architecture summary**, perform these steps:
+
+1. **Embed the Architecture Diagram**  
+   Copy the Mermaid block from `core_index.md` to provide the LLM with an immediate visual of top-level components.  
+
+2. **List Top Modules**  
+   From `metadata.json`, use `total_size_bytes` to calculate accurate percentages. Group files by `component`, sum their `size_bytes`, and sort by total size (descending) to identify the **5 largest components** with their calculated sizes and percentages.  
+
+3. **Component Breakdown**  
+   Group all files by `component`, then provide a one-sentence summary per group (e.g. "`api`: request handlers and validation").  
+
+4. **Highlight Hotspots**  
+   Flag any component accounting for **>10%** of total repo size as a potential refactoring hotspot. For hotspot components, identify the largest individual files with their sizes for actionable refactoring targets.
+
+5. **Output to File**  
+   After generating the summary, create/update the file `extraction/summary.md` with the complete repository summary. Include:
+   - Standard markdown formatting with proper headers
+   - The architecture diagram in a code block
+   - All analysis sections with clear structure
+   - Timestamp of generation at the end
+
+> _This rule relies on the structured JSON manifest and core index to avoid re-parsing raw code, keeping context lean and token-efficient. Uses `total_size_bytes` for mathematical accuracy and includes specific file targets for actionable refactoring. The summary is automatically saved to `extraction/summary.md` for persistence and reference._

@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # MCP-FastAPI Implementation (Tier 4) - Respects RAG Foundation
 
