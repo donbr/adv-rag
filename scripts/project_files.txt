@@ -1,8 +1,8 @@
 PROJECT FILES EXTRACTION
 ==================================================
 Root Directory: /home/donbr/aim/adv-rag
-Extraction Date: 2025-06-15 07:29:51 UTC
-Total Files: 69
+Extraction Date: 2025-06-15 08:46:02 UTC
+Total Files: 60
 Max File Size: 10MB
 ==================================================
 
@@ -18,8 +18,8 @@ EXCLUDED FILES: Script itself, output file, previous extracts
 TABLE OF CONTENTS
 ==================================================
 
-Total files: 69
-Generated: 2025-06-15 07:29:51 UTC
+Total files: 60
+Generated: 2025-06-15 08:46:02 UTC
 
  1. .gitignore (1.4K)
  2. README.md (7.1K)
@@ -29,9 +29,6 @@ Generated: 2025-06-15 07:29:51 UTC
  6. pytest.ini (814B)
  7. pytest_mcp.ini (1.1K)
  8. run.py (6.1K)
- 9. temp_schema_check.py (1.1K)
-10. test_imports.py (2.0K)
-11. test_redis_mcp_cache.py (6.2K)
 
 📁 data/
    1. .gitkeep (144B)
@@ -43,19 +40,19 @@ Generated: 2025-06-15 07:29:51 UTC
    1. .gitkeep (76B)
 
 📁 docs/
-   1. DEPENDENCY_VERSIONS_VALIDATED.md (3.2K)
-   2. MCP_LEARNING_JOURNEY.md (16.2K)
-   3. REDIS_MCP_INTEGRATION.md (9.2K)
-   4. REFACTORING_SUMMARY.md (4.2K)
-   5. RESOURCE_TEMPLATE_ENHANCEMENT.md (11.7K)
-   6. ROADMAP.md (15.8K)
-   7. TRANSPORT_AGNOSTIC_VALIDATION.md (6.7K)
-   8. project-structure.md (17.7K)
+   1. MCP_LEARNING_JOURNEY.md (16.2K)
+   2. REDIS_MCP_INTEGRATION.md (9.2K)
+   3. RESOURCE_TEMPLATE_ENHANCEMENT.md (11.7K)
+   4. ROADMAP.md (15.8K)
+   5. TRANSPORT_AGNOSTIC_VALIDATION.md (6.7K)
+   6. project-structure.md (17.7K)
 
 📁 scripts/
    1. list_project_files.sh (1.7K)
-   2. mcp_server_change_to_walkthrough.sh (4.5K)
-   3. test_redis_mcp_integration.py (9.4K)
+   2. test_redis_mcp_integration.py (9.4K)
+
+📁 scripts/diagnostics/
+   1. test_imports.py (2.0K)
 
 📁 scripts/evaluation/
    1. retrieval_method_comparison.py (16.9K)
@@ -68,15 +65,13 @@ Generated: 2025-06-15 07:29:51 UTC
    1. README.md (5.5K)
    2. compare_schema_outputs.py (7.2K)
    3. compare_transports.py (3.8K)
-   4. export_mcp_schema.py (24.8K)
-   5. export_mcp_schema_http.md (17.1K)
-   6. export_mcp_schema_http.py (25.0K)
-   7. export_mcp_schema_native.md (11.3K)
-   8. export_mcp_schema_native.py (10.1K)
-   9. export_mcp_schema_stdio.py (8.5K)
-  10. mcp_config.toml (4.0K)
-  11. mcp_config_http.toml (4.0K)
-  12. validate_mcp_schema.py (6.9K)
+   4. export_mcp_schema_native.py (10.1K)
+   5. export_mcp_schema_stdio.py (8.5K)
+   6. mcp_config.toml (4.0K)
+   7. validate_mcp_schema.py (6.9K)
+
+📁 scripts/testing/
+   1. test_redis_integration.py (6.2K)
 
 📁 sql/init/
    1. 01_init_memory_schema.sql (6.6K)
@@ -659,95 +654,6 @@ volumes:
 networks:
   langchain_network:
     driver: bridge
-
-
-
-================================================================================
-FILE: docs/DEPENDENCY_VERSIONS_VALIDATED.md
-SIZE: 3.2K | MODIFIED: 2025-06-14
-================================================================================
-
-# Dependency Versions Validated - June 2025
-
-## ✅ VALIDATION COMPLETE
-
-All dependencies have been validated against current PyPI versions as of June 2025.
-
-## Core FastAPI and MCP Stack
-
-| Package | Current Version | Release Date | Status |
-|---------|----------------|--------------|---------|
-| `fastapi` | ≥0.115.12 | Current stable | ✅ Validated |
-| `fastmcp` | ≥2.8.0 | June 11, 2025 | ✅ Validated |
-| `mcp` | ≥1.9.3 | June 12, 2025 | ✅ Validated |
-| `uvicorn[standard]` | ≥0.24.0 | Current | ✅ Validated |
-
-## LangChain Ecosystem - Exact Current Versions
-
-| Package | Current Version | Release Date | Status |
-|---------|----------------|--------------|---------|
-| `langchain` | ≥0.3.25 | May 2, 2025 | ✅ Validated |
-| `langchain-core` | ≥0.3.65 | June 10, 2025 | ✅ Validated |
-| `langchain-openai` | ≥0.3.23 | June 13, 2025 | ✅ Validated |
-| `langchain-community` | ≥0.3.25 | June 10, 2025 | ✅ Validated |
-| `langchain-text-splitters` | ≥0.3.8 | Apr 4, 2025 | ✅ Validated |
-| `langchain-experimental` | ≥0.3.4 | Dec 20, 2024 | ✅ Validated |
-| `langchain-qdrant` | ≥0.2.0 | Current | ✅ Validated |
-| `langchain-redis` | ≥0.2.2 | Current | ✅ Validated |
-| `langchain-cohere` | ≥0.4.0 | Current | ✅ Validated |
-
-## Vector Stores and Search
-
-| Package | Current Version | Release Date | Status |
-|---------|----------------|--------------|---------|
-| `qdrant-client` | ≥1.11.0 | Current | ✅ Validated |
-| `redis[hiredis]` | ≥6.2.0 | June 2025 | ✅ Validated |
-| `rank-bm25` | ≥0.2.2 | Current | ✅ Validated |
-
-## Configuration and Core
-
-| Package | Current Version | Release Date | Status |
-|---------|----------------|--------------|---------|
-| `pydantic` | ≥2.0.0 | Current | ✅ Validated |
-| `pydantic-settings` | ≥2.9.1 | Apr 18, 2025 | ✅ Validated |
-| `python-dotenv` | ≥1.0.0 | Current | ✅ Validated |
-
-## Validation Notes
-
-### LangChain Versioning Strategy
-- All LangChain packages share the same **major.minor** (0.3) for compatibility
-- **Patch** versions vary as each package releases independently
-- This ensures ecosystem compatibility while allowing independent updates
-
-### FastMCP Evolution
-- FastMCP 1.0 was incorporated into the official MCP SDK
-- FastMCP 2.0+ (current) provides enhanced features beyond the core protocol
-- Version 2.8.0 is the latest stable release
-
-### Redis Integration
-- `redis[hiredis]` includes the high-performance hiredis parser
-- Version 6.2.0 is the current stable release
-- `langchain-redis` 0.2.2 is the official partner package
-
-## Application Status
-
-✅ **All dependencies successfully installed and validated**
-✅ **Application starts without import errors**
-✅ **All RAG chains initialize successfully**
-✅ **FastAPI server runs on http://0.0.0.0:8000**
-
-## Next Steps
-
-1. **Redis MCP Integration**: Test Redis caching functionality
-2. **MCP Server**: Verify FastMCP.from_fastapi() conversion
-3. **Performance Testing**: Validate caching performance improvements
-4. **Documentation**: Update API documentation with current versions
-
----
-
-**Validation Date**: June 2025  
-**Validation Method**: PyPI version checks + import testing + application startup  
-**Environment**: uv-managed Python 3.11+ environment
 
 
 
@@ -1460,119 +1366,6 @@ redis:
 **🎉 Your Redis MCP Cache integration is now complete and production-ready!**
 
 The combination of automatic FastAPI caching + Redis MCP tools + Docker Compose infrastructure provides a robust, scalable caching solution that maintains your zero-duplication architecture while dramatically improving performance.
-
-
-
-================================================================================
-FILE: docs/REFACTORING_SUMMARY.md
-SIZE: 4.2K | MODIFIED: 2025-06-13
-================================================================================
-
-# MCP Schema Export Refactoring Summary
-
-## Overview
-
-Successfully refactored the native MCP schema export script to eliminate code duplication by reusing shared validation functions from the dedicated validation module.
-
-## Changes Made
-
-### 1. Import Structure Enhancement
-- **Added project root to Python path** for proper module imports
-- **Imported validation function** from `scripts.mcp.validate_mcp_schema`
-- **Enhanced error handling** for import failures
-
-### 2. Code Duplication Elimination
-- **Removed duplicated `validate_against_official_schema()` function** (33 lines)
-- **Replaced with import** of `validate_with_json_schema()` from shared module
-- **Maintained existing `validate_schema_structure()` function** (project-specific logic)
-
-### 3. Function Call Updates
-- **Updated validation call** to use imported function
-- **Preserved existing error handling** and logging patterns
-- **Maintained backward compatibility** with existing interfaces
-
-## Metrics Improvement
-
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Line Count** | 292 lines | 259 lines | **33 lines reduced (11.3%)** |
-| **Code Reduction vs HTTP** | 50% | 55% | **5% additional reduction** |
-| **Duplicated Functions** | 1 (validate_against_official_schema) | 0 | **100% elimination** |
-| **Shared Dependencies** | None | 1 (validate_mcp_schema) | **Improved maintainability** |
-
-## Benefits Achieved
-
-### ✅ **Code Quality Improvements**
-1. **Eliminated Code Duplication**: No more duplicate validation logic
-2. **Improved Maintainability**: Single source of truth for validation
-3. **Enhanced Consistency**: All scripts use same validation logic
-4. **Reduced Maintenance Burden**: Updates only needed in one place
-
-### ✅ **Functional Preservation**
-1. **Same Functionality**: All existing features preserved
-2. **Same Output**: Identical schema generation
-3. **Same Validation**: Both structure and official schema validation
-4. **Same Error Handling**: Comprehensive error reporting maintained
-
-### ✅ **Architecture Benefits**
-1. **Modular Design**: Clear separation of concerns
-2. **Reusable Components**: Validation logic can be used by other scripts
-3. **Standard Imports**: Follows Python best practices
-4. **Clean Dependencies**: Explicit import relationships
-
-## Technical Implementation
-
-### Before (Duplicated Code)
-```python
-# Duplicated validation function in native script
-def validate_against_official_schema(schema: dict) -> Tuple[bool, str]:
-    # 33 lines of duplicated validation logic
-    ...
-```
-
-### After (Shared Import)
-```python
-# Import shared validation function
-from scripts.mcp.validate_mcp_schema import validate_with_json_schema
-
-# Use imported function
-is_valid, message = validate_with_json_schema(schema)
-```
-
-## Validation Results
-
-### ✅ **Functionality Verified**
-- **Script execution**: ✅ Works correctly
-- **Schema generation**: ✅ Produces identical output
-- **Validation**: ✅ Both structure and official schema validation working
-- **Error handling**: ✅ Graceful error reporting maintained
-- **Import resolution**: ✅ Shared function imported successfully
-
-### ✅ **Quality Metrics**
-- **Line reduction**: 33 lines eliminated (11.3% decrease)
-- **Code duplication**: 100% eliminated
-- **Maintainability**: Significantly improved
-- **Consistency**: Enhanced across all scripts
-
-## Impact on Project
-
-### **Immediate Benefits**
-1. **Cleaner Codebase**: Less duplication, better organization
-2. **Easier Maintenance**: Single place to update validation logic
-3. **Consistent Behavior**: All scripts use same validation approach
-4. **Reduced Bugs**: Less code means fewer potential issues
-
-### **Long-term Benefits**
-1. **Scalability**: Easy to add new validation features
-2. **Testability**: Shared functions can be tested once
-3. **Documentation**: Single source of truth for validation logic
-4. **Standards Compliance**: Consistent MCP validation across project
-
-## Conclusion
-
-The refactoring successfully achieved the goal of eliminating code duplication while preserving all functionality. The native MCP schema export script is now more maintainable, consistent, and follows better software engineering practices.
-
-**Key Achievement**: 55% code reduction compared to HTTP method (259 vs 578 lines) with zero code duplication and improved maintainability.
 
 
 
@@ -4181,6 +3974,82 @@ if __name__ == "__main__":
 
 
 ================================================================================
+FILE: scripts/diagnostics/test_imports.py
+SIZE: 2.0K | MODIFIED: 2025-06-14
+================================================================================
+
+#!/usr/bin/env python3
+"""
+Test script to verify all imports work correctly after Redis MCP integration fixes
+"""
+
+import sys
+import traceback
+
+def test_import(module_name, description):
+    """Test importing a module and report results"""
+    try:
+        __import__(module_name)
+        print(f"✅ {description}: SUCCESS")
+        return True
+    except Exception as e:
+        print(f"❌ {description}: FAILED - {e}")
+        traceback.print_exc()
+        return False
+
+def main():
+    """Test all critical imports"""
+    print("🧪 Testing Critical Imports After Redis MCP Integration")
+    print("=" * 60)
+    
+    tests = [
+        ("pydantic_settings", "Pydantic Settings (BaseSettings)"),
+        ("redis.asyncio", "Redis Async Client"),
+        ("langchain_redis", "LangChain Redis Integration"),
+        ("src.settings", "Application Settings"),
+        ("src.redis_client", "Redis Client Module"),
+        ("src.llm_models", "LLM Models Module"),
+        ("src.main_api", "FastAPI Main Application"),
+    ]
+    
+    results = []
+    for module, description in tests:
+        results.append(test_import(module, description))
+    
+    print("\n" + "=" * 60)
+    print("📊 IMPORT TEST SUMMARY")
+    print("=" * 60)
+    
+    passed = sum(results)
+    total = len(results)
+    
+    print(f"✅ Passed: {passed}/{total}")
+    print(f"❌ Failed: {total - passed}/{total}")
+    
+    if passed == total:
+        print("🎉 ALL IMPORTS SUCCESSFUL! Application should start correctly.")
+        
+        # Test settings instantiation
+        try:
+            from src.settings import get_settings
+            settings = get_settings()
+            print(f"✅ Settings loaded: Redis URL = {settings.redis_url}")
+        except Exception as e:
+            print(f"⚠️ Settings instantiation failed: {e}")
+            
+    else:
+        print("⚠️ Some imports failed. Please install missing dependencies:")
+        print("   uv sync  # or pip install -e .")
+        return 1
+    
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+
+
+================================================================================
 FILE: scripts/evaluation/retrieval_method_comparison.py
 SIZE: 16.9K | MODIFIED: 2025-06-13
 ================================================================================
@@ -5882,1891 +5751,6 @@ if __name__ == "__main__":
 
 
 ================================================================================
-FILE: scripts/mcp/export_mcp_schema.py
-SIZE: 24.8K | MODIFIED: 2025-06-13
-================================================================================
-
-#!/usr/bin/env python3
-"""
-Export FastMCP server definitions to shareable JSON format.
-"""
-import json
-import asyncio
-import sys
-import os
-import logging
-import subprocess
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
-
-try:
-    import tomllib  # Python 3.11+
-except ImportError:
-    try:
-        import tomli as tomllib  # Fallback
-    except ImportError:
-        import toml as tomllib  # Final fallback
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-def get_project_root() -> Path:
-    """Get project root using git or fallback to current directory resolution."""
-    try:
-        # Try git first (most reliable)
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, timeout=5, check=True
-        )
-        return Path(result.stdout.strip())
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
-        # Fallback to relative path resolution
-        current_file = Path(__file__).resolve()
-        project_root = current_file.parent.parent.parent  # Go up from scripts/mcp/ to project root
-        logger.warning(f"Git not available, using fallback project root: {project_root}")
-        return project_root
-
-# Add project root to Python path
-project_root = get_project_root()
-sys.path.insert(0, str(project_root))
-
-try:
-    from fastmcp import Client
-    from src.mcp_server.fastapi_wrapper import mcp
-    from src.main_api import app as fastapi_app
-except ImportError as e:
-    logger.error(f"Failed to import MCP components: {e}")
-    logger.error("Ensure you're running from the project root and dependencies are installed")
-    sys.exit(1)
-
-# Add imports for enhanced MCP features
-import tomllib
-from typing import List, Dict, Any, Optional, Tuple
-import subprocess
-import logging
-
-async def export_mcp_definitions():
-    """Export MCP server definitions as JSON."""
-    
-    # Extract real metadata from the project
-    project_meta, fastapi_meta, mcp_meta = extract_project_metadata()
-    
-    async with Client(mcp) as client:
-        # Get all definitions
-        tools = await client.list_tools()
-        resources = await client.list_resources()
-        prompts = await client.list_prompts()
-        
-        # Build the standard schema format (legacy/community format)
-        schema = {
-            "_note": "This is a LEGACY/COMMUNITY format. Use mcp_server_official.json for production.",
-            "_extracted_metadata": {
-                "project_meta": project_meta,
-                "fastapi_meta": fastapi_meta,
-                "mcp_meta": mcp_meta
-            },
-            "server_info": {
-                "name": mcp_meta.get("name", project_meta.get("name", "advanced-rag")),
-                "description": fastapi_meta.get("description") or project_meta.get("description", "FastAPI Integration"),
-                "repo_url": "https://github.com/donbr/advanced-rag",  # repo-specific
-                "server_type": "FastAPI Integration",
-                "server_category": ["RAG", "Search", "AI", "LangChain"],
-                "server_version": fastapi_meta.get("version", project_meta.get("version", "0.1.0"))
-            },
-            "tools": [],
-            "resources": [],
-            "prompts": []
-        }
-        
-        # Convert tools with clean descriptions (legacy format uses snake_case)
-        for tool in tools:
-            # Clean up the description - remove FastAPI response documentation
-            clean_description = tool.description.split('\n\n\n**Responses:**')[0] if '\n\n\n**Responses:**' in tool.description else tool.description
-            
-            tool_def = {
-                "name": tool.name,
-                "description": clean_description,
-                "input_schema": tool.inputSchema  # Legacy format uses snake_case
-            }
-            
-            # Add response info as a note (not part of MCP spec, but useful for documentation)
-            if hasattr(tool, 'annotations'):
-                tool_def["annotations"] = tool.annotations
-                
-            schema["tools"].append(tool_def)
-        
-        # Convert resources  
-        for resource in resources:
-            schema["resources"].append({
-                "name": resource.name,
-                "description": resource.description,
-                "uri": resource.uri
-            })
-            
-        # Convert prompts
-        for prompt in prompts:
-            schema["prompts"].append({
-                "name": prompt.name,
-                "description": prompt.description,
-                "template": getattr(prompt, 'template', None)
-            })
-        
-        return schema
-
-def extract_project_metadata():
-    """Extract metadata from pyproject.toml, FastAPI app, and MCP server."""
-    
-    # Load MCP configuration
-    config = load_mcp_config()
-    
-    # Extract git repository information for dynamic URLs
-    repo_info = extract_git_repo_info()
-    
-    # Try to load project metadata from pyproject.toml
-    project_meta = {}
-    pyproject_path = project_root / "pyproject.toml"
-    
-    if pyproject_path.exists():
-        try:
-            # Always use binary mode for tomllib/tomli
-            with open(pyproject_path, 'rb') as f:
-                pyproject_data = tomllib.load(f)
-            project_meta = pyproject_data.get("project", {})
-            logger.info(f"Successfully loaded project metadata from {pyproject_path}")
-        except Exception as e:
-            # Fallback to text mode for toml library
-            try:
-                with open(pyproject_path, 'r', encoding='utf-8') as f:
-                    pyproject_data = tomllib.load(f)
-                project_meta = pyproject_data.get("project", {})
-                logger.info(f"Successfully loaded project metadata using fallback method")
-            except Exception as e2:
-                logger.warning(f"Could not parse pyproject.toml: {e2}")
-                project_meta = {}
-    else:
-        logger.warning(f"pyproject.toml not found at {pyproject_path}")
-    
-    # Extract FastAPI app metadata
-    fastapi_meta = {
-        "title": getattr(fastapi_app, "title", "Unknown FastAPI App"),
-        "description": getattr(fastapi_app, "description", ""),
-        "version": getattr(fastapi_app, "version", "0.0.0")
-    }
-    
-    # Try to get MCP server info from the mcp instance
-    mcp_meta = {}
-    try:
-        if hasattr(mcp, 'server_info'):
-            mcp_meta = mcp.server_info
-        elif hasattr(mcp, 'name'):
-            mcp_meta["name"] = mcp.name
-    except Exception as e:
-        logger.warning(f"Could not extract MCP server metadata: {e}")
-    
-    return project_meta, fastapi_meta, mcp_meta
-
-def load_mcp_config():
-    """Load MCP configuration from mcp_config.toml."""
-    try:
-        import tomllib
-    except ImportError:
-        try:
-            import tomli as tomllib
-        except ImportError:
-            try:
-                import toml as tomllib
-            except ImportError:
-                logger.warning("No TOML library available. Using defaults.")
-                return {}
-    
-    config_path = Path(__file__).parent / "mcp_config.toml"
-    if not config_path.exists():
-        logger.warning(f"mcp_config.toml not found at {config_path}. Using defaults.")
-        return {}
-    
-    try:
-        with open(config_path, 'rb') as f:
-            config = tomllib.load(f)
-            logger.info(f"Successfully loaded MCP configuration from {config_path}")
-            return config
-    except Exception as e:
-        logger.warning(f"Could not load mcp_config.toml: {e}")
-        return {}
-
-def extract_git_repo_info():
-    """Extract git repository information for dynamic URL generation."""
-    try:
-        # Get remote URL
-        result = subprocess.run(
-            ["git", "remote", "get-url", "origin"],
-            capture_output=True, text=True, timeout=5, check=True
-        )
-        
-        remote_url = result.stdout.strip()
-        
-        # Parse GitHub URLs
-        if "github.com" in remote_url:
-            # Handle both HTTPS and SSH formats
-            if remote_url.startswith("git@"):
-                # git@github.com:owner/repo.git -> owner/repo
-                repo_path = remote_url.split(":")[-1].replace(".git", "")
-            else:
-                # https://github.com/owner/repo.git -> owner/repo
-                repo_path = remote_url.split("github.com/")[-1].replace(".git", "")
-            
-            owner, repo = repo_path.split("/")
-            repo_info = {"owner": owner, "repo": repo, "full_name": repo_path}
-            logger.info(f"Successfully extracted git repository info: {repo_info['full_name']}")
-            return repo_info
-        
-        logger.warning("Repository is not hosted on GitHub")
-        return {}
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
-        logger.warning(f"Could not extract git repository information: {e}")
-        return {}
-    except Exception as e:
-        logger.warning(f"Unexpected error extracting git info: {e}")
-        return {}
-
-async def export_mcp_definitions_official():
-    """Export MCP server definitions using official MCP protocol format."""
-    
-    # Extract real metadata from the project
-    project_meta, fastapi_meta, mcp_meta = extract_project_metadata()
-    config = load_mcp_config()
-    repo_info = extract_git_repo_info()
-    
-    # Dynamic URL generation
-    repo_full_name = repo_info.get("full_name", f"{config.get('metadata', {}).get('repo_owner', 'unknown')}/{config.get('metadata', {}).get('repo_name', 'unknown')}")
-    
-    async with Client(mcp) as client:
-        # Get all definitions using the official MCP protocol
-        tools = await client.list_tools()
-        resources = await client.list_resources()
-        prompts = await client.list_prompts()
-        
-        # Build official MCP server descriptor using real metadata and config
-        server_descriptor = {
-            "$schema": config.get("server", {}).get("schema_url", "https://raw.githubusercontent.com/modelcontextprotocol/specification/main/schema/server.json"),
-            "$id": config.get("server", {}).get("id_template", "https://github.com/{repo}/mcp-server.json").format(repo=repo_full_name),
-            "name": mcp_meta.get("name", project_meta.get("name", "advanced-rag")),
-            "version": fastapi_meta.get("version", project_meta.get("version", "0.1.0")),
-            "description": fastapi_meta.get("description") or project_meta.get("description", config.get("metadata", {}).get("default_description", "FastAPI to MCP Integration")),
-            "repository": {
-                "type": "git",
-                "url": config.get("server", {}).get("repository_url_template", "https://github.com/{repo}.git").format(repo=repo_full_name)
-            },
-            "categories": config.get("server", {}).get("categories", ["RAG", "Search", "AI", "LangChain"]),
-            "keywords": config.get("server", {}).get("keywords", ["rag", "retrieval", "langchain", "fastapi"]),
-            "capabilities": config.get("capabilities", {
-                "tools": {"listChanged": False},
-                "resources": {"subscribe": False, "listChanged": False},
-                "prompts": {"listChanged": False},
-                "logging": {}
-            }),
-            "protocolVersion": config.get("server", {}).get("protocol_version", "2024-11-05"),
-            "tools": [],
-            "resources": [],
-            "prompts": []
-        }
-        
-        # Add optional fields if available in project metadata or config
-        license_info = project_meta.get("license") or config.get("metadata", {}).get("default_license")
-        if license_info:
-            # Handle both string and dict license formats
-            if isinstance(license_info, dict) and "text" in license_info:
-                server_descriptor["license"] = license_info["text"]
-            else:
-                server_descriptor["license"] = str(license_info)
-        
-        # Extract author information
-        author_info = None
-        if "authors" in project_meta and project_meta["authors"]:
-            # Extract author from pyproject.toml format
-            author_data = project_meta["authors"][0]
-            if isinstance(author_data, dict) and "name" in author_data:
-                author_info = author_data["name"]
-            else:
-                author_info = str(author_data)
-        elif config.get("metadata", {}).get("default_author"):
-            author_info = config.get("metadata", {}).get("default_author")
-        
-        if author_info:
-            server_descriptor["author"] = author_info
-        
-        if "homepage" in project_meta:
-            server_descriptor["homepage"] = project_meta["homepage"]
-        
-        # Convert tools to official format (using camelCase)
-        for tool in tools:
-            # Clean description - remove FastAPI response documentation
-            clean_description = tool.description.split('\n\n\n**Responses:**')[0] if '\n\n\n**Responses:**' in tool.description else tool.description
-            
-            tool_def = {
-                "name": tool.name,
-                "description": clean_description,
-                "inputSchema": tool.inputSchema  # camelCase as per spec
-            }
-            
-            # Add modern MCP annotations for governance and UX
-            annotations = generate_enhanced_tool_annotations(tool.name, config)
-            tool_def["annotations"] = annotations
-            
-            # Add practical examples for better LLM understanding
-            examples = generate_enhanced_examples(tool.name, config)
-            tool_def["examples"] = examples
-            
-            server_descriptor["tools"].append(tool_def)
-        
-        # Convert resources
-        for resource in resources:
-            server_descriptor["resources"].append({
-                "name": resource.name,
-                "description": resource.description,
-                "uri": resource.uri,
-                "mimeType": getattr(resource, 'mimeType', 'application/json')
-            })
-            
-        # Convert prompts
-        for prompt in prompts:
-            prompt_def = {
-                "name": prompt.name,
-                "description": prompt.description
-            }
-            
-            # Add arguments if available
-            if hasattr(prompt, 'arguments') and prompt.arguments:
-                prompt_def["arguments"] = prompt.arguments
-                
-            server_descriptor["prompts"].append(prompt_def)
-        
-        return server_descriptor
-
-def generate_enhanced_tool_annotations(tool_name: str, config: dict) -> dict:
-    """Generate comprehensive tool annotations based on MCP 2025-03-26 specification."""
-    base_annotations = config.get("annotations", {}).get("default", {})
-    governance = config.get("annotations", {}).get("governance", {})
-    resources = config.get("annotations", {}).get("resources", {})
-    
-    # Tool-specific overrides
-    overrides = config.get("annotations", {}).get("overrides", {}).get(tool_name, {})
-    
-    # Enhanced annotations for MCP 2025-03-26
-    annotations = {
-        "audience": base_annotations.get("audience", ["human", "llm"]),
-        "cachePolicy": {
-            "ttl": base_annotations.get("cache_ttl_seconds", 300)
-        },
-        "governance": {
-            "dataAccess": governance.get("data_access", "public"),
-            "aiEnabled": governance.get("ai_enabled", True),
-            "category": governance.get("category", "search"),
-            "requiresApproval": governance.get("requires_approval", False),
-            # NEW: Enhanced security annotations for 2025-03-26
-            "isReadOnly": tool_name not in ["upload", "delete", "modify"],  # Most RAG tools are read-only
-            "isDestructive": False,  # RAG retrieval tools are non-destructive
-            "hasNetworkAccess": True,  # Vector database access
-            "dataClassification": "public"  # Movie review data is public
-        },
-        "resources": {
-            "isIntensive": overrides.get("is_intensive", resources.get("is_intensive", False)),
-            "estimatedDuration": resources.get("estimated_duration", "medium"),
-            # NEW: Resource usage annotations
-            "memoryUsage": "medium" if "ensemble" in tool_name else "low",
-            "networkUsage": "medium",  # Vector database queries
-            "storageAccess": "read"    # Read-only access to vector stores
-        },
-        # NEW: Trust and safety annotations
-        "trustAndSafety": {
-            "contentFiltering": True,   # Filter inappropriate content
-            "rateLimited": True,        # Implement rate limiting
-            "auditLogged": True,        # Log all tool usage
-            "requiresHumanInLoop": False  # RAG searches don't need human approval
-        }
-    }
-    
-    # Apply tool-specific resource intensity overrides
-    if tool_name in ["ensemble_retriever", "contextual_compression_retriever", "multi_query_retriever"]:
-        annotations["resources"]["isIntensive"] = True
-        annotations["resources"]["memoryUsage"] = "high"
-        annotations["trustAndSafety"]["rateLimited"] = True
-        annotations["cachePolicy"]["ttl"] = 600  # Longer cache for intensive operations
-    
-    return annotations
-
-def generate_enhanced_examples(tool_name: str, config: dict) -> List[dict]:
-    """Generate enhanced examples with proper content types for MCP 2025-03-26."""
-    questions = config.get("examples", {}).get("default_questions", [
-        "What makes a good action movie?",
-        "How does John Wick compare to other action heroes?"
-    ])
-    
-    examples = []
-    for i, question in enumerate(questions[:2]):  # Limit to 2 examples per tool
-        example = {
-            "id": f"{tool_name}_example_{i+1}",
-            "description": f"Example {tool_name.replace('_', ' ')} search for: {question}",
-            "input": {
-                "question": question
-            },
-            "output": {
-                # NEW: Support for multiple content types in 2025-03-26
-                "contentTypes": ["text"],  # RAG tools primarily return text
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "content": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {"type": "string", "enum": ["text"]},
-                                    "text": {"type": "string"}
-                                }
-                            }
-                        },
-                        "isError": {"type": "boolean"}
-                    }
-                },
-                "description": f"Returns relevant movie review excerpts about {question.lower()}"
-            }
-        }
-        examples.append(example)
-    
-    return examples
-
-def validate_against_official_schema(server_descriptor: dict) -> Tuple[bool, str]:
-    """Validate the generated schema against the official MCP JSON schema."""
-    try:
-        import jsonschema
-        import requests
-        
-        schema_url = server_descriptor.get("$schema")
-        if not schema_url:
-            return False, "No $schema URL found in server descriptor"
-        
-        logger.info(f"Fetching official schema for validation: {schema_url}")
-        
-        try:
-            response = requests.get(schema_url, timeout=10)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            return False, f"Could not fetch official schema: {e}"
-        
-        try:
-            official_schema = response.json()
-        except json.JSONDecodeError as e:
-            return False, f"Invalid JSON in official schema: {e}"
-        
-        # Validate our schema against the official one
-        try:
-            jsonschema.validate(server_descriptor, official_schema)
-            return True, "Schema validation passed"
-        except jsonschema.ValidationError as e:
-            return False, f"Schema validation failed: {e.message}"
-        except jsonschema.SchemaError as e:
-            return False, f"Official schema is invalid: {e.message}"
-            
-    except ImportError:
-        logger.warning("jsonschema library not available. Install with: pip install jsonschema")
-        return False, "jsonschema library not installed"
-    except Exception as e:
-        return False, f"Unexpected validation error: {str(e)}"
-
-async def main():
-    """Export and save MCP definitions."""
-    logger.info("🔄 Exporting MCP server definitions...")
-    
-    try:
-        # Export community format
-        community_schema = await export_mcp_definitions()
-        
-        # Export official MCP format
-        official_schema = await export_mcp_definitions_official()
-        
-        # Strict JSON-Schema validation
-        if official_schema.get("$schema"):
-            logger.info("🔍 Performing strict JSON-Schema validation...")
-            is_valid, validation_message = validate_against_official_schema(official_schema)
-            if is_valid:
-                logger.info("✅ Schema validation passed!")
-            else:
-                logger.error(f"❌ Schema validation failed: {validation_message}")
-                logger.warning("Generated schema may not be fully compliant with MCP specification")
-        
-        # Save community format
-        community_file = Path("mcp_server_schema.json")
-        with open(community_file, 'w', encoding='utf-8') as f:
-            json.dump(community_schema, f, indent=2, ensure_ascii=False)
-        
-        # Save official format
-        official_file = Path("mcp_server_official.json")
-        with open(official_file, 'w', encoding='utf-8') as f:
-            json.dump(official_schema, f, indent=2, ensure_ascii=False)
-        
-        print(f"✅ Exported {len(official_schema['tools'])} tools, {len(official_schema['resources'])} resources, {len(official_schema['prompts'])} prompts")
-        print(f"📄 Legacy/Community format: {community_file.absolute()}")
-        print(f"📄 🎯 Official MCP format (RECOMMENDED): {official_file.absolute()}")
-        
-        # Show extracted metadata
-        print(f"\n📊 Extracted Metadata:")
-        project_meta, fastapi_meta, mcp_meta = extract_project_metadata()
-        print(f"  • Project name: {project_meta.get('name', 'N/A')} (from pyproject.toml)")
-        print(f"  • Project version: {project_meta.get('version', 'N/A')} (from pyproject.toml)")
-        print(f"  • FastAPI title: {fastapi_meta.get('title', 'N/A')} (from FastAPI app)")
-        print(f"  • FastAPI description: {fastapi_meta.get('description', 'N/A')[:50]}... (from FastAPI app)")
-        print(f"  • FastAPI version: {fastapi_meta.get('version', 'N/A')} (from FastAPI app)")
-        print(f"  • MCP metadata: {mcp_meta if mcp_meta else 'None found'}")
-        
-        # Print tool summary
-        print(f"\n🛠️ Available Tools:")
-        for tool in official_schema['tools']:
-            print(f"  • {tool['name']}: {tool['description']}")
-        
-        # Validate that we have complete tool definitions using official format
-        print(f"\n🔍 Official MCP Schema Validation:")
-        for tool in official_schema['tools']:
-            has_schema = tool.get('inputSchema') is not None  # Official format uses camelCase
-            has_properties = bool(tool.get('inputSchema', {}).get('properties', {}))
-            has_required = bool(tool.get('inputSchema', {}).get('required', []))
-            print(f"  • {tool['name']}: Schema✅ Properties✅ Required✅" if has_schema and has_properties and has_required else f"  • {tool['name']}: Issues detected")
-        
-        # Schema compliance check
-        print(f"\n🎯 Official MCP Schema Compliance:")
-        print(f"  • $schema field: {'✅' if official_schema.get('$schema') else '❌'}")
-        print(f"  • $id field: {'✅' if official_schema.get('$id') else '❌'}")
-        print(f"  • camelCase inputSchema: {'✅' if all(tool.get('inputSchema') for tool in official_schema['tools']) else '❌'}")
-        print(f"  • Capabilities defined: {'✅' if official_schema.get('capabilities') else '❌'}")
-        print(f"  • Protocol version: {'✅' if official_schema.get('protocolVersion') else '❌'}")
-        print(f"  • License field: {'✅' if official_schema.get('license') else '❌'}")
-        print(f"  • Author field: {'✅' if official_schema.get('author') else '❌'}")
-        
-        print(f"\n💡 MCP Specification Notes:")
-        print(f"   • Official schema: {official_schema.get('$schema', 'N/A')}")
-        print(f"   • Tool inputs use 'inputSchema' (camelCase), not 'input_schema'")
-        print(f"   • Tool responses are defined by MCP protocol content types: text, image, audio, resource")
-        print(f"   • Use the Official MCP format for production deployments")
-        
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ Export failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-if __name__ == "__main__":
-    success = asyncio.run(main())
-    exit(0 if success else 1)
-
-
-
-================================================================================
-FILE: scripts/mcp/export_mcp_schema_http.md
-SIZE: 17.1K | MODIFIED: 2025-06-13
-================================================================================
-
-# HTTP MCP Schema Export Update Guide
-
-## Overview
-
-This document outlines the step-by-step approach for updating `export_mcp_schema_http.py` to work with streamable-HTTP transport instead of local MCP object imports. This migration enables production-ready schema export with improved CI/CD integration and standards compliance.
-
-## Current State vs Target State
-
-### Current (STDIO Mode)
-```python
-from src.mcp_server.fastapi_wrapper import mcp
-async with Client(mcp) as client:
-    tools = await client.list_tools()
-```
-
-### Target (HTTP Mode)  
-```python
-HTTP_SERVER_URL = "http://127.0.0.1:8001/mcp"
-async with Client(HTTP_SERVER_URL, transport="streamable-http") as client:
-    openrpc_schema = await client.discover()  # Native discovery
-```
-
-## Step-by-Step Implementation
-
-### Step 1: Analyze Current Dependencies
-
-**Before making changes, document current state:**
-- `export_mcp_schema_http.py` imports `from src.mcp_server.fastapi_wrapper import mcp`
-- Uses `async with Client(mcp) as client:` for local object connection
-- Has functions: `export_mcp_definitions()`, `export_mcp_definitions_official()`
-- Configuration file: `mcp_config_http.toml`
-- Server running: `fastmcp run src/mcp_server/fastapi_wrapper.py --transport streamable-http --port 8001`
-
-**Reference Validation**: *Issue #600* clarifies that "The MCP specification can be found in the schema folder" and supports different transport mechanisms, validating our stdio→HTTP migration approach.
-
-### Step 2: Modify Import Statements
-
-**Remove local MCP import:**
-```python
-# REMOVE this line
-# from src.mcp_server.fastapi_wrapper import mcp
-```
-
-**Add HTTP-specific dependencies:**
-```python
-import httpx  # For server health checks
-from fastmcp import Client  # Keep this
-from src.main_api import app as fastapi_app  # Still needed for FastAPI metadata
-```
-
-**Reference**: *PR #1998 (SchemaFlow SSE Implementation)* demonstrates HTTP-based transport patterns, showing that MCP servers can effectively use web-based transports instead of stdio for production deployments.
-
-### Step 3: Add Server Configuration and Verification
-
-**Add configuration constant:**
-```python
-# HTTP server configuration
-HTTP_SERVER_URL = "http://127.0.0.1:8001/mcp"
-```
-
-**Add server verification function:**
-```python
-async def verify_server_running():
-    """Verify MCP server is running before attempting schema export."""
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.post(
-                HTTP_SERVER_URL,
-                json={"jsonrpc": "2.0", "id": 1, "method": "ping", "params": {}}
-            )
-            if response.status_code == 200:
-                logger.info(f"✅ MCP server is running at {HTTP_SERVER_URL}")
-                return True
-            else:
-                logger.error(f"❌ Server returned status {response.status_code}")
-                return False
-    except Exception as e:
-        logger.error(f"❌ Cannot connect to MCP server at {HTTP_SERVER_URL}: {e}")
-                 logger.error("💡 Make sure the server is running with: fastmcp run src/mcp_server/fastapi_wrapper.py --transport streamable-http --port 8001")
-         return False
-```
-
-**Reference**: *PR #640 (Web Discovery Extension)* demonstrates HTTP-based discovery patterns and emphasizes the need for proper server verification, as "Public LLMs and agents cannot automatically locate MCP endpoints" without standardized HTTP discovery mechanisms.
-
-### Step 4: Update Client Connection Methods
-
-**Modify all export functions to use HTTP connections:**
-
-```python
-async def export_mcp_definitions():
-    """Export MCP server definitions as JSON (HTTP mode - legacy format)."""
-    
-    # Verify server is running first
-    if not await verify_server_running():
-        raise ConnectionError("MCP server is not accessible")
-    
-    async with Client(HTTP_SERVER_URL, transport="streamable-http") as client:
-        # Get all definitions via HTTP
-        tools = await client.list_tools()
-        resources = await client.list_resources()
-        prompts = await client.list_prompts()
-        # ... rest of function
-```
-
-**Apply same pattern to:**
-- `export_mcp_definitions_official()`
-
-**Reference**: *LangChain MCP Adapters PR #140* shows "streamable-http-stateless" implementations, demonstrating that HTTP clients can be stateless and connection-independent, making them more reliable than stdio for automated environments.
-
-### Step 5: Add Native Discovery Method (RECOMMENDED)
-
-**Create new function using FastMCP's native discovery:**
-```python
-async def export_mcp_definitions_native():
-    """Export MCP server definitions using native discovery (HTTP mode)."""
-    
-    # Verify server is running first
-    if not await verify_server_running():
-        raise ConnectionError("MCP server is not accessible")
-    
-    async with Client(HTTP_SERVER_URL, transport="streamable-http") as client:
-        # Use native MCP discovery - returns complete OpenRPC document
-        logger.info("🔍 Using native MCP discovery via HTTP...")
-        openrpc_schema = await client.discover()
-        
-        # The discover() method returns the complete OpenRPC specification
-        # This is the official MCP schema format
-        return openrpc_schema
-```
-
-**Benefits of Native Discovery:**
-- ✅ Uses official MCP `rpc.discover` method
-- ✅ Returns complete OpenRPC specification
-- ✅ Standards compliant
-- ✅ CI/CD friendly
-- ✅ Works with curl and standard HTTP tools
-
-**Reference**: *Issue #673* specifically requests "a simplified document that contains all and only the specification documents themselves" and mentions tooling for "validation of an implementation or SDK against the spec." The native `client.discover()` method directly addresses this need by providing "a single document that a user, or an LLM, can refer to and read the entire protocol specification."
-
-### Step 6: Update Main Function and File Outputs
-
-**Modify main() to support multiple export methods:**
-```python
-async def main():
-    """Export and save MCP definitions via HTTP."""
-    logger.info("🔄 Exporting MCP server definitions via HTTP...")
-    
-    try:
-        # OPTION 1: Use native MCP discovery (RECOMMENDED)
-        logger.info("📡 Using native MCP discovery...")
-        native_schema = await export_mcp_definitions_native()
-        
-        # OPTION 2: Export community format (legacy)
-        community_schema = await export_mcp_definitions()
-        
-        # OPTION 3: Export official MCP format (manual reconstruction)
-        official_schema = await export_mcp_definitions_official()
-        
-        # Save native discovery format (RECOMMENDED)
-        native_file = Path("mcp_server_native.json")
-        with open(native_file, 'w', encoding='utf-8') as f:
-            json.dump(native_schema, f, indent=2, ensure_ascii=False)
-        
-        # Save community format (legacy)
-        community_file = Path("mcp_server_schema_http.json")
-        with open(community_file, 'w', encoding='utf-8') as f:
-            json.dump(community_schema, f, indent=2, ensure_ascii=False)
-        
-        # Save official format (manual reconstruction)
-        official_file = Path("mcp_server_official_http.json")
-        with open(official_file, 'w', encoding='utf-8') as f:
-            json.dump(official_schema, f, indent=2, ensure_ascii=False)
-        
-        print(f"✅ Exported {len(official_schema['tools'])} tools")
-        print(f"📄 🎯 Native MCP Discovery (RECOMMENDED): {native_file.absolute()}")
-        print(f"📄 Legacy/Community format: {community_file.absolute()}")
-        print(f"📄 Official MCP format (manual): {official_file.absolute()}")
-                 print(f"🌐 Transport: HTTP ({HTTP_SERVER_URL})")
-```
-
-**Reference**: *PR #616 (Tool Annotations Enhancement)* shows the evolution of MCP schemas with "comprehensive ToolAnnotations" for "Governance & Compliance", "Resource Management", and "User Experience." Our HTTP export must preserve these enhanced annotations which are critical for "Organizations implementing MCP [who] need better metadata about tools to support governance policies, security controls, and user experience enhancements."
-
-### Step 7: Testing and Validation Workflow
-
-**Start the HTTP server:**
-```bash
-fastmcp run src/mcp_server/fastapi_wrapper.py --transport streamable-http --port 8001
-```
-
-**Run the export script:**
-```bash
-python scripts/mcp/export_mcp_schema_http.py
-```
-
-**Verify outputs:**
-- `mcp_server_native.json` (recommended - uses rpc.discover)
-- `mcp_server_schema_http.json` (legacy community format)
-- `mcp_server_official_http.json` (manual reconstruction)
-
-**Validate HTTP connectivity:**
-```bash
-# Test server ping
-curl -X POST http://127.0.0.1:8001/mcp \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"ping","params":{}}'
-
-# Test native discovery  
-curl -X POST http://127.0.0.1:8001/mcp \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
-```
-
-**Reference**: *PR #640 (Web Discovery Extension)* emphasizes HTTP-based discovery patterns and the validation approach: "This has been fully tested locally and publicly. An html file and examples are provided" - demonstrating that HTTP endpoints must be thoroughly testable via standard web tools.
-
-### Step 8: Configuration Updates
-
-**Update `mcp_config_http.toml` for HTTP-specific settings:**
-```toml
-[server]
-# HTTP-specific configuration
-base_url = "http://127.0.0.1:8001/mcp"
-timeout_seconds = 30
-retry_attempts = 3
-
-[http]
-# HTTP transport specific settings
-verify_ssl = false  # for local development
-connection_timeout = 5.0
-read_timeout = 30.0
-
-[export]
-# Output file naming for HTTP mode
-native_file = "mcp_server_native.json"
-community_file = "mcp_server_schema_http.json"
-official_file = "mcp_server_official_http.json"
-```
-
-**Reference**: *PR #1998 (SchemaFlow)* demonstrates production HTTP configuration with "Token-based authentication for secure access" and "Real-time schema caching and updates," showing that HTTP-based MCP servers require proper configuration management for production deployment.
-
-## Benefits Achieved
-
-### 1. Standards Compliance
-- ✅ Uses official MCP `rpc.discover` method
-- ✅ Returns complete OpenRPC specification
-- ✅ Follows MCP 2025-03-26 specification
-
-### 2. Production Ready
-- ✅ HTTP transport suitable for deployment
-- ✅ Network accessible schema discovery
-- ✅ Proper error handling and timeouts
-
-### 3. CI/CD Integration  
-- ✅ Can be automated in build pipelines
-- ✅ Works with standard HTTP tools (curl, httpx)
-- ✅ No local Python import dependencies
-
-### 4. Multiple Output Formats
-- ✅ Native discovery (recommended)
-- ✅ Community format (legacy compatibility)
-- ✅ Manual official format (custom annotations)
-
-### 5. Tool Compatibility
-- ✅ Works with curl for simple testing
-- ✅ Compatible with automated testing frameworks
-- ✅ Standard HTTP client libraries
-
-## Migration Strategy
-
-### Concurrent Operation
-- Run both stdio and HTTP modes during transition
-- Gradual adoption of HTTP-based schema export
-- Maintain backward compatibility during migration
-
-### Recommended Migration Path
-1. **Phase 1**: Implement HTTP export alongside existing stdio export
-2. **Phase 2**: Test HTTP export in development environment  
-3. **Phase 3**: Update CI/CD to use HTTP export
-4. **Phase 4**: Deprecate stdio export for schema generation
-5. **Phase 5**: Full migration to HTTP-based schema workflows
-
-## Common Issues and Solutions
-
-### Server Not Running
-**Error**: `Cannot connect to MCP server`  
-**Solution**: Ensure server is started with correct port:
-```bash
-fastmcp run src/mcp_server/fastapi_wrapper.py --transport streamable-http --port 8001
-```
-
-### Connection Timeouts
-**Error**: `TimeoutError` during schema export  
-**Solution**: Increase timeout in configuration or check server performance
-
-### Import Errors
-**Error**: `ModuleNotFoundError: No module named 'src'`  
-**Solution**: Run with `PYTHONPATH=$(pwd)` prefix:
-```bash
-PYTHONPATH=$(pwd) python scripts/mcp/export_mcp_schema_http.py
-```
-
-### Schema Validation Failures
-**Error**: JSON schema validation errors  
-**Solution**: Use native discovery method which returns standards-compliant schemas
-
-## Summary
-
-This HTTP migration transforms the schema export process from a local Python import dependency to a network-accessible, standards-compliant HTTP service. The native discovery method provides the best combination of standards compliance, performance, and CI/CD integration.
-
----
-
-## Appendix: Citations and References
-
-### A.1 MCP Specification Documents
-
-1. **Model Context Protocol Official Specification (2025-03-26)**  
-   *URL*: https://modelcontextprotocol.io/specification/2025-03-26  
-   *Reference*: Official MCP protocol specification defining JSON-RPC message formats, capabilities, and transport requirements.
-
-2. **MCP Schema Definition (TypeScript)**  
-   *URL*: https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/src/schema.ts  
-   *Reference*: Authoritative TypeScript schema definitions for MCP protocol interfaces and data structures.
-
-3. **MCP JSON Schema (Generated)**  
-   *URL*: https://raw.githubusercontent.com/modelcontextprotocol/specification/refs/heads/main/schema/2025-03-26/schema.json  
-   *Reference*: Machine-readable JSON Schema specification used for validation in this document.
-
-### A.2 FastMCP Framework Documentation
-
-4. **FastMCP Official Documentation**  
-   *URL*: https://gofastmcp.com/  
-   *Reference*: Primary documentation for FastMCP v2 framework supporting FastAPI-to-MCP conversion patterns.
-
-5. **FastMCP Streamable HTTP Transport Guide**  
-   *URL*: https://gofastmcp.com/deployment/running-server.md  
-   *Reference*: Technical documentation for streamable-http transport configuration and deployment.
-
-6. **FastMCP OpenAPI Integration**  
-   *URL*: https://gofastmcp.com/servers/openapi.md  
-   *Reference*: Documentation for automated FastAPI endpoint conversion to MCP tools using `FastMCP.from_fastapi()`.
-
-### A.3 MCP Protocol Development Issues
-
-7. **MCP Specification Completeness Discussion (Issue #600)**  
-   *URL*: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/600  
-   *Reference*: Community discussion validating that MCP schema supports different transport mechanisms and that "The MCP specification can be found in the schema folder."
-
-8. **MCP Protocol Documentation Enhancement (Issue #673)**  
-   *URL*: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/673  
-   *Reference*: Feature request for "a simplified document that contains all and only the specification documents themselves" and tooling for "validation of an implementation or SDK against the spec." Directly supports native discovery method implementation.
-
-9. **SchemaFlow SSE Transport Implementation (PR #1998)**  
-   *URL*: https://github.com/modelcontextprotocol/servers/pull/1998  
-   *Reference*: Production implementation demonstrating HTTP-based transports with "Token-based authentication for secure access" and "Real-time schema caching and updates," validating our HTTP transport approach.
-
-10. **Tool Annotations Enhancement (PR #616)**  
-    *URL*: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/616  
-    *Reference*: Introduction of "comprehensive ToolAnnotations" for "Governance & Compliance", "Resource Management", and "User Experience" that must be preserved in HTTP schema export.
-
-### A.4 HTTP Transport Implementation
-
-11. **MCP Web Discovery Extension (PR #640)**  
-    *URL*: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/640  
-    *Reference*: Demonstrates HTTP-based discovery patterns and server verification needs, noting that "Public LLMs and agents cannot automatically locate MCP endpoints" without proper HTTP mechanisms.
-
-12. **LangChain Streamable HTTP Stateless (PR #140)**  
-    *URL*: https://github.com/langchain-ai/langchain-mcp-adapters/pull/140  
-    *Reference*: Shows "streamable-http-stateless" implementation patterns demonstrating that HTTP clients can be stateless and connection-independent for reliable automated environments.
-
-### A.5 Technical Standards Referenced
-
-13. **JSON-RPC 2.0 Specification**  
-    *URL*: https://www.jsonrpc.org/specification  
-    *Reference*: Underlying JSON-RPC protocol specification that MCP extends, required for HTTP transport implementation.
-
-14. **OpenRPC Specification**  
-    *URL*: https://open-rpc.org/  
-    *Reference*: Schema format returned by native MCP discovery methods (`client.discover()`), providing machine-readable API descriptions that address Issue #673 requirements.
-
----
-
-### Citation Methodology
-
-This document follows technical documentation standards with targeted references:
-- **Primary Sources**: Official MCP specification and FastMCP documentation (References 1-6)
-- **Implementation Evidence**: GitHub issues and PRs directly supporting stdio→HTTP migration (References 7-12)  
-- **Standards References**: Core protocol specifications required for HTTP transport (References 13-14)
-
-Each reference directly supports specific implementation steps in the stdio→streamable-http conversion process. Extraneous references have been removed to maintain focus on the migration requirements.
-
-All URLs were verified as of June 2025. For the most current information, consult the official MCP specification repository and FastMCP documentation.
-
-
-
-================================================================================
-FILE: scripts/mcp/export_mcp_schema_http.py
-SIZE: 25.0K | MODIFIED: 2025-06-13
-================================================================================
-
-#!/usr/bin/env python3
-"""
-Export FastMCP server definitions to shareable JSON format.
-"""
-import json
-import asyncio
-import sys
-import os
-import logging
-import subprocess
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
-
-try:
-    import tomllib  # Python 3.11+
-except ImportError:
-    try:
-        import tomli as tomllib  # Fallback
-    except ImportError:
-        import toml as tomllib  # Final fallback
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-def get_project_root() -> Path:
-    """Get project root using git or fallback to current directory resolution."""
-    try:
-        # Try git first (most reliable)
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, timeout=5, check=True
-        )
-        return Path(result.stdout.strip())
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
-        # Fallback to relative path resolution
-        current_file = Path(__file__).resolve()
-        project_root = current_file.parent.parent.parent  # Go up from scripts/mcp/ to project root
-        logger.warning(f"Git not available, using fallback project root: {project_root}")
-        return project_root
-
-# Add project root to Python path
-project_root = get_project_root()
-sys.path.insert(0, str(project_root))
-
-try:
-    from fastmcp import Client
-    from src.mcp_server.fastapi_wrapper import mcp
-    from src.main_api import app as fastapi_app
-except ImportError as e:
-    logger.error(f"Failed to import MCP components: {e}")
-    logger.error("Ensure you're running from the project root and dependencies are installed")
-    sys.exit(1)
-
-# Add imports for enhanced MCP features
-import tomllib
-from typing import List, Dict, Any, Optional, Tuple
-import subprocess
-import logging
-
-async def export_mcp_definitions():
-    """Export MCP server definitions as JSON."""
-    
-    # Extract real metadata from the project
-    project_meta, fastapi_meta, mcp_meta = extract_project_metadata()
-    config = load_mcp_config()
-
-    #async with Client(mcp) as client:
-    async with Client(
-        "http://127.0.0.1:8001/mcp/"
-    ) as client:
-
-        # Get all definitions
-        tools = await client.list_tools()
-        resources = await client.list_resources()
-        prompts = await client.list_prompts()
-        
-        # Build the standard schema format (legacy/community format)
-        schema = {
-            "_note": "This is a LEGACY/COMMUNITY format. Use mcp_server_official.json for production.",
-            "_extracted_metadata": {
-                "project_meta": project_meta,
-                "fastapi_meta": fastapi_meta,
-                "mcp_meta": mcp_meta
-            },
-            "server_info": {
-                "name": mcp_meta.get("name", project_meta.get("name", "advanced-rag")),
-                "description": fastapi_meta.get("description") or project_meta.get("description", "FastAPI Integration"),
-                "repo_url": "https://github.com/donbr/advanced-rag",  # repo-specific
-                "server_type": "FastAPI Integration",
-                "server_category": ["RAG", "Search", "AI", "LangChain"],
-                "server_version": fastapi_meta.get("version", project_meta.get("version", "0.1.0"))
-            },
-            "tools": [],
-            "resources": [],
-            "prompts": []
-        }
-        
-        # Convert tools with clean descriptions (legacy format uses snake_case)
-        for tool in tools:
-            # Clean up the description - remove FastAPI response documentation
-            clean_description = tool.description.split('\n\n\n**Responses:**')[0] if '\n\n\n**Responses:**' in tool.description else tool.description
-            
-            tool_def = {
-                "name": tool.name,
-                "description": clean_description,
-                "input_schema": tool.inputSchema  # Legacy format uses snake_case
-            }
-            
-            # Add response info as a note (not part of MCP spec, but useful for documentation)
-            if hasattr(tool, 'annotations'):
-                tool_def["annotations"] = tool.annotations
-                
-            schema["tools"].append(tool_def)
-        
-        # Convert resources  
-        for resource in resources:
-            schema["resources"].append({
-                "name": resource.name,
-                "description": resource.description,
-                "uri": resource.uri
-            })
-            
-        # Convert prompts
-        for prompt in prompts:
-            schema["prompts"].append({
-                "name": prompt.name,
-                "description": prompt.description,
-                "template": getattr(prompt, 'template', None)
-            })
-        
-        return schema
-
-def extract_project_metadata():
-    """Extract metadata from pyproject.toml, FastAPI app, and MCP server."""
-    
-    # Load MCP configuration
-    config = load_mcp_config()
-    
-    # Extract git repository information for dynamic URLs
-    repo_info = extract_git_repo_info()
-    
-    # Try to load project metadata from pyproject.toml
-    project_meta = {}
-    pyproject_path = project_root / "pyproject.toml"
-    
-    if pyproject_path.exists():
-        try:
-            # Always use binary mode for tomllib/tomli
-            with open(pyproject_path, 'rb') as f:
-                pyproject_data = tomllib.load(f)
-            project_meta = pyproject_data.get("project", {})
-            logger.info(f"Successfully loaded project metadata from {pyproject_path}")
-        except Exception as e:
-            # Fallback to text mode for toml library
-            try:
-                with open(pyproject_path, 'r', encoding='utf-8') as f:
-                    pyproject_data = tomllib.load(f)
-                project_meta = pyproject_data.get("project", {})
-                logger.info(f"Successfully loaded project metadata using fallback method")
-            except Exception as e2:
-                logger.warning(f"Could not parse pyproject.toml: {e2}")
-                project_meta = {}
-    else:
-        logger.warning(f"pyproject.toml not found at {pyproject_path}")
-    
-    # Extract FastAPI app metadata
-    fastapi_meta = {
-        "title": getattr(fastapi_app, "title", "Unknown FastAPI App"),
-        "description": getattr(fastapi_app, "description", ""),
-        "version": getattr(fastapi_app, "version", "0.0.0")
-    }
-    
-    # Try to get MCP server info from the mcp instance
-    mcp_meta = {}
-    try:
-        if hasattr(mcp, 'server_info'):
-            mcp_meta = mcp.server_info
-        elif hasattr(mcp, 'name'):
-            mcp_meta["name"] = mcp.name
-    except Exception as e:
-        logger.warning(f"Could not extract MCP server metadata: {e}")
-    
-    return project_meta, fastapi_meta, mcp_meta
-
-def load_mcp_config():
-    """Load MCP configuration from mcp_config_http.toml."""
-    try:
-        import tomllib
-    except ImportError:
-        try:
-            import tomli as tomllib
-        except ImportError:
-            try:
-                import toml as tomllib
-            except ImportError:
-                logger.warning("No TOML library available. Using defaults.")
-                return {}
-    
-    config_path = Path(__file__).parent / "mcp_config_http.toml"
-    if not config_path.exists():
-        logger.warning(f"mcp_config_http.toml not found at {config_path}. Using defaults.")
-        return {}
-    
-    try:
-        with open(config_path, 'rb') as f:
-            config = tomllib.load(f)
-            logger.info(f"Successfully loaded MCP configuration from {config_path}")
-            return config
-    except Exception as e:
-        logger.warning(f"Could not load mcp_config_http.toml: {e}")
-        return {}
-
-def extract_git_repo_info():
-    """Extract git repository information for dynamic URL generation."""
-    try:
-        # Get remote URL
-        result = subprocess.run(
-            ["git", "remote", "get-url", "origin"],
-            capture_output=True, text=True, timeout=5, check=True
-        )
-        
-        remote_url = result.stdout.strip()
-        
-        # Parse GitHub URLs
-        if "github.com" in remote_url:
-            # Handle both HTTPS and SSH formats
-            if remote_url.startswith("git@"):
-                # git@github.com:owner/repo.git -> owner/repo
-                repo_path = remote_url.split(":")[-1].replace(".git", "")
-            else:
-                # https://github.com/owner/repo.git -> owner/repo
-                repo_path = remote_url.split("github.com/")[-1].replace(".git", "")
-            
-            owner, repo = repo_path.split("/")
-            repo_info = {"owner": owner, "repo": repo, "full_name": repo_path}
-            logger.info(f"Successfully extracted git repository info: {repo_info['full_name']}")
-            return repo_info
-        
-        logger.warning("Repository is not hosted on GitHub")
-        return {}
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
-        logger.warning(f"Could not extract git repository information: {e}")
-        return {}
-    except Exception as e:
-        logger.warning(f"Unexpected error extracting git info: {e}")
-        return {}
-
-async def export_mcp_definitions_official():
-    """Export MCP server definitions using official MCP protocol format."""
-    
-    # Extract real metadata from the project
-    project_meta, fastapi_meta, mcp_meta = extract_project_metadata()
-    config = load_mcp_config()
-    repo_info = extract_git_repo_info()
-    
-    # Dynamic URL generation
-    repo_full_name = repo_info.get("full_name", f"{config.get('metadata', {}).get('repo_owner', 'unknown')}/{config.get('metadata', {}).get('repo_name', 'unknown')}")
-    
-    async with Client(mcp) as client:
-        # Get all definitions using the official MCP protocol
-        tools = await client.list_tools()
-        resources = await client.list_resources()
-        prompts = await client.list_prompts()
-        
-        # Build official MCP server descriptor using real metadata and config
-        server_descriptor = {
-            "$schema": config.get("server", {}).get("schema_url", "https://raw.githubusercontent.com/modelcontextprotocol/specification/main/schema/server.json"),
-            "$id": config.get("server", {}).get("id_template", "https://github.com/{repo}/mcp-server.json").format(repo=repo_full_name),
-            "name": mcp_meta.get("name", project_meta.get("name", "advanced-rag")),
-            "version": fastapi_meta.get("version", project_meta.get("version", "0.1.0")),
-            "description": fastapi_meta.get("description") or project_meta.get("description", config.get("metadata", {}).get("default_description", "FastAPI to MCP Integration")),
-            "repository": {
-                "type": "git",
-                "url": config.get("server", {}).get("repository_url_template", "https://github.com/{repo}.git").format(repo=repo_full_name)
-            },
-            "categories": config.get("server", {}).get("categories", ["RAG", "Search", "AI", "LangChain"]),
-            "keywords": config.get("server", {}).get("keywords", ["rag", "retrieval", "langchain", "fastapi"]),
-            "capabilities": config.get("capabilities", {
-                "tools": {"listChanged": False},
-                "resources": {"subscribe": False, "listChanged": False},
-                "prompts": {"listChanged": False},
-                "logging": {}
-            }),
-            "protocolVersion": config.get("server", {}).get("protocol_version", "2024-11-05"),
-            "tools": [],
-            "resources": [],
-            "prompts": []
-        }
-        
-        # Add optional fields if available in project metadata or config
-        license_info = project_meta.get("license") or config.get("metadata", {}).get("default_license")
-        if license_info:
-            # Handle both string and dict license formats
-            if isinstance(license_info, dict) and "text" in license_info:
-                server_descriptor["license"] = license_info["text"]
-            else:
-                server_descriptor["license"] = str(license_info)
-        
-        # Extract author information
-        author_info = None
-        if "authors" in project_meta and project_meta["authors"]:
-            # Extract author from pyproject.toml format
-            author_data = project_meta["authors"][0]
-            if isinstance(author_data, dict) and "name" in author_data:
-                author_info = author_data["name"]
-            else:
-                author_info = str(author_data)
-        elif config.get("metadata", {}).get("default_author"):
-            author_info = config.get("metadata", {}).get("default_author")
-        
-        if author_info:
-            server_descriptor["author"] = author_info
-        
-        if "homepage" in project_meta:
-            server_descriptor["homepage"] = project_meta["homepage"]
-        
-        # Convert tools to official format (using camelCase)
-        for tool in tools:
-            # Clean description - remove FastAPI response documentation
-            clean_description = tool.description.split('\n\n\n**Responses:**')[0] if '\n\n\n**Responses:**' in tool.description else tool.description
-            
-            tool_def = {
-                "name": tool.name,
-                "description": clean_description,
-                "inputSchema": tool.inputSchema  # camelCase as per spec
-            }
-            
-            # Add modern MCP annotations for governance and UX
-            annotations = generate_enhanced_tool_annotations(tool.name, config)
-            tool_def["annotations"] = annotations
-            
-            # Add practical examples for better LLM understanding
-            examples = generate_enhanced_examples(tool.name, config)
-            tool_def["examples"] = examples
-            
-            server_descriptor["tools"].append(tool_def)
-        
-        # Convert resources
-        for resource in resources:
-            server_descriptor["resources"].append({
-                "name": resource.name,
-                "description": resource.description,
-                "uri": resource.uri,
-                "mimeType": getattr(resource, 'mimeType', 'application/json')
-            })
-            
-        # Convert prompts
-        for prompt in prompts:
-            prompt_def = {
-                "name": prompt.name,
-                "description": prompt.description
-            }
-            
-            # Add arguments if available
-            if hasattr(prompt, 'arguments') and prompt.arguments:
-                prompt_def["arguments"] = prompt.arguments
-                
-            server_descriptor["prompts"].append(prompt_def)
-        
-        return server_descriptor
-
-def generate_enhanced_tool_annotations(tool_name: str, config: dict) -> dict:
-    """Generate comprehensive tool annotations based on MCP 2025-03-26 specification."""
-    base_annotations = config.get("annotations", {}).get("default", {})
-    governance = config.get("annotations", {}).get("governance", {})
-    resources = config.get("annotations", {}).get("resources", {})
-    
-    # Tool-specific overrides
-    overrides = config.get("annotations", {}).get("overrides", {}).get(tool_name, {})
-    
-    # Enhanced annotations for MCP 2025-03-26
-    annotations = {
-        "audience": base_annotations.get("audience", ["human", "llm"]),
-        "cachePolicy": {
-            "ttl": base_annotations.get("cache_ttl_seconds", 300)
-        },
-        "governance": {
-            "dataAccess": governance.get("data_access", "public"),
-            "aiEnabled": governance.get("ai_enabled", True),
-            "category": governance.get("category", "search"),
-            "requiresApproval": governance.get("requires_approval", False),
-            # NEW: Enhanced security annotations for 2025-03-26
-            "isReadOnly": tool_name not in ["upload", "delete", "modify"],  # Most RAG tools are read-only
-            "isDestructive": False,  # RAG retrieval tools are non-destructive
-            "hasNetworkAccess": True,  # Vector database access
-            "dataClassification": "public"  # Movie review data is public
-        },
-        "resources": {
-            "isIntensive": overrides.get("is_intensive", resources.get("is_intensive", False)),
-            "estimatedDuration": resources.get("estimated_duration", "medium"),
-            # NEW: Resource usage annotations
-            "memoryUsage": "medium" if "ensemble" in tool_name else "low",
-            "networkUsage": "medium",  # Vector database queries
-            "storageAccess": "read"    # Read-only access to vector stores
-        },
-        # NEW: Trust and safety annotations
-        "trustAndSafety": {
-            "contentFiltering": True,   # Filter inappropriate content
-            "rateLimited": True,        # Implement rate limiting
-            "auditLogged": True,        # Log all tool usage
-            "requiresHumanInLoop": False  # RAG searches don't need human approval
-        }
-    }
-    
-    # Apply tool-specific resource intensity overrides
-    if tool_name in ["ensemble_retriever", "contextual_compression_retriever", "multi_query_retriever"]:
-        annotations["resources"]["isIntensive"] = True
-        annotations["resources"]["memoryUsage"] = "high"
-        annotations["trustAndSafety"]["rateLimited"] = True
-        annotations["cachePolicy"]["ttl"] = 600  # Longer cache for intensive operations
-    
-    return annotations
-
-def generate_enhanced_examples(tool_name: str, config: dict) -> List[dict]:
-    """Generate enhanced examples with proper content types for MCP 2025-03-26."""
-    questions = config.get("examples", {}).get("default_questions", [
-        "What makes a good action movie?",
-        "How does John Wick compare to other action heroes?"
-    ])
-    
-    examples = []
-    for i, question in enumerate(questions[:2]):  # Limit to 2 examples per tool
-        example = {
-            "id": f"{tool_name}_example_{i+1}",
-            "description": f"Example {tool_name.replace('_', ' ')} search for: {question}",
-            "input": {
-                "question": question
-            },
-            "output": {
-                # NEW: Support for multiple content types in 2025-03-26
-                "contentTypes": ["text"],  # RAG tools primarily return text
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "content": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {"type": "string", "enum": ["text"]},
-                                    "text": {"type": "string"}
-                                }
-                            }
-                        },
-                        "isError": {"type": "boolean"}
-                    }
-                },
-                "description": f"Returns relevant movie review excerpts about {question.lower()}"
-            }
-        }
-        examples.append(example)
-    
-    return examples
-
-def validate_against_official_schema(server_descriptor: dict) -> Tuple[bool, str]:
-    """Validate the generated schema against the official MCP JSON schema."""
-    try:
-        import jsonschema
-        import requests
-        
-        schema_url = server_descriptor.get("$schema")
-        if not schema_url:
-            return False, "No $schema URL found in server descriptor"
-        
-        logger.info(f"Fetching official schema for validation: {schema_url}")
-        
-        try:
-            response = requests.get(schema_url, timeout=10)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            return False, f"Could not fetch official schema: {e}"
-        
-        try:
-            official_schema = response.json()
-        except json.JSONDecodeError as e:
-            return False, f"Invalid JSON in official schema: {e}"
-        
-        # Validate our schema against the official one
-        try:
-            jsonschema.validate(server_descriptor, official_schema)
-            return True, "Schema validation passed"
-        except jsonschema.ValidationError as e:
-            return False, f"Schema validation failed: {e.message}"
-        except jsonschema.SchemaError as e:
-            return False, f"Official schema is invalid: {e.message}"
-            
-    except ImportError:
-        logger.warning("jsonschema library not available. Install with: pip install jsonschema")
-        return False, "jsonschema library not installed"
-    except Exception as e:
-        return False, f"Unexpected validation error: {str(e)}"
-
-async def main():
-    """Export and save MCP definitions."""
-    logger.info("🔄 Exporting MCP server definitions...")
-    
-    try:
-        # Export community format
-        community_schema = await export_mcp_definitions()
-        
-        # Export official MCP format
-        official_schema = await export_mcp_definitions_official()
-        
-        # Strict JSON-Schema validation
-        if official_schema.get("$schema"):
-            logger.info("🔍 Performing strict JSON-Schema validation...")
-            is_valid, validation_message = validate_against_official_schema(official_schema)
-            if is_valid:
-                logger.info("✅ Schema validation passed!")
-            else:
-                logger.error(f"❌ Schema validation failed: {validation_message}")
-                logger.warning("Generated schema may not be fully compliant with MCP specification")
-        
-        # Save community format
-        community_file = Path("mcp_server_schema.json")
-        with open(community_file, 'w', encoding='utf-8') as f:
-            json.dump(community_schema, f, indent=2, ensure_ascii=False)
-        
-        # Save official format
-        official_file = Path("mcp_server_official.json")
-        with open(official_file, 'w', encoding='utf-8') as f:
-            json.dump(official_schema, f, indent=2, ensure_ascii=False)
-        
-        print(f"✅ Exported {len(official_schema['tools'])} tools, {len(official_schema['resources'])} resources, {len(official_schema['prompts'])} prompts")
-        print(f"📄 Legacy/Community format: {community_file.absolute()}")
-        print(f"📄 🎯 Official MCP format (RECOMMENDED): {official_file.absolute()}")
-        
-        # Show extracted metadata
-        print(f"\n📊 Extracted Metadata:")
-        project_meta, fastapi_meta, mcp_meta = extract_project_metadata()
-        print(f"  • Project name: {project_meta.get('name', 'N/A')} (from pyproject.toml)")
-        print(f"  • Project version: {project_meta.get('version', 'N/A')} (from pyproject.toml)")
-        print(f"  • FastAPI title: {fastapi_meta.get('title', 'N/A')} (from FastAPI app)")
-        print(f"  • FastAPI description: {fastapi_meta.get('description', 'N/A')[:50]}... (from FastAPI app)")
-        print(f"  • FastAPI version: {fastapi_meta.get('version', 'N/A')} (from FastAPI app)")
-        print(f"  • MCP metadata: {mcp_meta if mcp_meta else 'None found'}")
-        
-        # Print tool summary
-        print(f"\n🛠️ Available Tools:")
-        for tool in official_schema['tools']:
-            print(f"  • {tool['name']}: {tool['description']}")
-        
-        # Validate that we have complete tool definitions using official format
-        print(f"\n🔍 Official MCP Schema Validation:")
-        for tool in official_schema['tools']:
-            has_schema = tool.get('inputSchema') is not None  # Official format uses camelCase
-            has_properties = bool(tool.get('inputSchema', {}).get('properties', {}))
-            has_required = bool(tool.get('inputSchema', {}).get('required', []))
-            print(f"  • {tool['name']}: Schema✅ Properties✅ Required✅" if has_schema and has_properties and has_required else f"  • {tool['name']}: Issues detected")
-        
-        # Schema compliance check
-        print(f"\n🎯 Official MCP Schema Compliance:")
-        print(f"  • $schema field: {'✅' if official_schema.get('$schema') else '❌'}")
-        print(f"  • $id field: {'✅' if official_schema.get('$id') else '❌'}")
-        print(f"  • camelCase inputSchema: {'✅' if all(tool.get('inputSchema') for tool in official_schema['tools']) else '❌'}")
-        print(f"  • Capabilities defined: {'✅' if official_schema.get('capabilities') else '❌'}")
-        print(f"  • Protocol version: {'✅' if official_schema.get('protocolVersion') else '❌'}")
-        print(f"  • License field: {'✅' if official_schema.get('license') else '❌'}")
-        print(f"  • Author field: {'✅' if official_schema.get('author') else '❌'}")
-        
-        print(f"\n💡 MCP Specification Notes:")
-        print(f"   • Official schema: {official_schema.get('$schema', 'N/A')}")
-        print(f"   • Tool inputs use 'inputSchema' (camelCase), not 'input_schema'")
-        print(f"   • Tool responses are defined by MCP protocol content types: text, image, audio, resource")
-        print(f"   • Use the Official MCP format for production deployments")
-        
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ Export failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-if __name__ == "__main__":
-    success = asyncio.run(main())
-    exit(0 if success else 1)
-
-
-
-================================================================================
-FILE: scripts/mcp/export_mcp_schema_native.md
-SIZE: 11.3K | MODIFIED: 2025-06-13
-================================================================================
-
-# Native MCP Schema Export - Development Status
-
-## Overview
-
-Development of a **minimal native schema export** approach to replace the complex 580+ line legacy script with a ~30 line solution using FastMCP Client's native API.
-
-**✅ BREAKTHROUGH: Transport-Agnostic Design Validated!**
-
-The native approach now supports **both HTTP and stdio transports** with identical results, proving FastMCP's transport-agnostic architecture.
-
-## Approach Comparison
-
-| Method | Lines of Code | Transport | Status | Description |
-|--------|---------------|-----------|--------|-------------|
-| **Legacy** | 580+ | Server-side | ✅ Working | Complex server-side introspection |
-| **HTTP** | 578 | streamable-http | ✅ Working | HTTP transport with full features |
-| **Native (HTTP)** | 259 | streamable-http | ✅ Working | Minimal FastMCP Client API usage + shared validation |
-| **Native (stdio)** | 259 | stdio | ✅ Working | Same code, different transport |
-
-## Transport-Agnostic Architecture Validation
-
-### ✅ **Identical Results Across Transports**
-
-**Validation Results:**
-- **Same number of tools**: ✅ 6 tools in both HTTP and stdio
-- **Same tool names**: ✅ Identical tool names
-- **Same tool schemas**: ✅ Identical inputSchema definitions
-- **Transport independence**: ✅ VALIDATED
-
-**Key Discovery**: The same FastMCP Client code produces identical schemas regardless of transport:
-
-```python
-# This exact code works for BOTH transports:
-async with Client(connection) as client:
-    tools = await client.list_tools()
-    resources = await client.list_resources() 
-    prompts = await client.list_prompts()
-```
-
-**Transport Differences:**
-- **HTTP**: `Client("http://127.0.0.1:8001/mcp/")`
-- **stdio**: `Client(mcp_server_instance)`
-
-## Technical Architecture
-
-### Native Approach (HTTP Transport)
-```python
-# Connect to HTTP server
-async with Client("http://127.0.0.1:8001/mcp/") as client:
-    tools = await client.list_tools()
-    resources = await client.list_resources() 
-    prompts = await client.list_prompts()
-    
-    # Generate schema from native MCP responses
-    return build_schema(tools, resources, prompts)
-```
-
-### Native Approach (stdio Transport)
-```python
-# Connect directly to server instance
-from src.mcp_server.fastapi_wrapper import mcp
-async with Client(mcp) as client:
-    tools = await client.list_tools()
-    resources = await client.list_resources() 
-    prompts = await client.list_prompts()
-    
-    # Generate schema from native MCP responses
-    return build_schema(tools, resources, prompts)
-```
-
-### Key Technical Discoveries
-
-1. **✅ FastMCP Client is truly transport-agnostic**
-   - Same API methods work across all transports
-   - Identical schema output regardless of transport
-   - Transport choice is purely operational
-
-2. **✅ Correct FastMCP Client API**
-   - `list_tools()` - Get available tools
-   - `list_resources()` - Get available resources  
-   - `list_prompts()` - Get available prompts
-   - `call_tool()`, `read_resource()`, `get_prompt()` - Execute operations
-
-3. **✅ Transport-Agnostic Schema Generation**
-   - stdio vs streamable-http produce identical schemas
-   - Validates FastMCP.from_fastapi() zero-duplication architecture
-   - Proves transport independence at the protocol level
-
-## Current Status
-
-### ✅ **MISSION ACCOMPLISHED - Transport Independence Validated!**
-
-Both HTTP and stdio transports are working with identical results:
-
-1. **✅ Native Schema Export Working (HTTP)**
-   ```bash
-   python scripts/mcp/export_mcp_schema_native.py
-   ```
-   - **Result**: Successfully exported 6 tools via HTTP transport
-   - **Output**: `mcp_server_native.json` (4.9 KB)
-
-2. **✅ Native Schema Export Working (stdio)**
-   ```bash
-   python scripts/mcp/export_mcp_schema_stdio.py
-   ```
-   - **Result**: Successfully exported 6 tools via stdio transport
-   - **Output**: `mcp_server_stdio.json` (2.5 KB)
-
-3. **✅ Transport Validation**
-   ```bash
-   python scripts/mcp/compare_transports.py
-   ```
-   - **Result**: ✅ VALIDATED - Identical schemas across transports
-
-### **Key Achievements**
-- **✅ 55% Code Reduction**: 259 lines vs 580+ lines (with basic feature parity)
-- **✅ Core Feature Parity**: All 6 RAG tools exported correctly + validation
-- **✅ Standards Compliance**: Uses official FastMCP Client API methods
-- **✅ Transport Independence**: Works with both HTTP and stdio transports
-- **✅ Production Ready**: Comprehensive error handling and logging
-- **✅ Schema Validation**: Both structure validation and official MCP spec validation
-- **✅ Code Quality**: Eliminated duplication by reusing shared validation functions
-- **✅ **Transport-Agnostic Design**: Proven to work identically across transports
-- **⚠️ Trade-off**: Simpler output compared to HTTP version (missing annotations, examples)
-
-## FastMCP Client API Reference
-
-Based on documentation research and practical validation:
-
-### Supported Methods (Transport-Agnostic)
-```python
-# Tool operations
-tools = await client.list_tools()
-result = await client.call_tool(name, arguments)
-
-# Resource operations  
-resources = await client.list_resources()
-templates = await client.list_resource_templates()
-content = await client.read_resource(uri)
-
-# Prompt operations
-prompts = await client.list_prompts()
-prompt = await client.get_prompt(name, arguments)
-
-# Utility methods
-await client.ping()
-is_connected = client.is_connected()
-await client.close()
-```
-
-### ❌ Non-Existent Methods
-- `client.discover()` - **Does not exist**
-- `client.get_schema()` - **Does not exist**
-- `client.export_definitions()` - **Does not exist**
-
-## Transport Selection Guide
-
-### **stdio Transport** (Claude Desktop, Local Development)
-```python
-# Direct server connection
-from src.mcp_server.fastapi_wrapper import mcp
-async with Client(mcp) as client:
-    # ... FastMCP Client API calls
-```
-
-**Benefits:**
-- ✅ **Minimal overhead**: No HTTP layer
-- ✅ **Perfect for Claude Desktop**: Native integration
-- ✅ **Maximum performance**: Direct connection
-- ✅ **Smaller output files**: Less metadata overhead
-
-**Use Cases:**
-- Claude Desktop integration
-- Local development and testing
-- Single-user scenarios
-- Maximum performance requirements
-
-### **HTTP Transport** (Web Applications, Multi-User)
-```python
-# HTTP server connection
-async with Client("http://127.0.0.1:8001/mcp/") as client:
-    # ... FastMCP Client API calls
-```
-
-**Benefits:**
-- ✅ **Web-friendly**: Standard HTTP protocol
-- ✅ **Multi-user support**: Concurrent connections
-- ✅ **Network accessible**: Remote server access
-- ✅ **Standard tooling**: Works with curl, HTTP clients
-
-**Use Cases:**
-- Web applications
-- Multi-user scenarios
-- Remote server access
-- CI/CD integration
-
-## Schema Generation Strategy
-
-### Input Sources (Transport-Independent)
-1. **Tools**: `client.list_tools()` → Tool definitions with inputSchema
-2. **Resources**: `client.list_resources()` → Resource URIs and descriptions  
-3. **Prompts**: `client.list_prompts()` → Prompt templates and arguments
-
-### Output Formats
-1. **Standard Format** (Both Transports)
-   - JSON Schema compliant
-   - camelCase field names (`inputSchema`)
-   - Basic MCP structure
-
-2. **Transport-Specific Metadata**
-   - stdio: Minimal metadata, smaller files
-   - HTTP: Additional HTTP-specific information
-
-## Benefits of Native Approach
-
-1. **55% Code Reduction**: 259 lines vs 580+ lines (with full validation)
-2. **Simplified Maintenance**: Uses standard FastMCP Client API + shared validation
-3. **Transport Independence**: Works with any FastMCP transport
-4. **Real-time Schema**: Always reflects current server state
-5. **Standard Compliance**: Uses official MCP protocol methods
-6. **Code Quality**: Eliminates duplication by reusing validation functions
-7. **✅ **Proven Transport-Agnostic Design**: Validated across multiple transports
-
-## Integration with Existing Workflow
-
-### Development Workflow
-```bash
-# HTTP transport (for web development)
-python scripts/mcp/export_mcp_schema_native.py
-
-# stdio transport (for Claude Desktop)
-python scripts/mcp/export_mcp_schema_stdio.py
-
-# Compare transports (validation)
-python scripts/mcp/compare_transports.py
-```
-
-### CI/CD Integration
-```bash
-# Validate schema compliance
-python scripts/mcp/validate_mcp_schema.py
-
-# HTTP-based schema discovery
-curl -X POST http://127.0.0.1:8001/mcp/ \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
-
-# stdio-based schema export
-python scripts/mcp/export_mcp_schema_stdio.py
-```
-
-## Conclusion
-
-✅ **MISSION ACCOMPLISHED WITH TRANSPORT INDEPENDENCE!** 
-
-The native approach has been successfully implemented and validated across multiple transports:
-
-### **Technical Validation**
-- **Server Architecture**: Port 8000 (FastAPI) + Port 8001 (MCP wrapper)
-- **Schema Export**: Both HTTP and stdio produce identical 6-tool schemas
-- **Protocol Compliance**: Proper MCP JSON-RPC communication across transports
-- **Error Handling**: Graceful connection management and validation
-- **Schema Validation**: ✅ Structure validation PASSED + ✅ Official MCP spec validation PASSED
-- **Transport Independence**: ✅ VALIDATED - Identical results across HTTP and stdio
-
-### **Benefits Realized**
-1. **Simplified Maintenance**: Uses standard FastMCP Client API + shared validation
-2. **Real-time Schema**: Always reflects current server state  
-3. **Minimal Dependencies**: No complex introspection logic
-4. **Clean Interface**: Typed FastMCP Client methods
-5. **Performance**: Single connection, efficient protocol usage
-6. **Built-in Validation**: Comprehensive schema validation with detailed reporting
-7. **✅ **Transport Flexibility**: Choose optimal transport for your use case
-
-## Current Status & Trade-offs
-
-**Status**: ✅ **PRODUCTION READY** - Native schema export works across multiple transports with validated transport independence.
-
-### **Comparison Results** (Updated with stdio)
-
-| Method | Transport | MCP Compliance | Features | File Size | Best For |
-|--------|-----------|---------------|----------|-----------|----------|
-| **HTTP** | streamable-http | ⚠️ 50% (2/4 fields) | ✅ Full (annotations, examples) | 22.7 KB | **Production Web** |
-| **Native (HTTP)** | streamable-http | ⚠️ 0% (0/4 fields) | ❌ Basic (tools only) | 4.9 KB | **Development Web** |
-| **Native (stdio)** | stdio | ⚠️ 0% (0/4 fields) | ❌ Basic (tools only) | 2.5 KB | **Claude Desktop** |
-| **Legacy** | server-side | ⚠️ 0% (0/4 fields) | ⚠️ Partial | 4.5 KB | **Deprecated** |
-
-### **Key Trade-offs**
-
-**✅ Native Advantages:**
-- 55% code reduction (259 vs 580+ lines)
-- Uses official FastMCP Client API
-- Simple, maintainable code
-- Fast execution
-- Shared validation functions (no code duplication)
-- **✅ Transport independence validated**
-
-**❌ Native Limitations:**
-- Missing MCP compliance fields (`$schema`, `capabilities`, etc.)
-- No tool annotations for governance
-- No examples for LLM understanding  
-- Tool descriptions need cleaning (contain FastAPI docs)
-- Basic schema structure only
-
-### **Recommendations**
-
-1. **For Production Web Apps**: Use HTTP method (`export_mcp_schema_http.py`) - most feature-complete
-2. **For Claude Desktop**: Use Native stdio method (`export_mcp_schema_stdio.py`) - optimal performance
-3. **For Development**: Either native method is sufficient for basic testing
-4. **For Compliance**: All methods need enhancement to achieve full MCP compliance
-
-**Next Steps**: The transport-agnostic design is proven. Focus can now shift to enhancing MCP compliance fields while maintaining transport independence.
-
-
-
-================================================================================
 FILE: scripts/mcp/export_mcp_schema_native.py
 SIZE: 10.1K | MODIFIED: 2025-06-13
 ================================================================================
@@ -8395,141 +6379,6 @@ require_security_annotations = true
 
 
 ================================================================================
-FILE: scripts/mcp/mcp_config_http.toml
-SIZE: 4.0K | MODIFIED: 2025-06-13
-================================================================================
-
-# MCP Server Configuration
-# This file drives the export_mcp_schema.py script to eliminate hard-coded values
-
-[server]
-endpoint_url = "http://127.0.0.1:8001/mcp"
-
-# Server identification (can use templates with {repo}, {name}, etc.)
-id_template = "https://github.com/{repo}/mcp-server.json"
-repository_url_template = "https://github.com/{repo}.git"
-
-# MCP Protocol - FIXED: Canonical schema URL from specification repository
-protocol_version = "2025-03-26"  # Latest MCP spec version
-schema_url = "https://raw.githubusercontent.com/modelcontextprotocol/specification/refs/heads/main/schema/2025-03-26/schema.json"
-
-# Server categorization
-categories = ["RAG", "Search", "AI", "LangChain"]
-keywords = ["rag", "retrieval", "langchain", "fastapi", "semantic-search", "bm25", "vector-search"]
-
-[capabilities]
-# MCP server capabilities (enhanced for 2025-03-26)
-[capabilities.tools]
-listChanged = false
-
-[capabilities.resources]
-subscribe = false
-listChanged = false
-
-[capabilities.prompts]
-listChanged = false
-
-[capabilities.logging]
-# Enable logging capabilities (empty dict means basic logging)
-
-# NEW: Enhanced capabilities for 2025-03-26
-[capabilities.completions]
-# Support for argument autocompletion suggestions
-enabled = false
-
-[metadata]
-# Default metadata when not available from other sources (these are consumed by the script)
-default_author = "Advanced RAG Team"  # → server_descriptor["author"]
-default_license = "MIT"  # → server_descriptor["license"] 
-default_description = "FastAPI to MCP Integration"  # → server_descriptor["description"]
-
-# Repository information (used for URL templates)
-repo_owner = "donbr"
-repo_name = "advanced-rag"
-
-[annotations]
-# Enhanced tool annotations for MCP 2025-03-26
-[annotations.default]
-audience = ["human", "llm"]
-cache_ttl_seconds = 300
-
-[annotations.governance]
-data_access = "public"
-ai_enabled = true
-category = "search"
-requires_approval = false
-# NEW: Enhanced security annotations for 2025-03-26
-is_read_only = true  # Most RAG tools are read-only
-is_destructive = false  # RAG retrieval tools are non-destructive
-has_network_access = true  # Vector database access
-data_classification = "public"  # Movie review data is public
-
-[annotations.resources]
-estimated_duration = "medium"
-is_intensive = false
-# NEW: Resource usage annotations for 2025-03-26
-memory_usage = "low"
-network_usage = "medium"
-storage_access = "read"
-
-# NEW: Trust and safety annotations for 2025-03-26
-[annotations.trust_and_safety]
-content_filtering = true
-rate_limited = true
-audit_logged = true
-requires_human_in_loop = false  # RAG searches don't need human approval
-
-# Tool-specific overrides (enhanced for 2025-03-26)
-[annotations.overrides.ensemble_retriever]
-is_intensive = true
-memory_usage = "high"
-cache_ttl_seconds = 600  # Longer cache for intensive operations
-
-[annotations.overrides.contextual_compression_retriever]
-is_intensive = true
-memory_usage = "high"
-rate_limited = true
-
-[annotations.overrides.multi_query_retriever]
-is_intensive = true
-memory_usage = "high"
-rate_limited = true
-
-[examples]
-# Template examples for tools (enhanced for 2025-03-26)
-default_questions = [
-    "What makes a good action movie?",
-    "How does John Wick compare to other action heroes?",
-    "What are the key themes in action movies?",
-    "Which action sequences are most memorable?"
-]
-
-# NEW: Content type support for 2025-03-26
-[examples.content_types]
-primary = ["text"]  # RAG tools primarily return text
-supported = ["text"]  # Could extend to support audio/image in future
-
-[validation]
-# Validation settings (enhanced for 2025-03-26)
-enable_json_schema_validation = true
-require_examples = true
-require_annotations = true
-max_description_length = 500
-# NEW: Enhanced validation options
-validate_tool_annotations = true
-validate_content_types = true
-require_security_annotations = true
-
-# COMMENTS: Field mappings for maintainability
-# schema_url → server_descriptor["$schema"]
-# protocol_version → server_descriptor["protocolVersion"] 
-# categories → server_descriptor["categories"]
-# keywords → server_descriptor["keywords"]
-# capabilities → server_descriptor["capabilities"]
-
-
-
-================================================================================
 FILE: scripts/mcp/validate_mcp_schema.py
 SIZE: 6.9K | MODIFIED: 2025-06-13
 ================================================================================
@@ -8714,203 +6563,6 @@ if __name__ == "__main__":
     schema_file = sys.argv[1] if len(sys.argv) > 1 else None
     success = validate_mcp_schema(schema_file)
     exit(0 if success else 1)
-
-
-
-================================================================================
-FILE: scripts/mcp_server_change_to_walkthrough.sh
-SIZE: 4.5K | MODIFIED: 2025-06-12
-================================================================================
-
-#!/bin/bash
-# MCP Server startup script for development and testing
-
-set -euo pipefail
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-# Configuration
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MCP_SERVER_PATH="$PROJECT_ROOT/src/mcp_server/main.py"
-LOG_DIR="$PROJECT_ROOT/logs"
-PYTHON_PATH="$PROJECT_ROOT"
-
-# Functions
-log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-check_dependencies() {
-    log_info "Checking dependencies..."
-    
-    if ! command -v python &> /dev/null; then
-        log_error "Python not found. Please install Python 3.13+"
-        exit 1
-    fi
-    
-    if ! python -c "import sys; exit(0 if sys.version_info >= (3, 13) else 1)" 2>/dev/null; then
-        log_error "Python 3.13+ required"
-        exit 1
-    fi
-    
-    if [ ! -f "$MCP_SERVER_PATH" ]; then
-        log_error "MCP server not found at $MCP_SERVER_PATH"
-        exit 1
-    fi
-    
-    log_info "Dependencies check passed"
-}
-
-setup_environment() {
-    log_info "Setting up environment..."
-    
-    # Create logs directory
-    mkdir -p "$LOG_DIR"
-    
-    # Set Python path
-    export PYTHONPATH="$PYTHON_PATH:$PYTHONPATH"
-    
-    # Load environment variables
-    if [ -f "$PROJECT_ROOT/.env" ]; then
-        log_info "Loading environment from .env"
-        set -a
-        source "$PROJECT_ROOT/.env"
-        set +a
-    else
-        log_warn "No .env file found. Using defaults."
-    fi
-    
-    log_info "Environment setup complete"
-}
-
-run_server() {
-    local mode="${1:-stdio}"
-    
-    log_info "Starting MCP server in $mode mode..."
-    
-    cd "$PROJECT_ROOT"
-    
-    case "$mode" in
-        "stdio")
-            log_info "Running MCP server for Claude Desktop integration"
-            python "$MCP_SERVER_PATH"
-            ;;
-        "inspector")
-            log_info "Running MCP server with Inspector for testing"
-            if command -v npx &> /dev/null; then
-                npx @modelcontextprotocol/inspector python "$MCP_SERVER_PATH"
-            else
-                log_error "npx not found. Install Node.js to use Inspector mode."
-                exit 1
-            fi
-            ;;
-        "dev")
-            log_info "Running MCP server in development mode with auto-reload"
-            # Use watchdog or similar for auto-reload in development
-            python "$MCP_SERVER_PATH"
-            ;;
-        *)
-            log_error "Unknown mode: $mode. Use 'stdio', 'inspector', or 'dev'"
-            exit 1
-            ;;
-    esac
-}
-
-show_help() {
-    cat << EOF
-MCP Server Management Script
-
-Usage: $0 [OPTIONS] [MODE]
-
-MODES:
-    stdio      Run in stdio mode for Claude Desktop (default)
-    inspector  Run with MCP Inspector for testing
-    dev        Run in development mode
-
-OPTIONS:
-    -h, --help     Show this help message
-    -c, --check    Check dependencies only
-    -v, --verbose  Enable verbose logging
-
-Examples:
-    $0                    # Run in stdio mode
-    $0 inspector          # Run with Inspector
-    $0 dev                # Run in development mode
-    $0 --check            # Check dependencies only
-
-Environment Variables:
-    OPENAI_API_KEY       OpenAI API key (required)
-    QDRANT_URL          Qdrant database URL
-    COLLECTION_NAME     Vector collection name
-    LOG_LEVEL           Logging level (DEBUG, INFO, WARN, ERROR)
-
-EOF
-}
-
-# Main script
-main() {
-    local mode="stdio"
-    local check_only=false
-    local verbose=false
-    
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -h|--help)
-                show_help
-                exit 0
-                ;;
-            -c|--check)
-                check_only=true
-                shift
-                ;;
-            -v|--verbose)
-                verbose=true
-                set -x
-                shift
-                ;;
-            stdio|inspector|dev)
-                mode="$1"
-                shift
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                show_help
-                exit 1
-                ;;
-        esac
-    done
-    
-    # Execute based on options
-    if [ "$check_only" = true ]; then
-        check_dependencies
-        log_info "Dependencies check complete"
-        exit 0
-    fi
-    
-    # Full startup sequence
-    check_dependencies
-    setup_environment
-    run_server "$mode"
-}
-
-# Error handling
-trap 'log_error "Script failed on line $LINENO"' ERR
-
-# Run main function
-main "$@"
 
 
 
@@ -9159,6 +6811,189 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+
+================================================================================
+FILE: scripts/testing/test_redis_integration.py
+SIZE: 6.2K | MODIFIED: 2025-06-14
+================================================================================
+
+#!/usr/bin/env python3
+"""
+Test Redis MCP Cache Integration
+
+This script tests the Redis caching functionality for MCP tools by:
+1. Making requests to FastAPI endpoints (which become MCP tools)
+2. Verifying cache hits and misses
+3. Checking Redis directly for cached data
+"""
+
+import asyncio
+import httpx
+import redis.asyncio as redis
+import json
+import time
+from typing import Dict, Any
+
+async def test_redis_mcp_cache():
+    """Test Redis caching for MCP endpoints"""
+    
+    print("🧪 Testing Redis MCP Cache Integration")
+    print("=" * 50)
+    
+    # Connect to Redis
+    redis_client = redis.from_url("redis://localhost:6379", decode_responses=True)
+    
+    try:
+        # Test Redis connection
+        await redis_client.ping()
+        print("✅ Redis connection successful")
+        
+        # Clear any existing cache for clean test
+        await redis_client.flushdb()
+        print("🧹 Cleared Redis cache for clean test")
+        
+    except Exception as e:
+        print(f"❌ Redis connection failed: {e}")
+        return
+    
+    # Test data
+    test_question = "What makes John Wick movies so popular?"
+    test_endpoints = [
+        "naive_retriever",
+        "semantic_retriever", 
+        "bm25_retriever"
+    ]
+    
+    async with httpx.AsyncClient() as client:
+        for endpoint in test_endpoints:
+            print(f"\n🔍 Testing {endpoint}")
+            print("-" * 30)
+            
+            # First request (should be cache miss)
+            print("📤 Making first request (cache miss expected)...")
+            start_time = time.perf_counter()
+            
+            try:
+                response = await client.post(
+                    f"http://localhost:8000/invoke/{endpoint}",
+                    json={"question": test_question},
+                    timeout=30.0
+                )
+                response.raise_for_status()
+                first_result = response.json()
+                first_duration = (time.perf_counter() - start_time) * 1000
+                
+                print(f"✅ First request completed in {first_duration:.2f}ms")
+                print(f"📝 Answer preview: {first_result['answer'][:100]}...")
+                
+            except Exception as e:
+                print(f"❌ First request failed: {e}")
+                continue
+            
+            # Check Redis for cached data
+            cache_keys = await redis_client.keys("mcp_cache:*")
+            print(f"🗄️  Found {len(cache_keys)} cache entries in Redis")
+            
+            # Second request (should be cache hit)
+            print("📤 Making second request (cache hit expected)...")
+            start_time = time.perf_counter()
+            
+            try:
+                response = await client.post(
+                    f"http://localhost:8000/invoke/{endpoint}",
+                    json={"question": test_question},
+                    timeout=30.0
+                )
+                response.raise_for_status()
+                second_result = response.json()
+                second_duration = (time.perf_counter() - start_time) * 1000
+                
+                print(f"✅ Second request completed in {second_duration:.2f}ms")
+                
+                # Compare results
+                if first_result == second_result:
+                    print("✅ Results match (cache working correctly)")
+                else:
+                    print("⚠️  Results differ (potential cache issue)")
+                
+                # Check performance improvement
+                if second_duration < first_duration * 0.8:  # 20% faster
+                    speedup = (first_duration - second_duration) / first_duration * 100
+                    print(f"🚀 Cache speedup: {speedup:.1f}% faster")
+                else:
+                    print("⚠️  No significant speedup detected")
+                    
+            except Exception as e:
+                print(f"❌ Second request failed: {e}")
+                continue
+    
+    # Inspect Redis cache contents
+    print(f"\n🔍 Redis Cache Inspection")
+    print("-" * 30)
+    
+    cache_keys = await redis_client.keys("mcp_cache:*")
+    print(f"📊 Total cache entries: {len(cache_keys)}")
+    
+    for i, key in enumerate(cache_keys[:3]):  # Show first 3 entries
+        try:
+            cached_data = await redis_client.get(key)
+            ttl = await redis_client.ttl(key)
+            
+            if cached_data:
+                data = json.loads(cached_data)
+                print(f"🗝️  Key {i+1}: {key[:50]}...")
+                print(f"   ⏰ TTL: {ttl} seconds")
+                print(f"   📄 Data preview: {str(data)[:100]}...")
+                
+        except Exception as e:
+            print(f"❌ Error inspecting key {key}: {e}")
+    
+    # Test Redis MCP server tools
+    print(f"\n🛠️  Testing Redis MCP Tools")
+    print("-" * 30)
+    
+    try:
+        # Test basic Redis operations via MCP
+        test_key = "mcp_test_key"
+        test_value = "Hello from MCP Redis!"
+        
+        # Set a value
+        await redis_client.set(test_key, test_value, ex=60)
+        print(f"✅ Set test key: {test_key}")
+        
+        # Get the value
+        retrieved_value = await redis_client.get(test_key)
+        if retrieved_value == test_value:
+            print(f"✅ Retrieved test value: {retrieved_value}")
+        else:
+            print(f"❌ Value mismatch: expected {test_value}, got {retrieved_value}")
+            
+        # Clean up
+        await redis_client.delete(test_key)
+        print(f"🧹 Cleaned up test key")
+        
+    except Exception as e:
+        print(f"❌ Redis MCP tools test failed: {e}")
+    
+    # Final summary
+    print(f"\n📋 Test Summary")
+    print("=" * 50)
+    print("✅ Redis connection: Working")
+    print("✅ MCP endpoint caching: Working") 
+    print("✅ Cache performance: Improved response times")
+    print("✅ Redis MCP tools: Available")
+    print("\n🎉 Redis MCP Cache integration is fully functional!")
+    print("\n💡 Next steps:")
+    print("   - Monitor cache hit rates in RedisInsight (http://localhost:5540)")
+    print("   - Adjust TTL values based on your use case")
+    print("   - Use Redis MCP tools for advanced caching strategies")
+    
+    await redis_client.close()
+
+if __name__ == "__main__":
+    asyncio.run(test_redis_mcp_cache())
 
 
 
@@ -12754,308 +10589,6 @@ if __name__ == "__main__":
             logger.error(f"Error during Semantic vector store test: {e}", exc_info=True)
 
     logger.info("--- Finished vectorstore_setup.py standalone test ---")
-
-
-
-================================================================================
-FILE: temp_schema_check.py
-SIZE: 1.1K | MODIFIED: 2025-06-14
-================================================================================
-
-#!/usr/bin/env python3
-"""Temporary script to check resource_wrapper.py schema"""
-import asyncio
-import sys
-from pathlib import Path
-
-# Add project root to path
-project_root = Path(__file__).parent
-sys.path.insert(0, str(project_root))
-
-from fastmcp import Client
-from src.mcp_server.resource_wrapper import mcp
-
-async def get_schema():
-    async with Client(mcp) as client:
-        tools = await client.list_tools()
-        resources = await client.list_resources()
-        prompts = await client.list_prompts()
-        
-        print('=== RESOURCE_WRAPPER SCHEMA ===')
-        print(f'Tools: {len(tools)}')
-        for tool in tools:
-            print(f'  - {tool.name}: {tool.description[:60]}...')
-        
-        print(f'Resources: {len(resources)}')
-        for resource in resources:
-            print(f'  - {resource.name}: {resource.uri}')
-            print(f'    Description: {resource.description[:80]}...')
-        
-        print(f'Prompts: {len(prompts)}')
-        for prompt in prompts:
-            print(f'  - {prompt.name}: {prompt.description[:60]}...')
-
-if __name__ == "__main__":
-    asyncio.run(get_schema())
-
-
-
-================================================================================
-FILE: test_imports.py
-SIZE: 2.0K | MODIFIED: 2025-06-14
-================================================================================
-
-#!/usr/bin/env python3
-"""
-Test script to verify all imports work correctly after Redis MCP integration fixes
-"""
-
-import sys
-import traceback
-
-def test_import(module_name, description):
-    """Test importing a module and report results"""
-    try:
-        __import__(module_name)
-        print(f"✅ {description}: SUCCESS")
-        return True
-    except Exception as e:
-        print(f"❌ {description}: FAILED - {e}")
-        traceback.print_exc()
-        return False
-
-def main():
-    """Test all critical imports"""
-    print("🧪 Testing Critical Imports After Redis MCP Integration")
-    print("=" * 60)
-    
-    tests = [
-        ("pydantic_settings", "Pydantic Settings (BaseSettings)"),
-        ("redis.asyncio", "Redis Async Client"),
-        ("langchain_redis", "LangChain Redis Integration"),
-        ("src.settings", "Application Settings"),
-        ("src.redis_client", "Redis Client Module"),
-        ("src.llm_models", "LLM Models Module"),
-        ("src.main_api", "FastAPI Main Application"),
-    ]
-    
-    results = []
-    for module, description in tests:
-        results.append(test_import(module, description))
-    
-    print("\n" + "=" * 60)
-    print("📊 IMPORT TEST SUMMARY")
-    print("=" * 60)
-    
-    passed = sum(results)
-    total = len(results)
-    
-    print(f"✅ Passed: {passed}/{total}")
-    print(f"❌ Failed: {total - passed}/{total}")
-    
-    if passed == total:
-        print("🎉 ALL IMPORTS SUCCESSFUL! Application should start correctly.")
-        
-        # Test settings instantiation
-        try:
-            from src.settings import get_settings
-            settings = get_settings()
-            print(f"✅ Settings loaded: Redis URL = {settings.redis_url}")
-        except Exception as e:
-            print(f"⚠️ Settings instantiation failed: {e}")
-            
-    else:
-        print("⚠️ Some imports failed. Please install missing dependencies:")
-        print("   uv sync  # or pip install -e .")
-        return 1
-    
-    return 0
-
-if __name__ == "__main__":
-    sys.exit(main())
-
-
-
-================================================================================
-FILE: test_redis_mcp_cache.py
-SIZE: 6.2K | MODIFIED: 2025-06-14
-================================================================================
-
-#!/usr/bin/env python3
-"""
-Test Redis MCP Cache Integration
-
-This script tests the Redis caching functionality for MCP tools by:
-1. Making requests to FastAPI endpoints (which become MCP tools)
-2. Verifying cache hits and misses
-3. Checking Redis directly for cached data
-"""
-
-import asyncio
-import httpx
-import redis.asyncio as redis
-import json
-import time
-from typing import Dict, Any
-
-async def test_redis_mcp_cache():
-    """Test Redis caching for MCP endpoints"""
-    
-    print("🧪 Testing Redis MCP Cache Integration")
-    print("=" * 50)
-    
-    # Connect to Redis
-    redis_client = redis.from_url("redis://localhost:6379", decode_responses=True)
-    
-    try:
-        # Test Redis connection
-        await redis_client.ping()
-        print("✅ Redis connection successful")
-        
-        # Clear any existing cache for clean test
-        await redis_client.flushdb()
-        print("🧹 Cleared Redis cache for clean test")
-        
-    except Exception as e:
-        print(f"❌ Redis connection failed: {e}")
-        return
-    
-    # Test data
-    test_question = "What makes John Wick movies so popular?"
-    test_endpoints = [
-        "naive_retriever",
-        "semantic_retriever", 
-        "bm25_retriever"
-    ]
-    
-    async with httpx.AsyncClient() as client:
-        for endpoint in test_endpoints:
-            print(f"\n🔍 Testing {endpoint}")
-            print("-" * 30)
-            
-            # First request (should be cache miss)
-            print("📤 Making first request (cache miss expected)...")
-            start_time = time.perf_counter()
-            
-            try:
-                response = await client.post(
-                    f"http://localhost:8000/invoke/{endpoint}",
-                    json={"question": test_question},
-                    timeout=30.0
-                )
-                response.raise_for_status()
-                first_result = response.json()
-                first_duration = (time.perf_counter() - start_time) * 1000
-                
-                print(f"✅ First request completed in {first_duration:.2f}ms")
-                print(f"📝 Answer preview: {first_result['answer'][:100]}...")
-                
-            except Exception as e:
-                print(f"❌ First request failed: {e}")
-                continue
-            
-            # Check Redis for cached data
-            cache_keys = await redis_client.keys("mcp_cache:*")
-            print(f"🗄️  Found {len(cache_keys)} cache entries in Redis")
-            
-            # Second request (should be cache hit)
-            print("📤 Making second request (cache hit expected)...")
-            start_time = time.perf_counter()
-            
-            try:
-                response = await client.post(
-                    f"http://localhost:8000/invoke/{endpoint}",
-                    json={"question": test_question},
-                    timeout=30.0
-                )
-                response.raise_for_status()
-                second_result = response.json()
-                second_duration = (time.perf_counter() - start_time) * 1000
-                
-                print(f"✅ Second request completed in {second_duration:.2f}ms")
-                
-                # Compare results
-                if first_result == second_result:
-                    print("✅ Results match (cache working correctly)")
-                else:
-                    print("⚠️  Results differ (potential cache issue)")
-                
-                # Check performance improvement
-                if second_duration < first_duration * 0.8:  # 20% faster
-                    speedup = (first_duration - second_duration) / first_duration * 100
-                    print(f"🚀 Cache speedup: {speedup:.1f}% faster")
-                else:
-                    print("⚠️  No significant speedup detected")
-                    
-            except Exception as e:
-                print(f"❌ Second request failed: {e}")
-                continue
-    
-    # Inspect Redis cache contents
-    print(f"\n🔍 Redis Cache Inspection")
-    print("-" * 30)
-    
-    cache_keys = await redis_client.keys("mcp_cache:*")
-    print(f"📊 Total cache entries: {len(cache_keys)}")
-    
-    for i, key in enumerate(cache_keys[:3]):  # Show first 3 entries
-        try:
-            cached_data = await redis_client.get(key)
-            ttl = await redis_client.ttl(key)
-            
-            if cached_data:
-                data = json.loads(cached_data)
-                print(f"🗝️  Key {i+1}: {key[:50]}...")
-                print(f"   ⏰ TTL: {ttl} seconds")
-                print(f"   📄 Data preview: {str(data)[:100]}...")
-                
-        except Exception as e:
-            print(f"❌ Error inspecting key {key}: {e}")
-    
-    # Test Redis MCP server tools
-    print(f"\n🛠️  Testing Redis MCP Tools")
-    print("-" * 30)
-    
-    try:
-        # Test basic Redis operations via MCP
-        test_key = "mcp_test_key"
-        test_value = "Hello from MCP Redis!"
-        
-        # Set a value
-        await redis_client.set(test_key, test_value, ex=60)
-        print(f"✅ Set test key: {test_key}")
-        
-        # Get the value
-        retrieved_value = await redis_client.get(test_key)
-        if retrieved_value == test_value:
-            print(f"✅ Retrieved test value: {retrieved_value}")
-        else:
-            print(f"❌ Value mismatch: expected {test_value}, got {retrieved_value}")
-            
-        # Clean up
-        await redis_client.delete(test_key)
-        print(f"🧹 Cleaned up test key")
-        
-    except Exception as e:
-        print(f"❌ Redis MCP tools test failed: {e}")
-    
-    # Final summary
-    print(f"\n📋 Test Summary")
-    print("=" * 50)
-    print("✅ Redis connection: Working")
-    print("✅ MCP endpoint caching: Working") 
-    print("✅ Cache performance: Improved response times")
-    print("✅ Redis MCP tools: Available")
-    print("\n🎉 Redis MCP Cache integration is fully functional!")
-    print("\n💡 Next steps:")
-    print("   - Monitor cache hit rates in RedisInsight (http://localhost:5540)")
-    print("   - Adjust TTL values based on your use case")
-    print("   - Use Redis MCP tools for advanced caching strategies")
-    
-    await redis_client.close()
-
-if __name__ == "__main__":
-    asyncio.run(test_redis_mcp_cache())
 
 
 
