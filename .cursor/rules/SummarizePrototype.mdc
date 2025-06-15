@@ -1,0 +1,41 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "Distill a vibe-coded prototype into its core MVP flows and cleanup targets."
+globs:
+  - "extraction/metadata.json"
+  - "extraction/summary.md"
+alwaysApply: false
+---
+
+# SummarizePrototype
+
+When asked for a **prototype summary**, **distilled overview**, or **MVP distillation**, perform these steps:
+
+1. **Load Technical Summary**  
+   First, invoke **SummarizeRepo** to regenerate `extraction/summary.md` if needed; then read that file to get the architecture diagram and size-based analysis.
+
+2. **Filter Core vs. Experimental**  
+   From `metadata.json`, tag each file as **core** (underpinning MVP user flows) or **experimental** (proof-of-concept scripts, one-offs). Exclude experimental files from further summary.
+
+3. **Map MVP Journeys**  
+   Identify 3–5 end-to-end user journeys (e.g. “login → dashboard → logout”) and list which **core** components implement each flow, based on file paths and descriptions.
+
+4. **Highlight Cleanup Targets**  
+   From the remaining **experimental** set, call out modules with no core mappings or heavy console-logging as candidates for removal or archiving.
+
+5. **Output Distilled Summary**  
+   Emit a Markdown overview with:  
+   - The **Mermaid** diagram from `summary.md`’s architecture block.  
+   - A bullet list of MVP journeys with their component mappings.  
+   - A list of experimental files/modules flagged for cleanup.  
+   - A timestamp.
+
+> _This rule relies on the structured JSON manifest and `summary.md` markdown file to avoid re-parsing raw code, keeping context lean and token-efficient. Uses `total_size_bytes` for mathematical accuracy and includes specific file targets for actionable refactoring. The summary is automatically saved to `extraction/prototype_summary.md` for persistence and reference._
+
+
+
+
