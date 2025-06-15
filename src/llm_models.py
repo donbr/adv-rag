@@ -2,20 +2,56 @@
 from langchain_openai import ChatOpenAI
 from src import settings # To ensure API keys are set
 import logging
+from langchain.globals import set_llm_cache
+from langchain_redis import RedisCache, RedisSemanticCache
+from langchain_openai import OpenAIEmbeddings
+from src.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
 # settings.setup_env_vars() # Called when settings is imported
 
-def get_chat_model():
-    logger.info("Initializing ChatOpenAI model (default: gpt-4.1-mini)...")
+def get_chat_openai():
+    """
+    Get ChatOpenAI instance with Redis caching (2024-2025 best practices)
+    
+    Uses langchain-redis 0.2.2 for both exact and semantic caching
+    """
+    settings = get_settings()
+    
+    # Initialize Redis caching for LLM responses
     try:
-        model = ChatOpenAI(model="gpt-4.1-mini")
-        logger.info(f"ChatOpenAI model initialized successfully: {model.model_name}")
-        return model
+        # Option 1: Exact match caching (faster, less storage)
+        redis_cache = RedisCache(redis_url=settings.redis_url)
+        
+        # Option 2: Semantic caching (more intelligent, finds similar queries)
+        # embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+        # redis_cache = RedisSemanticCache(
+        #     redis_url=settings.redis_url,
+        #     embeddings=embeddings,
+        #     distance_threshold=0.2  # Adjust for similarity sensitivity
+        # )
+        
+        # Set global LLM cache
+        set_llm_cache(redis_cache)
+        logger.info("✅ LangChain Redis cache initialized successfully")
+        
     except Exception as e:
-        logger.error(f"Failed to initialize ChatOpenAI model: {e}", exc_info=True)
-        raise # Reraise to signal failure
+        logger.warning(f"⚠️ Failed to initialize Redis cache: {e}. LLM caching disabled.")
+    
+    return ChatOpenAI(
+        model=settings.openai_model_name,
+        temperature=0,
+        openai_api_key=settings.openai_api_key,
+        # Additional performance settings
+        max_retries=3,
+        request_timeout=60,
+    )
+
+# Backward compatibility alias
+def get_chat_model():
+    """Backward compatibility alias for get_chat_openai()"""
+    return get_chat_openai()
 
 if __name__ == "__main__":
     if not logging.getLogger().hasHandlers(): # Check if root logger is configured
@@ -25,7 +61,7 @@ if __name__ == "__main__":
 
     logger.info("--- Running llm_models.py standalone test ---")
     try:
-        chat_model = get_chat_model()
+        chat_model = get_chat_openai()
         if chat_model:
             logger.info(f"Chat model type: {type(chat_model)}")
         else:

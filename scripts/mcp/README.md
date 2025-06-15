@@ -22,6 +22,12 @@ python scripts/mcp/export_mcp_schema.py
 # 2. Validate official schema compliance
 python scripts/mcp/validate_mcp_schema.py
 ```
+# 3. streamable mode
+```bash
+python scripts/mcp/export_mcp_schema_http.py
+
+python scripts/mcp/validate_mcp_schema.py
+```
 
 ## Schema Formats
 

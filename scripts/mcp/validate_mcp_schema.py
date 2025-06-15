@@ -37,14 +37,27 @@ def validate_with_json_schema(our_schema):
     except Exception as e:
         return False, f"Validation error: {str(e)}"
 
-def validate_mcp_schema():
+def validate_mcp_schema(schema_filename=None):
     """Validate our MCP schema against the official specification."""
     
-    # Load our official schema
-    schema_file = Path("mcp_server_official.json")
-    if not schema_file.exists():
-        print("❌ mcp_server_official.json not found. Run export_mcp_schema.py first.")
-        return False
+    # Auto-detect schema file if not specified
+    if schema_filename is None:
+        candidates = ["mcp_server_official.json", "mcp_server_native.json", "mcp_server_schema.json"]
+        schema_file = None
+        for candidate in candidates:
+            if Path(candidate).exists():
+                schema_file = Path(candidate)
+                break
+        
+        if schema_file is None:
+            print("❌ No MCP schema file found. Tried: " + ", ".join(candidates))
+            print("💡 Run export_mcp_schema.py or export_mcp_schema_native.py first.")
+            return False
+    else:
+        schema_file = Path(schema_filename)
+        if not schema_file.exists():
+            print(f"❌ {schema_filename} not found.")
+            return False
     
     with open(schema_file, 'r', encoding='utf-8') as f:
         our_schema = json.load(f)
@@ -159,5 +172,9 @@ def validate_mcp_schema():
     return all_required_present
 
 if __name__ == "__main__":
-    success = validate_mcp_schema()
+    import sys
+    
+    # Allow specifying schema file as command line argument
+    schema_file = sys.argv[1] if len(sys.argv) > 1 else None
+    success = validate_mcp_schema(schema_file)
     exit(0 if success else 1) 

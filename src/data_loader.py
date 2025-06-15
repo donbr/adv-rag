@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 # Define the directory to store documents and the list of CSV files
 DOCS_DIR = "data/raw"
 CSV_FILES_BASENAMES = [
-    "jw1.csv",
-    "jw2.csv",
-    "jw3.csv",
-    "jw4.csv"
+    "john_wick_1.csv",
+    "john_wick_2.csv",
+    "john_wick_3.csv",
+    "john_wick_4.csv"
 ]
 # Construct full paths for CSV files within the DOCS_DIR
 CSV_FILES_PATHS = [os.path.join(DOCS_DIR, f) for f in CSV_FILES_BASENAMES]
@@ -48,8 +48,19 @@ def ensure_data_files_exist():
     if not all_files_present:
         logger.info(f"One or more CSV files are missing from the '{DOCS_DIR}' directory. Attempting to download all...")
         download_success = True
+        
+        # Map longer format names back to original download names
+        download_mapping = {
+            "john_wick_1.csv": "jw1.csv",
+            "john_wick_2.csv": "jw2.csv", 
+            "john_wick_3.csv": "jw3.csv",
+            "john_wick_4.csv": "jw4.csv"
+        }
+        
         for file_basename in CSV_FILES_BASENAMES:
-            file_url = BASE_URL + file_basename
+            # Use the original short name for download URL
+            original_name = download_mapping[file_basename]
+            file_url = BASE_URL + original_name
             local_path = os.path.join(DOCS_DIR, file_basename)
             if not download_file(file_url, local_path):
                 download_success = False
@@ -83,8 +94,14 @@ def load_documents():
         try:
             movie_docs = loader.load()
             for doc in movie_docs:
-                # Infer movie title part from basename, e.g., jw1.csv -> John Wick 1
-                movie_part = os.path.basename(file_path).replace('jw','').replace('.csv','')
+                # Extract movie number from longer format filename, e.g., john_wick_1.csv -> 1
+                filename = os.path.basename(file_path)
+                if filename.startswith("john_wick_") and filename.endswith(".csv"):
+                    movie_part = filename.replace("john_wick_", "").replace(".csv", "")
+                else:
+                    # Fallback for any unexpected filename format
+                    movie_part = str(i)
+                
                 doc.metadata["Movie_Title"] = f"John Wick {movie_part}"
                 doc.metadata["Rating"] = int(doc.metadata["Rating"]) if doc.metadata["Rating"] else 0
                 # Assigning last_accessed_at based on movie number for demonstration

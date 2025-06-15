@@ -36,7 +36,7 @@ cp .env.example .env
 docker-compose up -d
 
 # Verify infrastructure health
-curl http://localhost:6333/health    # Qdrant
+curl http://localhost:6333/dashboard    # Qdrant
 curl http://localhost:6006           # Phoenix  
 curl http://localhost:5540           # RedisInsight
 ```
@@ -60,8 +60,7 @@ open http://localhost:6006
 python run.py
 
 # In another terminal - verify endpoints
-curl http://localhost:8000/health
-curl http://localhost:8000/docs    # Swagger UI
+curl http://localhost:8000/docs
 
 # Test a retrieval endpoint
 curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
@@ -75,10 +74,33 @@ curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
 python src/mcp_server/fastapi_wrapper.py
 
 # In another terminal - verify MCP tools
-python tests/integration/verify_mcp.py
+PYTHONPATH=$(pwd) python tests/integration/verify_mcp.py
 
 # Expected: 6 retrieval tools available
+
+# to launch the MCP inspector
+DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp_server/fastapi_wrapper.py
+
+
+DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp_server/resource_wrapper.py
 ```
+
+#### 4.b **FastMCP Streamable Mode**
+
+After stopping the server above, run this variant to enable streamable HTTP mode:
+
+```bash
+# Activate virtual environment first
+source .venv/bin/activate
+
+# Run with Python directly (fastmcp CLI may not be available)
+python src/mcp_server/fastapi_wrapper.py
+
+# Alternative: If fastmcp CLI is installed
+# fastmcp run src/mcp_server/fastapi_wrapper.py --transport streamable-http --host 127.0.0.1 --port 8001
+```
+
+**Note**: The server will start on `http://127.0.0.1:8001/mcp` for schema discovery via native MCP `rpc.discover` method.
 
 #### 5. **Claude Desktop Integration** (Optional)
 ```json

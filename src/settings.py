@@ -1,6 +1,8 @@
 # settings.py
 import os
 import logging # For more structured logging
+from typing import Optional
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Initialize logging as the very first thing
 # This ensures that even early messages (like dotenv loading status or errors) are logged.
@@ -14,6 +16,41 @@ if load_dotenv():
     logging.info(".env file loaded successfully.")
 else:
     logging.info(".env file not found or failed to load. Will rely on OS environment variables.")
+
+class Settings(BaseSettings):
+    """Application settings using Pydantic BaseSettings (v2 compatible)"""
+    
+    # Core API Keys
+    openai_api_key: str
+    openai_model_name: str = "gpt-4.1-mini"  # Required for llm_models.py
+    cohere_api_key: Optional[str] = None
+    
+    # Redis Configuration (Updated for 2024-2025 best practices)
+    redis_url: str = "redis://localhost:6379"  # Docker Compose Redis
+    redis_cache_ttl: int = 300  # 5 minutes default
+    redis_max_connections: int = 20  # Increased pool size for better performance
+    redis_socket_keepalive: bool = True
+    redis_health_check_interval: int = 30
+    
+    # MCP Configuration
+    mcp_request_timeout: int = 30
+    max_snippets: int = 5
+    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra environment variables
+    )
+
+# Global settings instance
+_settings: Optional[Settings] = None
+
+def get_settings() -> Settings:
+    """Get application settings singleton"""
+    global _settings
+    if _settings is None:
+        _settings = Settings()
+    return _settings
 
 def get_env_variable(var_name, is_secret=True, default_value=None):
     """Gets an environment variable, logs if not found."""

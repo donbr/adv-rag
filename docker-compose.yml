@@ -10,6 +10,28 @@ services:
     networks:
       - langchain_network
 
+  # PostgreSQL with pgvector for FastMCP Memory System
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: langchain_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=memory_db
+      - POSTGRES_USER=memory_user
+      - POSTGRES_PASSWORD=memory_pass
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d
+    networks:
+      - langchain_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U memory_user -d memory_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:latest
     container_name: langchain_redis
@@ -55,6 +77,8 @@ services:
 
 volumes:
   qdrant_data:
+    driver: local
+  postgres_data:
     driver: local
   redis_data:
     driver: local
