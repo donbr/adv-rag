@@ -346,7 +346,6 @@ This audit systematically validated the project structure recommendations agains
 src/mcp_server/
 ├── fastapi_wrapper.py      # Core MCP server
 ├── resource_wrapper.py     # Advanced resource patterns
-├── memory_server.py        # Semantic memory features
 └── [additional modules]
 ```
 
@@ -378,7 +377,6 @@ For sophisticated MCP servers, implement enhanced resource handlers:
 src/mcp_server/
 ├── fastapi_wrapper.py      # Primary MCP server (FastMCP.from_fastapi)
 ├── resource_wrapper.py     # Enhanced resource handlers
-├── memory_server.py        # Semantic memory integration
 ├── transport_config.py     # Multi-transport configuration
 └── security/               # Security utilities
     ├── input_validation.py

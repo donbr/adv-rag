@@ -1,9 +1,9 @@
 [project]
-name = "fastmcp-memory-system"
-version = "1.0.0"
-description = "Brain-inspired memory system using FastMCP, PostgreSQL, and pgvector"
+name = "adv-rag"
+version = "0.1.0"
+description = "Production-ready RAG system with FastAPI→MCP integration, featuring 6 retrieval strategies and zero-duplication architecture"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     # Core FastAPI and MCP - CURRENT VERSIONS (June 2025)
     "fastapi>=0.115.12",  # Current stable version

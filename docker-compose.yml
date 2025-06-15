@@ -10,28 +10,6 @@ services:
     networks:
       - langchain_network
 
-  # PostgreSQL with pgvector for FastMCP Memory System
-  postgres:
-    image: pgvector/pgvector:pg16
-    container_name: langchain_postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=memory_db
-      - POSTGRES_USER=memory_user
-      - POSTGRES_PASSWORD=memory_pass
-      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./sql/init:/docker-entrypoint-initdb.d
-    networks:
-      - langchain_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U memory_user -d memory_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:latest
     container_name: langchain_redis
@@ -49,19 +27,6 @@ services:
     networks:
       - langchain_network
 
-  phoenix:
-    image: arizephoenix/phoenix:latest
-    container_name: langchain_phoenix
-    ports:
-      - "6006:6006"
-      - "4317:4317"
-    environment:
-      - PHOENIX_WORKING_DIR=/mnt/data
-    volumes:
-      - phoenix_data:/mnt/data
-    networks:
-      - langchain_network
-
   redisinsight:
     image: redis/redisinsight:latest
     container_name: langchain_redisinsight
@@ -74,6 +39,19 @@ services:
     depends_on:
       - redis
     # When connecting to Redis from RedisInsight, use host 'redis' and port '6379' (the service name, not 'localhost')
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: langchain_phoenix
+    ports:
+      - "6006:6006"
+      - "4317:4317"
+    environment:
+      - PHOENIX_WORKING_DIR=/mnt/data
+    volumes:
+      - phoenix_data:/mnt/data
+    networks:
+      - langchain_network
 
 volumes:
   qdrant_data:
