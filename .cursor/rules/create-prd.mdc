@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
 description: Comprehensive, conversation-driven approach to generating Product Requirements Documents (PRDs) with thorough requirements gathering through structured clarifying questions before creating detailed, junior-developer-friendly documentation
 globs: ["@extraction/metadata.json", "@extraction/prototype_summary.md", "@extraction/summary.md"]
 alwaysApply: false

@@ -1,16 +1,8 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
 description: "Distill a vibe-coded prototype into its core MVP flows and cleanup targets."
-globs:
-  - "extraction/metadata.json"
-  - "extraction/summary.md"
+globs: ["@extraction/metadata.json","@extraction/summary.md"]
 alwaysApply: false
 ---
-
 # SummarizePrototype
 
 When asked for a **prototype summary**, **distilled overview**, or **MVP distillation**, perform these steps:

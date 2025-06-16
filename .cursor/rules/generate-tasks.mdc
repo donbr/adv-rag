@@ -1,14 +1,8 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
-description: Two-phase process for generating detailed task lists from PRDs - creates parent tasks first, then breaks them into actionable sub-tasks with relevant file identification
+description: "Two-phase process for generating detailed task lists from PRDs - creates parent tasks first, then breaks them into actionable sub-tasks with relevant file identification
 globs: ["tasks/prd-*.md"]
 alwaysApply: false
 ---
-
 # Rule: Generating a Task List from a PRD
 
 ## Goal

@@ -1,14 +1,8 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
-description: Step-by-step task management protocol for implementing PRD features - enforces one sub-task at a time with completion tracking and file maintenance
+description: "Step-by-step task management protocol for implementing PRD features - enforces one sub-task at a time with completion tracking and file maintenance"
 globs: ["tasks/tasks-*.md"]
 alwaysApply: false
 ---
-
 # Task List Management
 
 Guidelines for managing task lists in markdown files to track progress on completing a PRD

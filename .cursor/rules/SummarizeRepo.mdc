@@ -1,6 +1,6 @@
 ---
 description: "Generate a high-level overview of the repository using the extracted architecture diagram and enriched metadata."
-globs: 
+globs: ["@extraction/metadata.json","@extraction/core_index.md"]
 alwaysApply: false
 ---
 # SummarizeRepo
@@ -10,7 +10,7 @@ When asked for a **repo summary**, **high-level overview**, or **architecture su
 1. **Embed the Architecture Diagram**  
    Copy the Mermaid block from `core_index.md` to provide the LLM with an immediate visual of top-level components.  
 
-2. **List Top Modules**  
+2. **List Top Modules**
    From `metadata.json`, use `total_size_bytes` to calculate accurate percentages. Group files by `component`, sum their `size_bytes`, and sort by total size (descending) to identify the **5 largest components** with their calculated sizes and percentages.  
 
 3. **Component Breakdown**  
