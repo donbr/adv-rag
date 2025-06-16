@@ -16,7 +16,7 @@ class ConsoleFilter(logging.Filter):
         # For INFO messages, only allow specific modules/loggers
         if record.levelno == logging.INFO:
             # Allow main_api INFO messages for startup/status
-            if record.name == 'src.main_api':
+            if record.name == 'src.api.app':
                 return True
             # Allow run.py INFO messages
             if record.name == '__main__':

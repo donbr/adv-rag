@@ -8,7 +8,7 @@ from typing import Optional
 from contextlib import asynccontextmanager
 from redis import asyncio as aioredis
 from redis.exceptions import ConnectionError, TimeoutError
-from src.settings import get_settings
+from src.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
 

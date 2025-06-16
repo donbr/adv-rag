@@ -8,7 +8,7 @@ and "top_k" vs "question" parameter mismatches.
 import asyncio
 import pytest
 from fastmcp import Client
-from src.mcp_server.fastapi_wrapper import mcp
+from src.mcp.server import mcp
 
 
 class TestSchemaAccuracy:

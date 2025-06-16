@@ -8,7 +8,7 @@ import asyncio
 import json
 import pytest
 from fastmcp import Client
-from src.mcp_server.fastapi_wrapper import mcp
+from src.mcp.server import mcp
 
 
 class TestJsonRpcTransport:

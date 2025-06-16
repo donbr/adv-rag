@@ -1,6 +1,6 @@
 import asyncio
 from fastmcp import Client
-from src.mcp_server.fastapi_wrapper import mcp
+from src.mcp.server import mcp
 
 async def verify_fastapi_mcp_server():
     """Verify the FastAPI-based MCP server (the correct one)."""

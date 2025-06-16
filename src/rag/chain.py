@@ -1,13 +1,13 @@
-# chain_factory.py
+# chain.py
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from operator import itemgetter
 import logging
 
-from src import settings
+from src.core.settings import get_settings
 
-from src.llm_models import get_chat_model
-from src.retriever_factory import (
+from src.integrations.llm_models import get_chat_model
+from .retriever import (
     get_naive_retriever,
     get_bm25_retriever,
     get_contextual_compression_retriever,
@@ -73,9 +73,8 @@ logger.info("Finished creating RAG chains.")
 
 if __name__ == "__main__":
     if not logging.getLogger().hasHandlers():
-        if 'logging_config' not in globals():
-            from src import logging_config
-        logging_config.setup_logging()
+        from src.core.logging_config import setup_logging
+        setup_logging()
 
     logger.info("--- Running chain_factory.py standalone test ---")
     chains = {

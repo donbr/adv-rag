@@ -1,4 +1,4 @@
-# resource_wrapper.py - Enhanced MCP Resource Implementation (Production-Ready v2.2)
+# resources.py - Enhanced MCP Resource Implementation (Production-Ready v2.2)
 import logging
 import sys
 import os
@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 from phoenix.otel import register
 
-phoenix_endpoint: str = "http://localhost:6006"
+# Get Phoenix endpoint from settings (will be set after path setup)
+phoenix_endpoint: str = None
 project_name: str = f"resource-wrapper-{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-os.environ["PHOENIX_COLLECTOR_ENDPOINT"] = phoenix_endpoint
 
 # Enhanced Phoenix integration with tracer provider
 tracer_provider = register(
@@ -49,8 +49,9 @@ def setup_project_path():
 setup_project_path()
 
 # Now import after path is set
-from src.main_api import app
-from src.chain_factory import (
+from src.core.settings import get_settings
+from src.api.app import app
+from src.rag.chain import (
     NAIVE_RETRIEVAL_CHAIN,
     BM25_RETRIEVAL_CHAIN,
     CONTEXTUAL_COMPRESSION_CHAIN,
@@ -103,10 +104,15 @@ METHOD_TO_OPERATION_ID = {
 # Derive method list from chain mapping
 RETRIEVAL_METHODS = list(CHAIN_MAPPING.keys())
 
-# Enhanced configuration with validation
-REQUEST_TIMEOUT = max(5, int(os.getenv("MCP_REQUEST_TIMEOUT", "30")))  # Minimum 5s timeout
-MAX_SNIPPETS = max(1, int(os.getenv("MAX_SNIPPETS", "5")))  # Minimum 1 snippet
+# Enhanced configuration using centralized settings
+settings = get_settings()
+REQUEST_TIMEOUT = settings.mcp_request_timeout
+MAX_SNIPPETS = settings.max_snippets
 QUERY_HASH_LENGTH = int(os.getenv("QUERY_HASH_LENGTH", "8"))  # Hash length for logging
+
+# Set Phoenix endpoint from settings and configure environment
+phoenix_endpoint = settings.phoenix_endpoint
+os.environ["PHOENIX_COLLECTOR_ENDPOINT"] = phoenix_endpoint
 
 def get_chain_by_method(method: str):
     """Get the appropriate chain instance by method name"""

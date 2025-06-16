@@ -120,8 +120,8 @@ if __name__ == "__main__":
     # Logging should already be configured by importing settings or logging_config
     # If not, and this is run truly standalone, basicConfig might take over or logs might go nowhere.
     if not logging.getLogger().hasHandlers():
-        from src import logging_config
-        logging_config.setup_logging()
+        from src.core.logging_config import setup_logging
+        setup_logging()
         
     logger.info("--- Running data_loader.py standalone test ---")
     loaded_docs = load_documents()

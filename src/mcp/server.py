@@ -1,4 +1,4 @@
-# mcp_server/fastapi_wrapper.py - Primary MCP Server Implementation (v2.2)
+# server.py - Primary MCP Server Implementation (v2.2)
 
 import os
 from datetime import datetime
@@ -14,8 +14,12 @@ logger = logging.getLogger(__name__)
 
 from phoenix.otel import register
 
+# Import settings for configuration
+from src.core.settings import get_settings
+
 # Unified Phoenix configuration for the entire Advanced RAG system
-phoenix_endpoint: str = "http://localhost:6006"
+settings = get_settings()
+phoenix_endpoint: str = settings.phoenix_endpoint
 # Use unified project name to correlate all traces across FastAPI, MCP Server, and Resources
 project_name: str = f"advanced-rag-system-{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 os.environ["PHOENIX_COLLECTOR_ENDPOINT"] = phoenix_endpoint
@@ -49,7 +53,7 @@ def create_mcp_server():
             
             # Add project root to Python path for imports
             current_file = Path(__file__).resolve()
-            project_root = current_file.parent.parent.parent  # Go up 3 levels: mcp_server -> src -> project_root
+            project_root = current_file.parent.parent.parent  # Go up 3 levels: mcp -> src -> project_root
             if str(project_root) not in sys.path:
                 sys.path.insert(0, str(project_root))
                 logger.info(f"Added project root to Python path: {project_root}")
@@ -60,7 +64,7 @@ def create_mcp_server():
             
             # Import the FastAPI app with tracing
             span.add_event("fastapi.import.start")
-            from src.main_api import app
+            from src.api.app import app
             
             # Set span attributes for FastAPI app analysis
             route_count = len(app.routes)
@@ -112,7 +116,7 @@ def create_mcp_server():
             span.add_event("fastapi.import.error", {
                 "error_type": "ImportError",
                 "error_message": str(e),
-                "module": "src.main_api"
+                "module": "src.api.app"
             })
             
             logger.error(
@@ -169,7 +173,7 @@ def get_server_health() -> dict:
             # Gather health information
             health_info = {
                 "status": "healthy",
-                "timestamp": datetime.now(datetime.UTC).isoformat(),
+                "timestamp": datetime.now().isoformat(),
                 "server_type": "FastMCP.from_fastapi",
                 "version": "2.2.0",
                 "phoenix_integration": {
@@ -228,7 +232,7 @@ def get_server_health() -> dict:
             
             return {
                 "status": "unhealthy",
-                "timestamp": datetime.now(datetime.UTC).isoformat(),
+                "timestamp": datetime.now().isoformat(),
                 "error": str(e),
                 "error_type": type(e).__name__,
                 "phoenix_integration": {

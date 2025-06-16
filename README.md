@@ -6,6 +6,16 @@ This guide walks you through setting up the complete Advanced RAG system from sc
 including Docker infrastructure, data ingestion, FastAPI server, MCP integration, and 
 telemetry-driven evaluation.
 
+### 🏗️ Project Structure
+This project uses a **domain-organized architecture** for clean separation of concerns:
+- **`src/core/`** - Shared infrastructure (settings, logging, exceptions)
+- **`src/api/`** - FastAPI web layer with 6 retrieval endpoints
+- **`src/rag/`** - RAG pipeline components (embeddings, vectorstore, retrievers, chains)
+- **`src/mcp/`** - MCP server implementation (FastMCP.from_fastapi conversion)
+- **`src/integrations/`** - External service clients (LLM, Redis, etc.)
+
+For detailed architecture documentation, see [`docs/project-structure.md`](docs/project-structure.md).
+
 ### Prerequisites
 ```bash
 # Required software
@@ -71,7 +81,7 @@ curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
 #### 4. **MCP Server Integration** (30 seconds)
 ```bash
 # Start MCP server (converts FastAPI → MCP tools)
-python src/mcp_server/fastapi_wrapper.py
+python src/mcp/server.py
 
 # In another terminal - verify MCP tools
 PYTHONPATH=$(pwd) python tests/integration/verify_mcp.py
@@ -79,10 +89,10 @@ PYTHONPATH=$(pwd) python tests/integration/verify_mcp.py
 # Expected: 6 retrieval tools available
 
 # to launch the MCP inspector
-DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp_server/fastapi_wrapper.py
+DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/server.py
 
 
-DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp_server/resource_wrapper.py
+DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/resources.py
 ```
 
 #### 4.b **FastMCP Streamable Mode**
@@ -94,10 +104,10 @@ After stopping the server above, run this variant to enable streamable HTTP mode
 source .venv/bin/activate
 
 # Run with Python directly (fastmcp CLI may not be available)
-python src/mcp_server/fastapi_wrapper.py
+python src/mcp/server.py
 
 # Alternative: If fastmcp CLI is installed
-# fastmcp run src/mcp_server/fastapi_wrapper.py --transport streamable-http --host 127.0.0.1 --port 8001
+# fastmcp run src/mcp/server.py --transport streamable-http --host 127.0.0.1 --port 8001
 ```
 
 **Note**: The server will start on `http://127.0.0.1:8001/mcp` for schema discovery via native MCP `rpc.discover` method.
@@ -109,7 +119,7 @@ python src/mcp_server/fastapi_wrapper.py
   "mcpServers": {
     "advanced-rag": {
       "command": "python",
-      "args": ["/full/path/to/src/mcp_server/fastapi_wrapper.py"],
+      "args": ["/full/path/to/src/mcp/server.py"],
       "env": {
         "OPENAI_API_KEY": "your-key-here",
         "COHERE_API_KEY": "your-key-here"
@@ -139,11 +149,11 @@ graph TB
     end
     
     subgraph "MCP Integration Layer"
-        C[MCP Server<br/>fastapi_wrapper.py]
+        C[MCP Server<br/>src/mcp/server.py]
     end
     
     subgraph "API Layer"
-        D[FastAPI Server<br/>main_api.py<br/>Port 8000]
+        D[FastAPI Server<br/>src/api/app.py<br/>Port 8000]
     end
     
     subgraph "RAG Pipeline"
@@ -230,7 +240,7 @@ After complete bootstrap, you should have:
 docker-compose down -v && docker-compose up -d
 python scripts/ingestion/csv_ingestion_pipeline.py
 python run.py &
-python src/mcp_server/fastapi_wrapper.py &
+python src/mcp/server.py &
 
 # Check service health
 docker-compose ps          # All services Up

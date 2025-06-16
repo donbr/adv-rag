@@ -1,4 +1,4 @@
-# main_api.py
+# app.py
 import os
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, Depends
@@ -10,11 +10,11 @@ import hashlib
 from typing import Optional
 from contextlib import asynccontextmanager
 
-from src import settings
-from src.redis_client import redis_client, get_redis
+from src.core.settings import get_settings
+from src.integrations.redis_client import redis_client, get_redis
 from redis import asyncio as aioredis
 
-from src.chain_factory import (
+from src.rag.chain import (
     NAIVE_RETRIEVAL_CHAIN,
     BM25_RETRIEVAL_CHAIN,
     CONTEXTUAL_COMPRESSION_CHAIN,
@@ -26,7 +26,8 @@ from src.chain_factory import (
 from phoenix.otel import register
 
 # Unified Phoenix configuration - coordinate with fastapi_wrapper.py
-phoenix_endpoint: str = "http://localhost:6006"
+settings = get_settings()
+phoenix_endpoint: str = settings.phoenix_endpoint
 # Use coordinated project name for trace correlation across FastAPI and MCP components
 project_name: str = f"advanced-rag-system-{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 os.environ["PHOENIX_COLLECTOR_ENDPOINT"] = phoenix_endpoint
@@ -59,8 +60,11 @@ async def get_cached_response(cache_key: str, redis: aioredis.Redis) -> Optional
         logger.warning(f"⚠️ Cache read error: {e}")
     return None
 
-async def cache_response(cache_key: str, response_data: dict, redis: aioredis.Redis, ttl: int = 300):
-    """Cache response with TTL (default 5 minutes)"""
+async def cache_response(cache_key: str, response_data: dict, redis: aioredis.Redis, ttl: int = None):
+    """Cache response with TTL (default from settings)"""
+    if ttl is None:
+        settings = get_settings()
+        ttl = settings.redis_cache_ttl
     try:
         await redis.setex(
             cache_key, 
@@ -214,10 +218,11 @@ async def invoke_chain_logic(chain, question: str, chain_name: str, redis: aiore
             # Create response
             response_data = {"answer": answer, "context_document_count": context_docs_count}
             
-            # Cache the response (5 minutes TTL for RAG results)
+            # Cache the response (TTL from settings)
             span.add_event("cache.store.start")
-            await cache_response(cache_key, response_data, redis, ttl=300)
-            span.add_event("cache.store.complete", {"ttl": 300})
+            settings = get_settings()
+            await cache_response(cache_key, response_data, redis)
+            span.add_event("cache.store.complete", {"ttl": settings.redis_cache_ttl})
             
             return AnswerResponse(**response_data)
             

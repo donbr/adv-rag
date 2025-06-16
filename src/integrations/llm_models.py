@@ -1,15 +1,12 @@
 # llm_models.py
 from langchain_openai import ChatOpenAI
-from src import settings # To ensure API keys are set
 import logging
 from langchain.globals import set_llm_cache
 from langchain_redis import RedisCache, RedisSemanticCache
 from langchain_openai import OpenAIEmbeddings
-from src.settings import get_settings
+from src.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
-
-# settings.setup_env_vars() # Called when settings is imported
 
 def get_chat_openai():
     """
@@ -41,11 +38,11 @@ def get_chat_openai():
     
     return ChatOpenAI(
         model=settings.openai_model_name,
-        temperature=0,
+        temperature=settings.openai_temperature,
         openai_api_key=settings.openai_api_key,
-        # Additional performance settings
-        max_retries=3,
-        request_timeout=60,
+        # Additional performance settings from configuration
+        max_retries=settings.openai_max_retries,
+        request_timeout=settings.openai_request_timeout,
     )
 
 # Backward compatibility alias
@@ -54,10 +51,9 @@ def get_chat_model():
     return get_chat_openai()
 
 if __name__ == "__main__":
-    if not logging.getLogger().hasHandlers(): # Check if root logger is configured
-        if 'logging_config' not in globals(): # Simple check if logging_config was imported
-            from src import logging_config # Make sure it's available from src package
-        logging_config.setup_logging()
+    if not logging.getLogger().hasHandlers():
+        from src.core.logging_config import setup_logging
+        setup_logging()
 
     logger.info("--- Running llm_models.py standalone test ---")
     try:

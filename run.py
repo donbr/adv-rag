@@ -113,7 +113,7 @@ curl -X POST "http://localhost:8000/invoke/naive_retriever" \
 ### Integration with MCP:
 ```bash
 # This FastAPI server becomes the backend for MCP tools
-python src/mcp_server/fastapi_wrapper.py
+python src/mcp/server.py
 
 # FastMCP.from_fastapi() converts these endpoints to MCP tools automatically
 ```
@@ -127,7 +127,7 @@ python src/mcp_server/fastapi_wrapper.py
 ### Scaling Options:
 ```bash
 # Multi-worker production deployment
-uvicorn src.main_api:app --workers 4 --host 0.0.0.0 --port 8000
+uvicorn src.api.app:app --workers 4 --host 0.0.0.0 --port 8000
 
 # Docker deployment
 docker-compose -f docker-compose.prod.yml up
@@ -166,7 +166,7 @@ After successful startup:
 ## 🔗 Next Steps
 
 1. **Test API endpoints** using curl or test scripts
-2. **Start MCP server** with `python src/mcp_server/fastapi_wrapper.py`
+2. **Start MCP server** with `python src/mcp/server.py`
 3. **Run evaluations** to compare retrieval strategies
 4. **Monitor telemetry** in Phoenix UI for performance insights
 
@@ -176,12 +176,12 @@ for Claude Desktop and other MCP clients.
 
 import uvicorn
 import logging
-from src.main_api import app
-from src import logging_config
+from src.api.app import app
+from src.core.logging_config import setup_logging
 
 # Ensure logging is set up
 if not logging.getLogger().hasHandlers():
-    logging_config.setup_logging()
+    setup_logging()
 
 logger = logging.getLogger(__name__)
 

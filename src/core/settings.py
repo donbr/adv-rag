@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Initialize logging as the very first thing
 # This ensures that even early messages (like dotenv loading status or errors) are logged.
-from src import logging_config
+from . import logging_config
 logging_config.setup_logging()
 
 from dotenv import load_dotenv
@@ -24,6 +24,21 @@ class Settings(BaseSettings):
     openai_api_key: str
     openai_model_name: str = "gpt-4.1-mini"  # Required for llm_models.py
     cohere_api_key: Optional[str] = None
+    
+    # LLM Configuration
+    openai_temperature: float = 0.0
+    openai_max_retries: int = 3
+    openai_request_timeout: int = 60
+    
+    # Embedding Configuration
+    embedding_model_name: str = "text-embedding-3-small"
+    
+    # Cohere Configuration
+    cohere_rerank_model: str = "rerank-english-v3.0"
+    
+    # External Service Endpoints
+    phoenix_endpoint: str = "http://localhost:6006"
+    qdrant_url: str = "http://localhost:6333"
     
     # Redis Configuration (Updated for 2024-2025 best practices)
     redis_url: str = "redis://localhost:6379"  # Docker Compose Redis

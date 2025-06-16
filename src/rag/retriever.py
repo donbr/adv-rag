@@ -1,4 +1,4 @@
-# retriever_factory.py
+# retriever.py
 from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_cohere import CohereRerank
@@ -9,13 +9,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 import logging
 import os
 
-from src import settings
+from src.core.settings import get_settings
 # settings.setup_env_vars() # Called by settings import
 
-from src.data_loader import load_documents # For BM25 and ParentDocumentRetriever original docs
-from src.llm_models import get_chat_model
-from src.embeddings import get_openai_embeddings # For SemanticChunker if used directly here
-from src.vectorstore_setup import (
+from .data_loader import load_documents # For BM25 and ParentDocumentRetriever original docs
+from src.integrations.llm_models import get_chat_model
+from .embeddings import get_openai_embeddings # For SemanticChunker if used directly here
+from .vectorstore import (
     get_main_vectorstore,
     get_semantic_vectorstore
 )
@@ -78,7 +78,8 @@ def get_contextual_compression_retriever():
         logger.warning("COHERE_API_KEY not set. Cannot create CohereRerank for contextual_compression_retriever. Returning None.")
         return None
     try:
-        compressor = CohereRerank(model="rerank-english-v3.0") 
+        settings = get_settings()
+        compressor = CohereRerank(model=settings.cohere_rerank_model) 
         retriever = ContextualCompressionRetriever(
             base_compressor=compressor, base_retriever=naive_ret
         )
@@ -188,9 +189,8 @@ def create_retriever(retrieval_type: str, vectorstore=None, **kwargs):
 
 if __name__ == "__main__":
     if not logging.getLogger().hasHandlers():
-        if 'logging_config' not in globals():
-            from src import logging_config
-        logging_config.setup_logging()
+        from src.core.logging_config import setup_logging
+        setup_logging()
     
     logger.info("--- Running retriever_factory.py standalone test ---")
     if not DOCUMENTS:

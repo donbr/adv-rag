@@ -1,18 +1,19 @@
-# vectorstore_setup.py
+# vectorstore.py
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
 from qdrant_client import QdrantClient, models as qdrant_models
 from langchain_experimental.text_splitter import SemanticChunker
 import logging
 
-from src import settings
+from src.core.settings import get_settings
 
-from src.data_loader import load_documents
-from src.embeddings import get_openai_embeddings
+from .data_loader import load_documents
+from .embeddings import get_openai_embeddings
 
 logger = logging.getLogger(__name__)
 
 # Initialize once
-QDRANT_API_URL = "http://localhost:6333"
+settings = get_settings()
+QDRANT_API_URL = settings.qdrant_url
 BASELINE_COLLECTION_NAME = "johnwick_baseline"
 SEMANTIC_COLLECTION_NAME = "johnwick_semantic"
 logger.debug("Loading documents for vector store setup...")
@@ -71,9 +72,8 @@ def get_semantic_vectorstore():
 
 if __name__ == "__main__":
     if not logging.getLogger().hasHandlers():
-        if 'logging_config' not in globals():
-            from src import logging_config
-        logging_config.setup_logging()
+        from src.core.logging_config import setup_logging
+        setup_logging()
 
     logger.info("--- Running vectorstore_setup.py standalone test ---")
     if not DOCUMENTS:

@@ -1,14 +1,15 @@
 # embeddings.py
 from langchain_openai import OpenAIEmbeddings
-from src import settings
+from src.core.settings import get_settings
 import logging
 
 logger = logging.getLogger(__name__)
 
 def get_openai_embeddings():
-    logger.info("Initializing OpenAIEmbeddings model: text-embedding-3-small")
+    settings = get_settings()
+    logger.info(f"Initializing OpenAIEmbeddings model: {settings.embedding_model_name}")
     try:
-        model = OpenAIEmbeddings(model="text-embedding-3-small")
+        model = OpenAIEmbeddings(model=settings.embedding_model_name)
         logger.info("OpenAIEmbeddings model initialized successfully.")
         return model
     except Exception as e:
@@ -17,8 +18,8 @@ def get_openai_embeddings():
 
 if __name__ == "__main__":
     if not logging.getLogger().hasHandlers():
-        from src import logging_config
-        logging_config.setup_logging()
+        from src.core.logging_config import setup_logging
+        setup_logging()
 
     logger.info("--- Running embeddings.py standalone test ---")
     try:

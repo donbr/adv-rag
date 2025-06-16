@@ -1,1 +1,0 @@
-# MCP server implementation for advanced RAG capabilities 
