@@ -3,7 +3,6 @@ description: Comprehensive, conversation-driven approach to generating Product R
 globs: ["@extraction/metadata.json", "@extraction/prototype_summary.md", "@extraction/summary.md"]
 alwaysApply: false
 ---
-
 # Rule: Generating a Product Requirements Document (PRD)
 
 ## Key Features
