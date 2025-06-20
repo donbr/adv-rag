@@ -1,0 +1,125 @@
+{
+  "info": {
+    "title": "Advanced RAG MCP Server (stdio)",
+    "version": "1.0.0",
+    "description": "FastMCP server exposing RAG retrieval tools via stdio transport"
+  },
+  "tools": [
+    {
+      "name": "naive_retriever",
+      "description": "Invokes the Naive Retriever chain for basic similarity search.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "bm25_retriever",
+      "description": "Invokes the BM25 Retriever chain for keyword-based search.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "contextual_compression_retriever",
+      "description": "Invokes the Contextual Compression Retriever chain for compressed context.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "multi_query_retriever",
+      "description": "Invokes the Multi-Query Retriever chain for enhanced query expansion.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "ensemble_retriever",
+      "description": "Invokes the Ensemble Retriever chain combining multiple retrieval strategies.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "semantic_retriever",
+      "description": "Invokes the Semantic Retriever chain for advanced semantic search.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "health_check_health_get",
+      "description": "Health check endpoint with Phoenix tracing integration",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "cache_stats_cache_stats_get",
+      "description": "Get cache statistics with Phoenix tracing",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ],
+  "resources": [],
+  "prompts": []
+}

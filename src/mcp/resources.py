@@ -3,7 +3,7 @@ import logging
 import sys
 import os
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from fastmcp import FastMCP
 from typing import Dict, Any, List, Union
@@ -507,7 +507,7 @@ async def health_check() -> str:
             # Basic health checks
             health_status = {
                 "status": "healthy",
-                "timestamp": datetime.now(datetime.UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "version": "2.2.0",
                 "available_methods": len(RETRIEVAL_METHODS),
                 "configuration": {
@@ -617,7 +617,7 @@ async def health_check() -> str:
 {safe_escape_markdown(str(e))}
 
 ## Timestamp
-{datetime.now(datetime.UTC).isoformat()}
+{datetime.now(timezone.utc).isoformat()}
 
 ## Phoenix Tracing
 - **Project**: {project_name}
@@ -633,7 +633,7 @@ async def health_check() -> str:
 5. Review Phoenix UI for detailed trace analysis
 
 ---
-*Error health check generated at {datetime.now(datetime.UTC).isoformat()} - v2.2.0*
+*Error health check generated at {datetime.now(timezone.utc).isoformat()} - v2.2.0*
 """
 
 # Create the MCP server as a global variable for inspector compatibility

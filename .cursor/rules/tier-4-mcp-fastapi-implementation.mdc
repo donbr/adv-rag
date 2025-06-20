@@ -1,37 +1,58 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # MCP-FastAPI Implementation (Tier 4) - Respects RAG Foundation
 
 ## Implementation Constraint
 
-**This tier must preserve all RAG patterns and interfaces from Tier 3.** MCP serves as an interface layer that exposes existing RAG functionality without modifying core business logic.
+**This tier must preserve all RAG patterns from Tier 3.** MCP serves as an interface layer that exposes existing RAG functionality.
 
-## Core Implementation Pattern: FastMCP.from_fastapi()
+## FastMCP 2.0 - Current Version
 
-The [fastapi_wrapper.py](mdc:src/mcp_server/fastapi_wrapper.py) implements zero-duplication FastAPI-to-MCP conversion:
+**FastMCP 2.0 is the actively maintained version** ([PyPI 2.8.1](mdc:https:/pypi.org/project/fastmcp), incorporated into official MCP Python SDK). It provides:
+- Complete toolkit for MCP ecosystem
+- Production deployment features  
+- Authentication and security
+- Client libraries and testing tools
 
+## Core Implementation Patterns
+
+### Modern FastMCP Server (2.0)
 ```python
 from fastmcp import FastMCP
-from src.main_api import app  # Existing FastAPI app
 
-# Convert FastAPI app to MCP server (zero duplication)
-mcp = FastMCP.from_fastapi(app=app)
+mcp = FastMCP("Advanced RAG Server")
+
+@mcp.tool
+def semantic_search(query: str, top_k: int = 5) -> dict:
+    """Perform semantic search on document collection"""
+    # Existing RAG logic here
+    return results
+```
+
+### FastAPI Integration (Legacy Support)
+For existing FastAPI apps, continue using:
+```python
+# FastMCP 1.0 pattern (if needed for compatibility)  
+from fastmcp import FastMCP
+from src.api.app import app
+
+mcp = FastMCP.from_fastapi(app=app)  # Zero duplication
 ```
 
 ## Architecture Benefits
 
-- ✅ **Zero Code Duplication**: No need to rewrite business logic
-- ✅ **Schema Inheritance**: Automatic Pydantic model conversion
-- ✅ **Consistent API**: Single source of truth for endpoints
+- ✅ **Production Ready**: FastMCP 2.0 includes deployment and auth
+- ✅ **Zero Code Duplication**: Wrap existing functionality
+- ✅ **Schema Inheritance**: Automatic type hint to MCP schema conversion
 - ✅ **Preserves RAG Patterns**: MCP wraps existing functionality
 
 ## Endpoint-to-Tool Mapping
 
 ### Current Production Mapping
-The [main_api.py](mdc:src/main_api.py) FastAPI endpoints automatically become MCP tools:
+The [app.py](mdc:src/api/app.py) FastAPI endpoints automatically become MCP tools:
 
 | FastAPI Endpoint | MCP Tool Name | Purpose |
 |---|---|---|
@@ -181,9 +202,9 @@ mcp discover http://127.0.0.1:8000/mcp
 **Primary deployment method** - combines FastMCP.from_fastapi() with native schema discovery:
 
 ```python
-# src/mcp_server/fastapi_wrapper.py - Updated for streamable HTTP
+# src/mcp/server.py - Updated for streamable HTTP
 from fastmcp import FastMCP
-from src.main_api import app  # Existing FastAPI app
+from src.api.app import app  # Existing FastAPI app
 
 # Convert FastAPI app to MCP server (zero duplication)
 mcp = FastMCP.from_fastapi(

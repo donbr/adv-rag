@@ -1,8 +1,9 @@
 # settings.py
 import os
 import logging # For more structured logging
-from typing import Optional
+from typing import Optional, List
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 # Initialize logging as the very first thing
 # This ensures that even early messages (like dotenv loading status or errors) are logged.
@@ -51,6 +52,142 @@ class Settings(BaseSettings):
     mcp_request_timeout: int = 30
     max_snippets: int = 5
     
+    # Phoenix Integration Configuration (Task 1.7)
+    phoenix_integration_enabled: bool = Field(
+        default=True,
+        description="Enable Phoenix MCP integration for experiment analysis"
+    )
+    
+    phoenix_base_url: Optional[str] = Field(
+        default=None,
+        description="Base URL for Phoenix MCP server (auto-detected if None)"
+    )
+    
+    phoenix_api_key: Optional[str] = Field(
+        default=None,
+        description="API key for Phoenix authentication (if required)"
+    )
+    
+    phoenix_timeout_seconds: float = Field(
+        default=30.0,
+        description="Default timeout for Phoenix MCP operations"
+    )
+    
+    # Phoenix Error Handling Configuration
+    phoenix_retry_max_attempts: int = Field(
+        default=3,
+        description="Maximum retry attempts for Phoenix operations"
+    )
+    
+    phoenix_retry_base_delay: float = Field(
+        default=1.0,
+        description="Base delay for exponential backoff in seconds"
+    )
+    
+    phoenix_retry_max_delay: float = Field(
+        default=30.0,
+        description="Maximum delay for exponential backoff in seconds"
+    )
+    
+    phoenix_retry_exponential_base: float = Field(
+        default=2.0,
+        description="Exponential base for backoff calculation"
+    )
+    
+    phoenix_retry_jitter: bool = Field(
+        default=True,
+        description="Enable jitter in retry delays to prevent thundering herd"
+    )
+    
+    # Phoenix Circuit Breaker Configuration
+    phoenix_circuit_breaker_enabled: bool = Field(
+        default=True,
+        description="Enable circuit breaker pattern for Phoenix operations"
+    )
+    
+    phoenix_circuit_breaker_failure_threshold: int = Field(
+        default=5,
+        description="Number of failures before opening circuit breaker"
+    )
+    
+    phoenix_circuit_breaker_success_threshold: int = Field(
+        default=3,
+        description="Number of successes to close from half-open state"
+    )
+    
+    phoenix_circuit_breaker_timeout: float = Field(
+        default=60.0,
+        description="Time in seconds before attempting to close circuit breaker"
+    )
+    
+    # Phoenix Batch Processing Configuration
+    phoenix_batch_enabled: bool = Field(
+        default=True,
+        description="Enable batch processing for Phoenix data synchronization"
+    )
+    
+    phoenix_batch_size: int = Field(
+        default=10,
+        description="Number of items to process in each batch"
+    )
+    
+    phoenix_batch_timeout_seconds: float = Field(
+        default=300.0,
+        description="Timeout for batch operations in seconds"
+    )
+    
+    phoenix_batch_progress_interval: int = Field(
+        default=5,
+        description="Progress reporting interval for batch operations"
+    )
+    
+    phoenix_batch_concurrent_limit: int = Field(
+        default=3,
+        description="Maximum concurrent batch operations"
+    )
+    
+    # Phoenix Pattern Extraction Configuration
+    phoenix_pattern_qa_threshold: float = Field(
+        default=0.8,
+        description="Minimum QA correctness score for pattern extraction"
+    )
+    
+    phoenix_pattern_rag_threshold: float = Field(
+        default=0.7,
+        description="Minimum RAG relevance score for pattern extraction"
+    )
+    
+    phoenix_pattern_confidence_threshold: float = Field(
+        default=0.75,
+        description="Minimum confidence score for pattern validation"
+    )
+    
+    phoenix_pattern_max_patterns_per_experiment: int = Field(
+        default=50,
+        description="Maximum patterns to extract per experiment"
+    )
+    
+    # Phoenix Data Sync Configuration
+    phoenix_sync_enabled: bool = Field(
+        default=False,
+        description="Enable periodic Phoenix data synchronization"
+    )
+    
+    phoenix_sync_interval_hours: int = Field(
+        default=24,
+        description="Interval between Phoenix data synchronizations in hours"
+    )
+    
+    phoenix_sync_datasets: List[str] = Field(
+        default_factory=lambda: ["johnwick_golden_testset_v1", "johnwick_golden_testset_v2"],
+        description="List of dataset names to synchronize from Phoenix"
+    )
+    
+    phoenix_sync_max_age_days: int = Field(
+        default=30,
+        description="Maximum age of experiments to synchronize in days"
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False,

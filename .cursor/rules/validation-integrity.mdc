@@ -1,0 +1,133 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Validation Integrity Rule
+
+## Purpose
+Ensures honest, evidence-based validation during refactoring and structural changes, preventing false completion claims and maintaining process integrity.
+
+## Core Principles
+
+### 1. Fresh Testing Mandate
+- **NEVER** use historical outputs as validation for current state
+- **ALWAYS** test the current codebase structure after changes
+- **REQUIRE** fresh execution of critical paths after refactoring
+- **DOCUMENT** what was actually tested vs. what was assumed
+
+### 2. Evidence-Based Completion
+- Tasks can only be marked complete with **verifiable evidence**
+- Provide specific commands run and their outputs
+- Include timestamps and environment context
+- Distinguish between "implementation complete" and "validation complete"
+
+### 3. Temporal Clarity
+- Clearly separate pre-change and post-change validation
+- Label all terminal outputs with their temporal context
+- Never conflate historical success with current functionality
+- Maintain clear timeline of when tests were executed
+
+## Validation Protocol for Refactoring
+
+### Phase 1: Pre-Change Baseline
+```bash
+# Document current working state
+pytest tests/ -v > baseline_tests.log
+python run.py --validate > baseline_functionality.log
+```
+
+### Phase 2: Post-Change Verification
+```bash
+# Test new structure
+pytest tests/ -v > post_refactor_tests.log
+python run.py --validate > post_refactor_functionality.log
+# Compare results explicitly
+diff baseline_tests.log post_refactor_tests.log
+```
+
+### Phase 3: Import Verification
+```bash
+# Test all new import paths
+python -c "from src.core.settings import get_settings; print('✅ Core imports work')"
+python -c "from src.rag.embeddings import get_openai_embeddings; print('✅ RAG imports work')"
+python -c "from src.api.app import app; print('✅ API imports work')"
+python -c "from src.mcp.server import mcp; print('✅ MCP imports work')"
+```
+
+## Completion Criteria
+
+### ✅ Valid Completion Claims
+- "Task completed - verified with fresh test run at [timestamp]"
+- "Import paths updated and tested successfully: [specific commands]"
+- "Functionality validated with current codebase: [evidence]"
+
+### ❌ Invalid Completion Claims
+- "Task completed - previous tests showed it working"
+- "Validation successful based on earlier outputs"
+- "Imports should work based on file moves"
+- "Functionality preserved - no testing needed"
+
+## Error Recovery Protocol
+
+### When Validation Fails
+1. **Acknowledge the failure immediately**
+2. **Document what specifically failed**
+3. **Provide rollback plan if needed**
+4. **Re-test after fixes**
+5. **Update task status honestly**
+
+### When Historical Data is Referenced
+1. **Clearly label it as historical**
+2. **Explain why it's not current validation**
+3. **Provide fresh testing plan**
+4. **Execute current validation before claiming completion**
+
+## Integration with Other Rules
+
+### With process-task-list.mdc
+- Enforce evidence requirement for each sub-task completion
+- Require fresh validation before moving to next task
+- Document validation methodology in task updates
+
+### With tier-*-*.mdc Rules
+- Validate that technical standards are maintained post-refactoring
+- Test that model pinning and patterns are preserved
+- Verify architectural constraints remain intact
+
+## Anti-Patterns to Avoid
+
+### Temporal Confusion
+- Using pre-refactoring outputs to validate post-refactoring state
+- Mixing different time periods in validation claims
+- Assuming historical success implies current functionality
+
+### Validation Shortcuts
+- Marking tasks complete without testing
+- Assuming file moves preserve functionality
+- Skipping import verification after structural changes
+
+### False Confidence
+- Claiming validation when only implementation was done
+- Presenting assumptions as verified facts
+- Avoiding uncertainty acknowledgment
+
+## Success Metrics
+
+### Process Integrity
+- All completion claims backed by fresh evidence
+- Clear separation of implementation vs. validation phases
+- Honest documentation of what remains untested
+
+### Technical Validation
+- All import paths verified with actual execution
+- End-to-end functionality tested post-refactoring
+- Performance and behavior regression testing completed
+
+### Documentation Quality
+- Clear timeline of validation activities
+- Explicit uncertainty acknowledgment where appropriate
+- Evidence-based progress reporting
+
+## Remember
+**Integrity over convenience. Evidence over assumptions. Fresh validation over historical references.**

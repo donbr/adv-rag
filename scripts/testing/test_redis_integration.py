@@ -169,7 +169,7 @@ async def test_redis_mcp_cache():
     print("   - Adjust TTL values based on your use case")
     print("   - Use Redis MCP tools for advanced caching strategies")
     
-    await redis_client.close()
+    await redis_client.aclose()
 
 if __name__ == "__main__":
     asyncio.run(test_redis_mcp_cache()) 

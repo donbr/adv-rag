@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """
-Compare MCP schema outputs from different export methods.
+Compare MCP schemas across different transport implementations.
 
-This script provides meaningful comparisons between:
-- Legacy export (export_mcp_schema.py)
-- HTTP export (export_mcp_schema_http.py) 
-- Native export (export_mcp_schema_native.py)
+This script validates transport-agnostic design by comparing schemas from:
+- stdio transport (export_mcp_schema_stdio.py)
+- http transport (export_mcp_schema_native.py via HTTP)
+- sse transport (Server-Sent Events)
+- websocket transport (WebSocket connections)
+- tcp transport (Raw TCP connections)
+
+Key principle: MCP schemas should be identical regardless of transport layer.
 """
 import json
 from pathlib import Path
@@ -81,27 +85,64 @@ def compare_tool_descriptions(schemas: Dict[str, Dict[str, Any]]) -> None:
             else:
                 print(f"  • {schema_name}: ❌ Missing")
 
+def validate_transport_agnostic_design(schemas: Dict[str, Dict[str, Any]]) -> bool:
+    """Validate that all schemas are identical (transport-agnostic principle)."""
+    valid_schemas = {k: v for k, v in schemas.items() if v}
+    
+    if len(valid_schemas) < 2:
+        print("⚠️ Need at least 2 schemas to validate transport-agnostic design")
+        return True
+    
+    # Remove transport-specific metadata for comparison
+    normalized_schemas = {}
+    for name, schema in valid_schemas.items():
+        normalized = schema.copy()
+        # Remove fields that might legitimately differ between transports
+        normalized.pop("serverInfo", None)
+        normalized.pop("timestamp", None)
+        normalized_schemas[name] = normalized
+    
+    # Compare all schemas against the first one
+    schema_names = list(normalized_schemas.keys())
+    base_schema = normalized_schemas[schema_names[0]]
+    
+    for i in range(1, len(schema_names)):
+        compare_name = schema_names[i]
+        compare_schema = normalized_schemas[compare_name]
+        
+        if base_schema != compare_schema:
+            print(f"❌ TRANSPORT-AGNOSTIC VIOLATION: {schema_names[0]} != {compare_name}")
+            print(f"   This indicates transport-specific bugs in schema generation")
+            return False
+    
+    print(f"✅ TRANSPORT-AGNOSTIC VALIDATED: All {len(schema_names)} schemas are identical")
+    return True
+
 def main():
-    """Compare schema outputs from different export methods."""
-    print("🔍 MCP Schema Export Method Comparison")
+    """Validate MCP transport-agnostic design and schema quality."""
+    print("🔍 MCP Transport-Agnostic Design Validation")
     print("=" * 50)
     
-    # Load all available schemas
+    # Load available schemas to validate transport-agnostic design
+    # All schemas should be identical if transport-agnostic design is correct
     schemas = {
-        "Legacy": load_schema("mcp_server_schema.json"),
-        "HTTP": load_schema("mcp_server_http.json"), 
-        "Native": load_schema("mcp_server_native.json"),
-        "Official": load_schema("mcp_server_official.json")
+        "stdio": load_schema("mcp_server_stdio.json"),
+        "http": load_schema("mcp_server_http.json"), 
+        "sse": load_schema("mcp_server_sse.json")
     }
+    
+    # First: Validate transport-agnostic design
+    print("\n🎯 Primary Validation: Transport-Agnostic Design")
+    is_transport_agnostic = validate_transport_agnostic_design(schemas)
     
     # Analyze each schema
     analyses = {}
     for name, schema in schemas.items():
         analyses[name] = analyze_schema_completeness(schema, name)
     
-    # Display comparison table
-    print("\n📊 Feature Comparison:")
-    print(f"{'Method':<10} {'Exists':<6} {'Tools':<6} {'Schema':<7} {'Caps':<5} {'Anno':<5} {'Examples':<8} {'Size(KB)':<8}")
+    # Display schema quality analysis
+    print(f"\n📊 Schema Quality Analysis:")
+    print(f"{'Transport':<10} {'Exists':<6} {'Tools':<6} {'Schema':<7} {'Caps':<5} {'Anno':<5} {'Examples':<8} {'Size(KB)':<8}")
     print("-" * 70)
     
     for name, analysis in analyses.items():
@@ -139,49 +180,48 @@ def main():
     compare_tool_descriptions(schemas)
     
     # Recommendations
-    print("\n💡 Recommendations:")
+    print("\n💡 Transport-Agnostic Recommendations:")
     
-    native_analysis = analyses.get("Native", {})
-    if native_analysis.get("exists", False):
-        if not native_analysis.get("has_schema_field", False):
-            print("  • Native: Add $schema field for MCP compliance")
-        if not native_analysis.get("has_capabilities", False):
-            print("  • Native: Add capabilities field for MCP compliance")
-        if not native_analysis.get("has_annotations", False):
-            print("  • Native: Consider adding tool annotations for governance")
-        if not native_analysis.get("has_examples", False):
-            print("  • Native: Consider adding tool examples for better LLM understanding")
+    # Check all transports for common issues
+    for transport_name, analysis in analyses.items():
+        if not analysis.get("exists", False):
+            continue
+            
+        issues = []
+        if not analysis.get("has_schema_field", False):
+            issues.append("Add $schema field for MCP compliance")
+        if not analysis.get("has_capabilities", False):
+            issues.append("Add capabilities field for MCP compliance")
+        if not analysis.get("has_annotations", False):
+            issues.append("Consider adding tool annotations for governance")
+        if not analysis.get("has_examples", False):
+            issues.append("Consider adding tool examples for better LLM understanding")
+            
+        if issues:
+            print(f"  • {transport_name} transport: {'; '.join(issues)}")
+        else:
+            print(f"  • {transport_name} transport: ✅ Full MCP compliance")
     
     # Summary
-    print(f"\n📋 Summary:")
-    existing_methods = [name for name, analysis in analyses.items() if analysis["exists"]]
-    if existing_methods:
-        print(f"  • Available exports: {', '.join(existing_methods)}")
+    print(f"\n📋 Transport-Agnostic Design Summary:")
+    existing_transports = [name for name, analysis in analyses.items() if analysis["exists"]]
+    
+    if existing_transports:
+        print(f"  • Available transport schemas: {', '.join(existing_transports)}")
+        print(f"  • Transport-agnostic design: {'✅ VALID' if is_transport_agnostic else '❌ VIOLATED'}")
         
-        # Find most complete
-        most_complete = max(existing_methods, 
-                          key=lambda x: sum([
-                              analyses[x]["has_schema_field"],
-                              analyses[x]["has_capabilities"], 
-                              analyses[x]["has_annotations"],
-                              analyses[x]["has_examples"]
-                          ]))
-        print(f"  • Most feature-complete: {most_complete}")
-        
-        # Find most compliant
-        compliant_methods = []
-        for name in existing_methods:
-            analysis = analyses[name]
-            if (analysis["has_schema_field"] and 
-                analysis["has_capabilities"]):
-                compliant_methods.append(name)
-        
-        if compliant_methods:
-            print(f"  • MCP compliant: {', '.join(compliant_methods)}")
+        if len(existing_transports) == 1:
+            print(f"  • Schema quality: {existing_transports[0]} transport only (need more for validation)")
         else:
-            print(f"  • MCP compliant: None (all need compliance fixes)")
+            # All should have same quality since they should be identical
+            sample_analysis = analyses[existing_transports[0]]
+            if (sample_analysis["has_schema_field"] and sample_analysis["has_capabilities"]):
+                print(f"  • MCP compliance: ✅ All transports compliant")
+            else:
+                print(f"  • MCP compliance: ❌ All transports need fixes")
     else:
-        print("  • No schema exports found. Run an export script first.")
+        print("  • No transport schemas found. Run an export script first.")
+        print("  • Next step: python scripts/mcp/export_mcp_schema_stdio.py")
 
 if __name__ == "__main__":
     main() 

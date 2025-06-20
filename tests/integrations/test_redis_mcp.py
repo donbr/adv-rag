@@ -39,7 +39,7 @@ class RedisMCPTester:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit"""
         if self.redis_client:
-            await self.redis_client.close()
+            await self.redis_client.aclose()
         if self.http_client:
             await self.http_client.aclose()
     

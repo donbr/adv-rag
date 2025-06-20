@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # RAG & LangChain Patterns (Tier 3) - Immutable Foundation
 
@@ -12,7 +12,7 @@ This project implements a sophisticated RAG pipeline with hybrid search, LangCha
 ## Core RAG Components
 
 ### Retrieval Factory Pattern
-**[retriever_factory.py](mdc:src/retriever_factory.py)** implements the factory pattern for retrieval strategies:
+**[retriever.py](mdc:src/rag/retriever.py)** implements the factory pattern for retrieval strategies:
 
 ```python
 # Standard retrieval interface
@@ -31,7 +31,7 @@ def create_retriever(
 - `contextual`: Context-aware retrieval with metadata filtering
 
 ### Chain Factory Pattern
-**[chain_factory.py](mdc:src/chain_factory.py)** assembles LangChain LCEL chains with standardized interfaces:
+**[chain.py](mdc:src/rag/chain.py)** assembles LangChain LCEL chains with standardized interfaces:
 
 ```python
 # LCEL chain construction
@@ -116,7 +116,7 @@ def create_hybrid_retrieval_chain(
 ## Vector Store Management
 
 ### Qdrant Configuration
-**[vectorstore_setup.py](mdc:src/vectorstore_setup.py)** manages vector database lifecycle:
+**[vectorstore.py](mdc:src/rag/vectorstore.py)** manages vector database lifecycle:
 
 ```python
 # Production Qdrant setup
@@ -141,12 +141,12 @@ def setup_qdrant(
 The project uses a **dual-loading approach** for different use cases:
 
 **Primary Data Ingestion:**
-- **[ingest.py](mdc:scripts/data_ingestion/ingest.py)**: Main data source that populates vector stores
+- **[ingest.py](mdc:scripts/ingestion/csv_ingestion_pipeline.py)**: Main data source that populates vector stores
 - Handles bulk ingestion with semantic chunking
 - Sets up baseline and semantic collections in Qdrant
 
 **Real-Time Processing:**
-- **[data_loader.py](mdc:src/data_loader.py)**: Supports real-time BM25 ingestion
+- **[data_loader.py](mdc:src/rag/data_loader.py)**: Supports real-time BM25 ingestion
 - Provides interface for on-demand document loading
 - Some duplication with ingest.py but serves specific runtime needs
 

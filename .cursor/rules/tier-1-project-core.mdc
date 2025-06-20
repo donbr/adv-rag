@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Project Core Standards (Tier 1) - Non-Negotiable
 
@@ -17,35 +17,48 @@ These values are considered part of the public contract of the server (to reprod
 ## Essential Project Structure
 
 ### Core Application Files
-- **[main_api.py](mdc:src/main_api.py)**: FastAPI application with RAG endpoints
-- **[settings.py](mdc:src/settings.py)**: Environment configuration using Pydantic settings
-- **[llm_models.py](mdc:src/llm_models.py)**: LLM model instantiation (must use `gpt-4.1-mini`)
-- **[embeddings.py](mdc:src/embeddings.py)**: Embedding models (must use `text-embedding-3-small`)
+- **[app.py](mdc:src/api/app.py)**: FastAPI application with RAG endpoints (renamed from main_api.py)
+- **[settings.py](mdc:src/core/settings.py)**: Environment configuration using Pydantic settings
+- **[llm_models.py](mdc:src/integrations/llm_models.py)**: LLM model instantiation (must use `gpt-4.1-mini`)
+- **[embeddings.py](mdc:src/rag/embeddings.py)**: Embedding models (must use `text-embedding-3-small`)
 
 ### MCP Implementation
-- **[fastapi_wrapper.py](mdc:src/mcp_server/fastapi_wrapper.py)**: FastMCP wrapper for FastAPI app
+- **[server.py](mdc:src/mcp/server.py)**: FastMCP wrapper for FastAPI app (moved from mcp_server/fastapi_wrapper.py)
+- **[resources.py](mdc:src/mcp/resources.py)**: MCP resource implementation (moved from mcp_server/resource_wrapper.py)
 - **[verify_mcp.py](mdc:tests/integration/verify_mcp.py)**: MCP server verification
 
 ### RAG Pipeline Components  
-- **[vectorstore_setup.py](mdc:src/vectorstore_setup.py)**: Qdrant vector database configuration
-- **[retriever_factory.py](mdc:src/retriever_factory.py)**: Retrieval strategies and hybrid search
-- **[chain_factory.py](mdc:src/chain_factory.py)**: LangChain LCEL chain assembly
-- **[ingest.py](mdc:scripts/data_ingestion/ingest.py)**: Primary data ingestion (populates vector stores)
-- **[data_loader.py](mdc:src/data_loader.py)**: Real-time document loading (BM25 support)
+- **[vectorstore.py](mdc:src/rag/vectorstore.py)**: Qdrant vector database configuration (renamed from vectorstore_setup.py)
+- **[retriever.py](mdc:src/rag/retriever.py)**: Retrieval strategies and hybrid search (renamed from retriever_factory.py)
+- **[chain.py](mdc:src/rag/chain.py)**: LangChain LCEL chain assembly (renamed from chain_factory.py)
+- **[ingest.py](mdc:scripts/ingestion/csv_ingestion_pipeline.py)**: Primary data ingestion (populates vector stores)
+- **[data_loader.py](mdc:src/rag/data_loader.py)**: Real-time document loading (BM25 support)
 
 ## Import Conventions
 
-Use absolute imports from the `src` package:
+Use absolute imports from the reorganized `src` package structure:
 ```python
-from src.llm_models import get_chat_openai
-from src.embeddings import get_openai_embeddings
-from src.vectorstore_setup import setup_qdrant
+from src.integrations.llm_models import get_chat_openai
+from src.rag.embeddings import get_openai_embeddings
+from src.rag.vectorstore import setup_qdrant
+from src.core.settings import get_settings
+from src.api.app import app
+from src.mcp.server import mcp
 ```
 
 ## Configuration Management
 
-All configuration flows through **[settings.py](mdc:src/settings.py)** using Pydantic BaseSettings:
+All configuration flows through **[settings.py](mdc:src/core/settings.py)** using Pydantic BaseSettings:
 - Environment variables loaded from `.env`
 - Type validation and defaults
 - MCP server configuration
 - LLM and embedding model settings
+
+## Domain-Organized Structure
+
+The project follows a domain-organized architecture:
+- **`src/core/`**: Shared infrastructure (settings, logging, exceptions)
+- **`src/api/`**: FastAPI application and endpoints
+- **`src/rag/`**: RAG pipeline components (embeddings, vectorstore, retrieval, chains)
+- **`src/mcp/`**: MCP server implementation and resources
+- **`src/integrations/`**: External service integrations (LLM models, Redis)

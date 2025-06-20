@@ -1,0 +1,265 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Honest Progress Tracking Rule
+
+## Purpose
+Ensures transparent, accurate progress reporting during development and refactoring, preventing false completion claims and maintaining trust through honest uncertainty acknowledgment.
+
+## Core Principles
+
+### 1. Transparency Over Convenience
+- **ALWAYS** distinguish between assumptions and verified facts
+- **NEVER** claim completion without evidence
+- **ACKNOWLEDGE** uncertainty when it exists
+- **DOCUMENT** what remains untested or unverified
+
+### 2. Evidence-Based Claims
+- All progress claims must be backed by verifiable evidence
+- Provide specific commands, outputs, and timestamps
+- Include both successful and failed attempts
+- Show the actual work performed, not just the intended outcome
+
+### 3. Honest Uncertainty
+- Explicitly state when something is assumed vs. verified
+- Acknowledge limitations in testing or validation
+- Provide confidence levels for different claims
+- Offer to perform additional verification when needed
+
+## Progress Reporting Standards
+
+### ✅ Honest Progress Claims
+```markdown
+- [x] Task 1.1 - Directory created and verified with `ls -la src/core/`
+- [x] Task 1.2 - Import tested successfully: `python -c "from src.core.settings import get_settings; print('✅ Import works')"`
+- [~] Task 1.3 - File moved (ASSUMED working, needs import testing)
+- [ ] Task 1.4 - Not started
+```
+
+### ❌ Dishonest Progress Claims
+```markdown
+- [x] Task 1.1 - Directory created (no verification shown)
+- [x] Task 1.2 - Import working (based on previous tests)
+- [x] Task 1.3 - File moved successfully (assumed from file operation)
+- [x] Task 1.4 - Completed (no evidence provided)
+```
+
+## Status Indicators
+
+### Standard Status Markers
+- `[ ]` - Not started
+- `[x]` - Completed with evidence
+- `[~]` - Partially complete or assumed (needs verification)
+- `[?]` - Uncertain status (requires investigation)
+- `[!]` - Failed or blocked (needs attention)
+
+### Evidence Requirements by Status
+
+#### `[x]` Completed Status
+**Requirements:**
+- Specific command or action performed
+- Output or result shown
+- Timestamp or context provided
+- Success clearly demonstrated
+
+**Example:**
+```markdown
+- [x] 2.1 Move settings.py to core/ - Completed at 14:32
+  - Command: `mv src/settings.py src/core/settings.py`
+  - Verification: `ls -la src/core/settings.py` shows file exists
+  - Import test: `python -c "from src.core.settings import get_settings; print('✅')"` successful
+```
+
+#### `[~]` Assumed/Partial Status
+**Requirements:**
+- Clear statement of what is assumed
+- Explanation of why verification is pending
+- Plan for completing verification
+- Acknowledgment of uncertainty
+
+**Example:**
+```markdown
+- [~] 2.2 Update imports in chain.py - File modified, imports need testing
+  - Action: Updated import statements in src/rag/chain.py
+  - Assumption: New imports should work based on file structure
+  - Needs: Fresh import testing to verify functionality
+  - Next: Run `python -c "from src.rag.chain import create_rag_chain"` to verify
+```
+
+#### `[?]` Uncertain Status
+**Requirements:**
+- Clear statement of uncertainty
+- Explanation of what needs investigation
+- Plan for resolving uncertainty
+- No false confidence claims
+
+**Example:**
+```markdown
+- [?] 3.1 MCP server functionality - Status unclear after refactoring
+  - Issue: Server imports may be affected by file moves
+  - Unknown: Whether MCP server starts with new structure
+  - Investigation needed: Test server startup and tool availability
+  - Next steps: Run verification script to check MCP functionality
+```
+
+## Documentation Standards
+
+### Progress Updates Format
+```markdown
+## Progress Update - [Date] [Time]
+
+### Completed This Session
+- [x] Task X.Y - [Description] - [Evidence]
+- [x] Task X.Z - [Description] - [Evidence]
+
+### Assumptions Made (Need Verification)
+- [~] Task A.B - [What was assumed] - [Why verification pending]
+
+### Uncertainties Identified
+- [?] Task C.D - [What is uncertain] - [Investigation plan]
+
+### Next Steps
+1. Verify assumptions: [specific actions]
+2. Investigate uncertainties: [specific actions]
+3. Continue with: [next tasks]
+
+### Evidence Log
+- Command: `[command]` - Output: `[output]` - Time: [timestamp]
+- Test: `[test]` - Result: `[result]` - Time: [timestamp]
+```
+
+## Anti-Patterns to Avoid
+
+### False Completion
+```markdown
+❌ BAD:
+- [x] All imports updated - should work now
+
+✅ GOOD:
+- [x] Import statements updated in 5 files - verified with syntax check
+- [~] Import functionality - updated statements, needs runtime testing
+```
+
+### Assumption Presentation as Fact
+```markdown
+❌ BAD:
+- [x] Refactoring complete - all functionality preserved
+
+✅ GOOD:
+- [x] File reorganization complete - all files moved to new structure
+- [~] Functionality preservation - file moves done, runtime testing needed
+- [?] Performance impact - unknown until load testing performed
+```
+
+### Historical Reference as Current Validation
+```markdown
+❌ BAD:
+- [x] System working - previous tests showed success
+
+✅ GOOD:
+- [x] System tested at [timestamp] - fresh validation performed
+- [~] System status - worked previously, needs revalidation after changes
+```
+
+## Integration with Other Rules
+
+### With validation-integrity.mdc
+- Use honest status indicators during validation phases
+- Clearly separate implementation completion from validation completion
+- Provide evidence for all validation claims
+
+### With process-task-list.mdc
+- Update task status honestly after each sub-task
+- Require evidence before marking parent tasks complete
+- Use appropriate status indicators for different completion levels
+
+### With security-first-refactoring.mdc
+- Honestly report security validation status
+- Acknowledge when security testing is incomplete
+- Provide evidence for security compliance claims
+
+## Confidence Levels
+
+### High Confidence `[x]`
+- Direct evidence available
+- Recent verification performed
+- Multiple validation methods used
+- Clear success criteria met
+
+### Medium Confidence `[~]`
+- Partial evidence available
+- Some assumptions made
+- Limited validation performed
+- Success likely but not certain
+
+### Low Confidence `[?]`
+- Little or no evidence
+- Significant assumptions
+- No recent validation
+- Success uncertain
+
+### No Confidence `[!]`
+- Evidence of failure
+- Known issues present
+- Validation failed
+- Immediate attention needed
+
+## Success Metrics
+
+### Process Integrity
+- All completion claims backed by evidence
+- Clear distinction between facts and assumptions
+- Honest acknowledgment of uncertainties
+- Transparent progress reporting
+
+### Trust Building
+- Consistent evidence provision
+- Accurate uncertainty acknowledgment
+- Reliable progress indicators
+- Honest failure reporting
+
+### Quality Assurance
+- Reduced false completion claims
+- Better validation coverage
+- Clearer understanding of project status
+- More reliable delivery estimates
+
+## Common Scenarios
+
+### After File Operations
+```markdown
+✅ HONEST:
+- [x] Files moved to new structure - verified with `find src/ -name "*.py"`
+- [~] Import paths updated - syntax valid, runtime testing needed
+- [?] Functionality preserved - unknown until end-to-end testing
+
+❌ DISHONEST:
+- [x] Refactoring complete - all files moved and working
+```
+
+### After Code Changes
+```markdown
+✅ HONEST:
+- [x] Code modified - changes saved and syntax checked
+- [~] Logic preserved - changes made carefully, needs testing
+- [?] Performance impact - unknown until benchmarking
+
+❌ DISHONEST:
+- [x] Code updated - functionality improved and tested
+```
+
+### After Configuration Changes
+```markdown
+✅ HONEST:
+- [x] Configuration updated - new settings added to config file
+- [~] Settings loading - should work based on existing patterns
+- [?] Runtime behavior - needs testing with actual application
+
+❌ DISHONEST:
+- [x] Configuration complete - all settings working properly
+```
+
+## Remember
+**Honesty builds trust. Uncertainty is acceptable. False confidence is not. Evidence speaks louder than assumptions.**

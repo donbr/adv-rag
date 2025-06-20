@@ -1,0 +1,200 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Weekly Rule Assessment Protocol
+
+## Purpose
+Establish a systematic weekly review process to evaluate Cursor rule effectiveness, identify improvements, and optimize development workflow based on actual outcomes and metrics.
+
+## Assessment Schedule
+**Every Friday at end of development week** - conduct comprehensive rule evaluation covering the previous 7 days of development activity.
+
+## Assessment Framework
+
+### 1. Effectiveness Metrics
+**Question**: Are the rules achieving their intended outcomes?
+
+#### Quantitative Measures
+- **Task Completion Rate**: % of tasks completed successfully using rule guidance
+- **Error Reduction**: Decrease in common mistakes (import errors, validation failures, etc.)
+- **Time to Resolution**: Average time to resolve issues with rule assistance
+- **Rule Usage Frequency**: Which rules are being invoked most/least often
+
+#### Qualitative Measures
+- **Developer Confidence**: How confident do you feel following rule guidance?
+- **Decision Clarity**: Do rules provide clear direction when needed?
+- **Workflow Smoothness**: Are rules helping or hindering development flow?
+
+### 2. Quality Assessment
+**Question**: Are the rules producing high-quality outcomes?
+
+#### Code Quality Indicators
+- **Standards Compliance**: Are tier rules maintaining technical standards?
+- **Architecture Preservation**: Are refactoring rules preserving system integrity?
+- **Test Coverage**: Are validation rules ensuring adequate testing?
+- **Documentation Quality**: Are PRD/task generation rules producing clear docs?
+
+#### Process Quality Indicators
+- **Validation Accuracy**: Are completion claims backed by evidence?
+- **Security Compliance**: Are security rules preventing sensitive data exposure?
+- **Honest Progress**: Are progress reports accurate and trustworthy?
+
+### 3. Cost-Benefit Analysis
+**Question**: Are the rules worth their overhead?
+
+#### Costs
+- **Cognitive Load**: Mental effort required to follow rule protocols
+- **Time Overhead**: Additional time spent on rule compliance
+- **Context Switching**: Disruption to development flow
+- **Maintenance Burden**: Effort to keep rules updated and relevant
+
+#### Benefits
+- **Error Prevention**: Issues avoided through rule guidance
+- **Quality Improvement**: Better outcomes vs. ad-hoc approaches
+- **Knowledge Preservation**: Institutional knowledge captured in rules
+- **Consistency**: Standardized approaches across projects
+
+### 4. Rule-Specific Evaluation
+
+#### Tier Rules (Always Applied)
+- **tier-1-project-core.mdc**: Are model pinning and structure standards being maintained?
+- **tier-2-development-workflow.mdc**: Are development commands and processes effective?
+- **tier-3-rag-langchain-patterns.mdc**: Are RAG patterns being preserved during changes?
+- **tier-4-mcp-fastapi-implementation.mdc**: Is MCP integration working smoothly?
+
+#### Process Rules (Conditionally Applied)
+- **create-prd.mdc**: Quality of generated PRDs and requirement gathering
+- **generate-tasks.mdc**: Effectiveness of task breakdown and organization
+- **process-task-list.mdc**: Task management and completion tracking
+- **validation-integrity.mdc**: Evidence-based validation and honest progress
+- **security-first-refactoring.mdc**: Security boundary enforcement
+- **honest-progress-tracking.mdc**: Accuracy of progress reporting
+
+## Weekly Assessment Template
+
+```markdown
+# Weekly Rule Assessment - [Date]
+
+## Development Activity Summary
+- **Projects Worked On**: [List active projects]
+- **Major Tasks Completed**: [Key accomplishments]
+- **Rules Most Frequently Used**: [Top 3-5 rules]
+- **Challenges Encountered**: [Issues faced this week]
+
+## Rule Effectiveness Analysis
+
+### High-Performing Rules ✅
+- **Rule Name**: [Specific outcomes and benefits]
+- **Rule Name**: [Specific outcomes and benefits]
+
+### Underperforming Rules ⚠️
+- **Rule Name**: [Issues identified and impact]
+- **Rule Name**: [Issues identified and impact]
+
+### Unused/Ignored Rules 📋
+- **Rule Name**: [Why not used? Still relevant?]
+- **Rule Name**: [Why not used? Still relevant?]
+
+## Quality Outcomes
+- **Standards Compliance**: [How well were technical standards maintained?]
+- **Validation Accuracy**: [Were completion claims backed by evidence?]
+- **Security Compliance**: [Any security boundary violations?]
+- **Documentation Quality**: [Quality of generated PRDs, tasks, progress reports]
+
+## Cost-Benefit Assessment
+- **High-Value Rules**: [Rules providing significant benefit for low cost]
+- **High-Cost Rules**: [Rules requiring significant overhead]
+- **Questionable ROI**: [Rules where cost may exceed benefit]
+
+## Improvement Recommendations
+
+### Rules to Enhance
+- **Rule Name**: [Specific improvements needed]
+- **Rule Name**: [Specific improvements needed]
+
+### Rules to Simplify
+- **Rule Name**: [How to reduce overhead while maintaining benefit]
+- **Rule Name**: [How to reduce overhead while maintaining benefit]
+
+### Rules to Retire
+- **Rule Name**: [Rationale for removal]
+- **Rule Name**: [Rationale for removal]
+
+### New Rules Needed
+- **Gap Identified**: [What's missing from current rule set?]
+- **Proposed Rule**: [Brief description of needed rule]
+
+## Action Items for Next Week
+- [ ] Update/modify rules: [Specific changes]
+- [ ] Create new rules: [New rules to develop]
+- [ ] Remove obsolete rules: [Rules to retire]
+- [ ] Test rule changes: [Validation approach]
+
+## Metrics for Next Assessment
+- [Specific metrics to track for next week's evaluation]
+```
+
+## Assessment Process
+
+### Step 1: Data Collection (15 minutes)
+- Review development activity from past week
+- Identify which rules were used and how often
+- Note any issues, errors, or friction points
+- Gather quantitative metrics where available
+
+### Step 2: Rule-by-Rule Evaluation (20 minutes)
+- Go through each rule systematically
+- Assess effectiveness, quality, and cost
+- Note specific examples of success or failure
+- Identify patterns across similar rules
+
+### Step 3: Synthesis and Recommendations (10 minutes)
+- Identify top-performing and underperforming rules
+- Propose specific improvements or changes
+- Plan action items for the following week
+- Set metrics to track for next assessment
+
+### Step 4: Implementation (5 minutes)
+- Make immediate rule updates if needed
+- Schedule larger rule development tasks
+- Document decisions and rationale
+
+## Success Indicators
+
+### Effective Rule Ecosystem
+- **High Usage**: Rules are being invoked regularly and appropriately
+- **Positive Outcomes**: Rules consistently lead to better results
+- **Low Friction**: Rules enhance rather than impede development flow
+- **Continuous Improvement**: Rule set evolves based on real usage patterns
+
+### Quality Metrics
+- **Reduced Errors**: Fewer mistakes in areas covered by rules
+- **Faster Resolution**: Quicker problem-solving with rule guidance
+- **Better Documentation**: Higher quality PRDs, tasks, and progress reports
+- **Maintained Standards**: Consistent adherence to technical and process standards
+
+## Integration with Development Workflow
+
+### Friday End-of-Week Routine
+1. Complete current development tasks
+2. Run weekly rule assessment (45-50 minutes)
+3. Update rules based on findings
+4. Plan rule improvements for following week
+5. Document lessons learned
+
+### Monthly Meta-Assessment
+- Review 4 weeks of weekly assessments
+- Identify longer-term patterns and trends
+- Consider major rule architecture changes
+- Assess overall rule ecosystem health
+
+## Remember
+**Rules should serve the developer, not the other way around. Regular assessment ensures the rule ecosystem remains valuable, relevant, and efficient.**
+
+## Output Requirements
+- **Assessment Document**: Save weekly assessment in `.cursor/assessments/YYYY-MM-DD-weekly-assessment.md`
+- **Rule Updates**: Implement approved changes immediately
+- **Tracking**: Maintain metrics across assessments for trend analysis
+- **Feedback Loop**: Use assessment outcomes to improve the assessment process itself

@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # MCP Schema Management (Tier 5) - Schema Export & Validation
 
@@ -72,7 +72,7 @@ python scripts/mcp/export_mcp_schema.py
 
 ```bash
 # Start server with streamable HTTP
-python src/mcp_server/fastapi_wrapper.py
+python src/mcp/server.py
 
 # Native schema discovery via HTTP
 curl -X POST http://127.0.0.1:8000/mcp \
@@ -199,7 +199,7 @@ While designed for server-side use, the utility can work with:
 ### Debug Commands
 ```bash
 # Check MCP server can be imported
-python -c "from src.mcp_server.fastapi_wrapper import mcp; print('✅ MCP import success')"
+python -c "from src.mcp.server import mcp; print('✅ MCP import success')"
 
 # Verify git repository info
 git remote get-url origin

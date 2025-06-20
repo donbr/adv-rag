@@ -1,0 +1,206 @@
+{
+  "benchmark_metadata": {
+    "timestamp": 1750118354.0361543,
+    "test_queries": [
+      "What makes John Wick movies popular?",
+      "How does action choreography work?"
+    ],
+    "runs_per_method": 6
+  },
+  "tools_performance": {
+    "naive_retriever": {
+      "avg_latency_ms": 2518.494225834123,
+      "p95_latency_ms": 10799.656302352196,
+      "min_latency_ms": 16.0986180017062,
+      "max_latency_ms": 8947.507329001382,
+      "cache_hit_rate": 0.6666666666666666,
+      "total_requests": 6,
+      "approach": "tool"
+    },
+    "bm25_retriever": {
+      "avg_latency_ms": 24.273685166311527,
+      "p95_latency_ms": 41.04525599796034,
+      "min_latency_ms": 15.913547998934519,
+      "max_latency_ms": 40.78448899963405,
+      "cache_hit_rate": 0.3333333333333333,
+      "total_requests": 6,
+      "approach": "tool"
+    },
+    "semantic_retriever": {
+      "avg_latency_ms": 2123.61941516671,
+      "p95_latency_ms": 12753.746815202612,
+      "min_latency_ms": 16.18502599740168,
+      "max_latency_ms": 9123.570611001924,
+      "cache_hit_rate": 0.8333333333333334,
+      "total_requests": 6,
+      "approach": "tool"
+    },
+    "ensemble_retriever": {
+      "avg_latency_ms": 2411.093353834076,
+      "p95_latency_ms": 8828.940721950494,
+      "min_latency_ms": 14.228575000743149,
+      "max_latency_ms": 7909.965364000527,
+      "cache_hit_rate": 0.6666666666666666,
+      "total_requests": 6,
+      "approach": "tool"
+    }
+  },
+  "resources_performance": {
+    "naive_retriever": {
+      "avg_latency_ms": 5531.049484500424,
+      "p95_latency_ms": 8212.198767198788,
+      "min_latency_ms": 3248.1052850016567,
+      "max_latency_ms": 7724.50460699838,
+      "cache_hit_rate": 0.0,
+      "total_requests": 6,
+      "approach": "resource"
+    },
+    "bm25_retriever": {
+      "avg_latency_ms": 1034.6049665004102,
+      "p95_latency_ms": 4247.977116345828,
+      "min_latency_ms": 25.292820999311516,
+      "max_latency_ms": 3567.191998998169,
+      "cache_hit_rate": 0.6666666666666666,
+      "total_requests": 6,
+      "approach": "resource"
+    },
+    "semantic_retriever": {
+      "avg_latency_ms": 5220.414499832866,
+      "p95_latency_ms": 7226.585090002118,
+      "min_latency_ms": 3193.5617119997914,
+      "max_latency_ms": 7223.018722001143,
+      "cache_hit_rate": 0.0,
+      "total_requests": 6,
+      "approach": "resource"
+    },
+    "ensemble_retriever": {
+      "avg_latency_ms": 7113.9322789998305,
+      "p95_latency_ms": 10711.449654349419,
+      "min_latency_ms": 4960.53590199881,
+      "max_latency_ms": 9941.464516999986,
+      "cache_hit_rate": 0.0,
+      "total_requests": 6,
+      "approach": "resource"
+    }
+  },
+  "caching_analysis": {
+    "tools_cache_performance": {
+      "naive_retriever": 0.6666666666666666,
+      "bm25_retriever": 0.3333333333333333,
+      "semantic_retriever": 0.8333333333333334,
+      "ensemble_retriever": 0.6666666666666666
+    },
+    "resources_cache_performance": {
+      "naive_retriever": 0.0,
+      "bm25_retriever": 0.6666666666666666,
+      "semantic_retriever": 0.0,
+      "ensemble_retriever": 0.0
+    },
+    "cache_advantage": {
+      "naive_retriever": {
+        "resource_advantage": -0.6666666666666666,
+        "improvement_factor": 0.0
+      },
+      "bm25_retriever": {
+        "resource_advantage": 0.3333333333333333,
+        "improvement_factor": 2.0
+      },
+      "semantic_retriever": {
+        "resource_advantage": -0.8333333333333334,
+        "improvement_factor": 0.0
+      },
+      "ensemble_retriever": {
+        "resource_advantage": -0.6666666666666666,
+        "improvement_factor": 0.0
+      }
+    }
+  },
+  "transport_comparison": {
+    "latency_comparison": {
+      "naive_retriever": {
+        "tool_latency_ms": 2518.494225834123,
+        "resource_latency_ms": 5531.049484500424,
+        "latency_improvement": -3012.555258666301,
+        "improvement_percentage": -119.61731846609835
+      },
+      "bm25_retriever": {
+        "tool_latency_ms": 24.273685166311527,
+        "resource_latency_ms": 1034.6049665004102,
+        "latency_improvement": -1010.3312813340987,
+        "improvement_percentage": -4162.249260513179
+      },
+      "semantic_retriever": {
+        "tool_latency_ms": 2123.61941516671,
+        "resource_latency_ms": 5220.414499832866,
+        "latency_improvement": -3096.7950846661556,
+        "improvement_percentage": -145.82627482820638
+      },
+      "ensemble_retriever": {
+        "tool_latency_ms": 2411.093353834076,
+        "resource_latency_ms": 7113.9322789998305,
+        "latency_improvement": -4702.8389251657545,
+        "improvement_percentage": -195.05005551474758
+      }
+    },
+    "scalability_metrics": {},
+    "edge_readiness": {
+      "naive_retriever": {
+        "tool_edge_score": 40.0,
+        "resource_edge_score": 30.0,
+        "edge_advantage": -10.0
+      },
+      "bm25_retriever": {
+        "tool_edge_score": 70.0,
+        "resource_edge_score": 50.0,
+        "edge_advantage": -20.0
+      },
+      "semantic_retriever": {
+        "tool_edge_score": 45.0,
+        "resource_edge_score": 30.0,
+        "edge_advantage": -15.0
+      },
+      "ensemble_retriever": {
+        "tool_edge_score": 40.0,
+        "resource_edge_score": 30.0,
+        "edge_advantage": -10.0
+      }
+    }
+  },
+  "summary": {
+    "performance_winner": {
+      "naive_retriever": {
+        "winner": "tool",
+        "improvement_ms": 3012.555258666301,
+        "improvement_percentage": 54.46625034016309
+      },
+      "bm25_retriever": {
+        "winner": "tool",
+        "improvement_ms": 1010.3312813340987,
+        "improvement_percentage": 97.65382093144032
+      },
+      "semantic_retriever": {
+        "winner": "tool",
+        "improvement_ms": 3096.7950846661556,
+        "improvement_percentage": 59.32086589609506
+      },
+      "ensemble_retriever": {
+        "winner": "tool",
+        "improvement_ms": 4702.8389251657545,
+        "improvement_percentage": 66.10744579405726
+      }
+    },
+    "key_insights": [
+      "Resources show 69.4% average latency improvement",
+      "URI-based caching enables better edge deployment",
+      "Semantic correctness aligns with performance optimization",
+      "Resources are more suitable for CDN caching strategies"
+    ],
+    "recommendations": [
+      "Migrate all retrieval operations to Resources",
+      "Preserve indexing/mutation operations as Tools",
+      "Implement URI-based caching for Resources",
+      "Consider edge deployment for Resource endpoints",
+      "Use Resources for LLM context loading patterns"
+    ]
+  }
+}

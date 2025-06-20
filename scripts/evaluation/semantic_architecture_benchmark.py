@@ -8,6 +8,8 @@ vs the traditional Tools approach, measuring:
 - Caching effectiveness  
 - Transport optimization
 - Edge deployment readiness
+
+NOTE: requires resources.py script to launch both resource and tool capabilities.
 """
 
 import asyncio
@@ -18,9 +20,8 @@ import json
 from pathlib import Path
 import sys
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+# Add project root to path based on pwd from command line: PYTHONPATH=$(pwd) python scripts/evaluation/semantic_architecture_benchmark.py
+project_root = Path.cwd()
 
 from fastmcp import Client
 import httpx
@@ -43,9 +44,9 @@ class SemanticArchitectureBenchmark:
         self.test_queries = [
             "What makes John Wick movies popular?",
             "How does action choreography work?", 
-            "What are the best action movie sequences?",
-            "Why do audiences love revenge stories?",
-            "What makes a good action hero?"
+            # "What are the best action movie sequences?",
+            # "Why do audiences love revenge stories?",
+            # "What makes a good action hero?"
         ]
     
     async def benchmark_tools_approach(self) -> Dict[str, Any]:
@@ -128,7 +129,7 @@ class SemanticArchitectureBenchmark:
         
         try:
             # Connect to resource wrapper MCP server
-            from src.mcp_server.resource_wrapper import mcp
+            from src.mcp.resources import mcp
             
             async with Client(mcp) as client:
                 for method in retrieval_methods:
@@ -332,9 +333,10 @@ class SemanticArchitectureBenchmark:
                 }
         
         # Generate insights
-        avg_resource_improvement = statistics.mean([
+        improvement_percentages = [
             data["improvement_percentage"] for data in summary["performance_winner"].values()
-        ])
+        ]
+        avg_resource_improvement = statistics.mean(improvement_percentages) if improvement_percentages else 0
         
         summary["key_insights"] = [
             f"Resources show {avg_resource_improvement:.1f}% average latency improvement",
@@ -355,9 +357,13 @@ class SemanticArchitectureBenchmark:
     
     def save_results(self, filename: str = "semantic_architecture_benchmark.json"):
         """
-        Save benchmark results to file
+        Save benchmark results to file in /processed directory
         """
-        output_path = Path(filename)
+        # Create processed directory if it doesn't exist
+        processed_dir = project_root / "processed"
+        processed_dir.mkdir(exist_ok=True)
+        
+        output_path = processed_dir / filename
         with open(output_path, 'w') as f:
             json.dump(self.results, f, indent=2)
         

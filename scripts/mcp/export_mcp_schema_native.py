@@ -56,7 +56,7 @@ async def verify_server_running() -> bool:
             
     except ConnectionError as e:
         logger.error(f"❌ Connection refused to {HTTP_SERVER_URL}: {e}")
-        logger.error("💡 Start server with: fastmcp run src/mcp_server/fastapi_wrapper.py --transport streamable-http --host 127.0.0.1 --port 8001 --path /mcp")
+        logger.error("💡 Start server with: python src/mcp/server.py --transport streamable-http --host 127.0.0.1 --port 8001 --path /mcp")
         return False
     except Exception as e:
         logger.error(f"❌ Cannot connect to MCP server at {HTTP_SERVER_URL}: {e}")

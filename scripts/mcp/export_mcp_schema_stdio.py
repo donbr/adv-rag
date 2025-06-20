@@ -25,7 +25,7 @@ try:
     # Import validation functions from the dedicated validation script
     from scripts.mcp.validate_mcp_schema import validate_with_json_schema
     # Import the MCP server directly
-    from src.mcp_server.fastapi_wrapper import mcp
+    from src.mcp.server import mcp
 except ImportError as e:
     logger.error(f"Failed to import required modules: {e}")
     logger.error("Install with: pip install fastmcp")
