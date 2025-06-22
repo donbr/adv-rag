@@ -54,6 +54,10 @@ python scripts/evaluation/retrieval_method_comparison.py
 
 # Run semantic architecture benchmark
 python scripts/evaluation/semantic_architecture_benchmark.py
+
+# Migrate from PostgreSQL pgvector (if using legacy data)
+python scripts/migration/pgvector_to_qdrant_migration.py --dry-run
+python scripts/migration/pgvector_to_qdrant_migration.py
 ```
 
 ### Infrastructure
@@ -266,6 +270,14 @@ DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/resources.py
 - `retriever://ensemble_retriever/{query}` - Direct hybrid results
 - `system://health` - System status and configuration
 
+### Invalid Tests (Clean Up Required)
+**CRITICAL**: The following test files reference removed components and need attention:
+- `tests/integration/test_cqrs_resources.py` - Imports missing `src.mcp.qdrant_resources` module
+- `tests/integration/test_cqrs_resources_with_assertions.py` - Same import issue
+- `tests/integration/test_cqrs_structure_validation.py` - Validates non-existent file structure
+
+**Action Required**: Update these tests to reference current `src/mcp/resources.py` implementation or remove if obsolete.
+
 ### FastMCP Inspector Commands
 
 #### Tools Server Inspection
@@ -319,8 +331,7 @@ DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/resources.py
 ```bash
 # Test both servers independently
 python tests/integration/verify_mcp.py                    # Tools server
-python tests/integration/test_cqrs_resources.py          # Resources server
-python tests/integration/test_cqrs_structure_validation.py # CQRS compliance
+# NOTE: CQRS resources tests are currently broken - see Invalid Tests section
 
 # Schema validation
 python scripts/mcp/export_mcp_schema_stdio.py            # Tools schema
@@ -532,6 +543,8 @@ These MCP servers provide a rich ecosystem for development, testing, and analysi
 - `docs/SETUP.md` - Complete bootstrap walkthrough
 - `docs/FUNCTIONAL_OVERVIEW.md` - System architecture details  
 - `docs/MCP_COMMAND_LINE_GUIDE.md` - MCP CLI usage patterns
+- `docs/CQRS_IMPLEMENTATION_SUMMARY.md` - MCP Resources implementation details
+- `docs/project-structure.md` - Detailed architecture reference
 - `claude_code_mcp_guide.md` - Claude Code MCP integration guide
 
 ## Development Decision Matrix
@@ -568,7 +581,7 @@ curl http://localhost:6333/collections  # Should show johnwick collections
 
 # 5. Verify MCP servers
 python tests/integration/verify_mcp.py  # MCP tools validation
-python tests/integration/test_cqrs_resources.py  # CQRS resources check
+# CQRS resources tests are broken - see Invalid Tests section
 
 # 6. Check memory server storage (if configured)
 ls -la data/memory.json  # Should exist if custom path configured
@@ -673,8 +686,8 @@ python src/core/settings.py  # Verify API keys
 
 #### Problem: "Resource not found" errors
 ```bash
-# Test CQRS resources server
-python tests/integration/test_cqrs_resources.py
+# Test CQRS resources server (BROKEN - needs update)
+# python tests/integration/test_cqrs_resources.py
 
 # Verify Qdrant collections exist
 curl http://localhost:6333/collections
