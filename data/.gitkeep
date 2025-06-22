@@ -1,2 +1,13 @@
-# This file ensures the data/ directory is preserved in version control
-# Directory structure is maintained while actual data files are ignored 
+# Data Directory
+
+## Structure:
+- raw/ - Original data files (John Wick movie reviews)
+- interim/ - Intermediate processed data  
+- processed/ - Final processed data for analysis
+- memory.json - MCP Memory server storage (if configured)
+
+## Memory Server Configuration:
+To store MCP memory data in this directory, configure:
+MEMORY_FILE_PATH="/home/donbr/ghcp/adv-rag/data/memory.json"
+
+# This file ensures the data/ directory is preserved in version control 

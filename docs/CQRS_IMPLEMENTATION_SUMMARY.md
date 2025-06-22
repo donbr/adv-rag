@@ -6,48 +6,50 @@ The CQRS-compliant MCP Resources have been successfully implemented following th
 
 ## 🎯 What Was Delivered
 
-### 1. **Core Implementation** (`src/mcp/qdrant_resources.py`)
-- **QdrantResourceProvider class** with 5 read-only methods
-- **Zero business logic duplication** from existing RAG components
-- **Direct Qdrant access** for optimal query performance
+### 1. **Core Implementation** (`src/mcp/resources.py`)
+- **FastMCP resource handlers** for 6 retrieval methods + health check
+- **Zero business logic duplication** via shared chain mapping
+- **LangChain integration** using existing RAG chains
 - **Structured LLM-friendly responses** in markdown format
 - **Comprehensive error handling** with troubleshooting guidance
+- **Phoenix tracing integration** with enhanced observability
 
-### 2. **MCP Server Integration** (`src/mcp/server.py`)
-- **5 CQRS Resources registered** with proper URI patterns
-- **@ mention syntax support** for Claude Desktop
-- **Phoenix telemetry integration** for observability
-- **Health check updates** documenting resource availability
+### 2. **MCP Server Integration** (`src/mcp/resources.py`)
+- **6 retrieval resources + 1 health resource** registered with operation_id consistency
+- **Dual interface architecture** (FastAPI tools + MCP resources)
+- **Phoenix telemetry integration** with explicit spans and events
+- **Health check endpoint** at `system://health`
 
 ### 3. **Resource URI Patterns**
 ```bash
-# List all collections
-@server:qdrant://collections
+# Retrieval method resources (actual implementation)
+retriever://naive_retriever/{query}
+retriever://bm25_retriever/{query}
+retriever://contextual_compression_retriever/{query}
+retriever://multi_query_retriever/{query}
+retriever://ensemble_retriever/{query}
+retriever://semantic_retriever/{query}
 
-# Get collection metadata  
-@server:qdrant://collections/johnwick_baseline
+# System health check
+system://health
 
-# Retrieve specific document
-@server:qdrant://collections/johnwick_baseline/documents/point_id
-
-# Vector similarity search
-@server:qdrant://collections/johnwick_baseline/search?query=text&limit=5
-
-# Collection statistics
-@server:qdrant://collections/johnwick_baseline/stats
+# Example usage:
+# retriever://semantic_retriever/What makes John Wick movies popular?
 ```
 
-### 4. **Comprehensive Testing Suite**
-- **Structure validation test** (✅ 37/37 checks passed)
-- **Assertions-based runtime test** with expected outcomes
-- **Expected response documentation** with validation criteria
-- **CQRS compliance verification** ensuring read-only operations
+### 4. **Architecture Features**
+- **Operation ID consistency** between FastAPI tools and MCP resources
+- **Phoenix tracing integration** with explicit spans, events, and attributes
+- **LangChain LCEL integration** using existing retrieval chains
+- **CQRS compliance** ensuring read-only resource operations
+- **Enhanced error handling** with timeout protection and troubleshooting guides
 
-### 5. **Documentation Updates**
-- **CLAUDE.md** updated with CQRS Resources section
-- **Usage examples** with @ mention syntax
-- **Testing commands** for verification
-- **Implementation roadmap** with detailed guidance
+### 5. **Implementation Details**
+- **Dual interface**: FastMCP.from_fastapi() + native FastMCP resources
+- **Chain mapping**: Direct integration with existing LangChain LCEL chains
+- **Phoenix project**: Enhanced tracing with project name and explicit spans
+- **Security**: Input sanitization and timeout protection
+- **Version**: v2.2.0 with production-ready features
 
 ## 🏗️ CQRS Pattern Compliance
 
@@ -68,13 +70,14 @@ The CQRS-compliant MCP Resources have been successfully implemented following th
 - **Structured responses** optimized for LLM consumption
 - **Error handling** with actionable guidance
 
-## 📊 Test Results
+## 📊 Implementation Status
 
-### **Structure Validation**: ✅ PASSED (100%)
+### **Production Ready**: ✅ DEPLOYED (v2.2.0)
 ```
-✅ Checks Passed: 37
-❌ Checks Failed: 0
-Success Rate: 100.0%
+✅ Resources: 7 (6 retrieval + 1 health)
+✅ Operation ID consistency: Enabled
+✅ Phoenix tracing: Enhanced integration
+✅ Error handling: Comprehensive
 ```
 
 **Key Validations:**
@@ -85,14 +88,15 @@ Success Rate: 100.0%
 - ✅ Comprehensive error handling
 - ✅ Documentation updated
 
-### **Expected Response Validation**: ✅ DOCUMENTED
-All 6 resource types have documented expected responses:
-1. **Collections List** - Available collections with metadata
-2. **Collection Info** - Detailed collection metadata and config
-3. **Search Results** - Vector similarity search with scores
-4. **Document Retrieval** - Full document with metadata
-5. **Collection Stats** - Performance and configuration statistics
-6. **Error Handling** - Graceful error responses with troubleshooting
+### **Resource Types Available**: ✅ IMPLEMENTED
+All 7 resources provide LLM-optimized responses:
+1. **Naive Retriever** - Basic vector similarity
+2. **BM25 Retriever** - Keyword-based search  
+3. **Contextual Compression** - AI-powered reranking
+4. **Multi-Query** - Query expansion strategies
+5. **Ensemble** - Hybrid retrieval combination
+6. **Semantic** - Advanced semantic search
+7. **Health Check** - System status and configuration
 
 ## 🚀 Ready for Production
 
@@ -103,25 +107,25 @@ All 6 resource types have documented expected responses:
 
 ### **Testing Commands:**
 ```bash
-# Structure validation (no dependencies required)
-python3 tests/integration/test_cqrs_structure_validation.py
+# Test MCP resources server
+python src/mcp/resources.py
 
-# Runtime testing (requires environment)
-python3 tests/integration/test_cqrs_resources_with_assertions.py
+# Validate MCP functionality
+python tests/integration/verify_mcp.py
 
-# View expected responses
-python3 tests/integration/test_cqrs_expected_responses.py
+# Test individual resources
+python tests/integration/test_cqrs_resources.py
 ```
 
 ### **Usage Examples:**
 ```bash
-# Start MCP server
-python src/mcp/server.py
+# Start MCP resources server
+python src/mcp/resources.py
 
-# Use in Claude Desktop with @ mention syntax
-@server:qdrant://collections
-@server:qdrant://collections/johnwick_baseline
-@server:qdrant://collections/johnwick_baseline/search?query=action+movie&limit=3
+# Access resources via MCP client
+retriever://semantic_retriever/What makes John Wick popular?
+retriever://ensemble_retriever/Best action scenes
+system://health
 ```
 
 ## 💡 Key Benefits Achieved

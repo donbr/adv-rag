@@ -2,9 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**System Version**: Advanced RAG with CQRS MCP Resources v2.3  
+**System Version**: Advanced RAG with CQRS MCP Resources v2.4  
 **Last Updated**: 2025-06-22  
-**Key Feature**: Triple MCP interface (Tools + Resources + Client Wrappers) with zero duplication
+**Key Feature**: Dual MCP interface (Tools + Resources) with zero duplication + external MCP ecosystem + feedback analysis capabilities  
+**Python Requirement**: Python >=3.13 (as specified in pyproject.toml)
 
 ## Essential Commands
 
@@ -13,8 +14,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Start FastAPI server (port 8000)
 python run.py
 
-# Start MCP server (stdio mode)
+# Start MCP Tools server (stdio mode)
 python src/mcp/server.py
+
+# Start MCP Resources server (separate terminal)
+python src/mcp/resources.py
 ```
 
 ### Testing
@@ -54,13 +58,15 @@ python scripts/evaluation/semantic_architecture_benchmark.py
 
 ### Infrastructure
 ```bash
-# Start Docker services (Qdrant, Redis, Phoenix)
+# Start Docker services (Qdrant, Redis, Phoenix, RedisInsight)
 docker-compose up -d
 
 # Check service health
 curl http://localhost:6333/health    # Qdrant
 curl http://localhost:6006           # Phoenix
 curl http://localhost:8000/health    # FastAPI
+curl http://localhost:6379           # Redis (PING response)
+# RedisInsight available at http://localhost:5540
 
 # View services
 docker-compose ps
@@ -76,13 +82,17 @@ ruff check src/ tests/
 
 # Fix linting issues automatically
 ruff check src/ tests/ --fix
+
+# Install development dependencies
+uv sync --dev
 ```
 
 ## Architecture Overview
 
-This is a production-ready RAG system with dual interfaces:
+This is a production-ready RAG system with dual MCP interfaces and comprehensive telemetry:
 - **FastAPI REST API** (6 retrieval endpoints)
 - **MCP Tools** (automatic conversion via FastMCP) + **CQRS Resources** (direct data access)
+- **Phoenix Telemetry Integration** for AI agent observability and experiment tracking
 
 ### Key Architectural Patterns
 - **Clean Architecture**: Clear separation between API layer (`src/api/`), business logic (`src/rag/`), and infrastructure (`src/core/`, `src/integrations/`)
@@ -96,6 +106,7 @@ This is a production-ready RAG system with dual interfaces:
 - **Import Convention**: Use absolute imports from `src` package structure
 - **Code Quality**: Always run `ruff check src/ tests/ --fix` before committing
 - **Environment Setup**: Virtual environment activation is REQUIRED for all development work
+- **Dependency Management**: Use `uv` for package management and virtual environments
 
 ### Core Components
 
@@ -117,19 +128,20 @@ This is a production-ready RAG system with dual interfaces:
 
 **src/core/settings.py** - Centralized configuration using Pydantic settings
 
-**src/mcp/qdrant_resources_claude_code.py** - CQRS-compliant read-only Resources for direct Qdrant access
+**src/mcp/resources.py** - Native FastMCP resources for read-only data access
 
 **src/integrations/** - External service integrations:
 - `redis_client.py` - Redis caching client
 - `llm_models.py` - OpenAI LLM wrapper
-- `qdrant_mcp.py`, `phoenix_mcp.py` - MCP resource integrations
+- `phoenix_mcp.py` - Phoenix telemetry integration
 
 ### Key Dependencies
-- **FastAPI + FastMCP** - API server and MCP conversion
-- **LangChain** - RAG pipeline (langchain>=0.3.25)
+- **FastAPI + FastMCP** - API server and MCP conversion (fastapi>=0.115.12, fastmcp>=2.8.0)
+- **LangChain** - RAG pipeline (langchain>=0.3.25, langchain-core>=0.3.65)
 - **Qdrant** - Vector database (qdrant-client>=1.11.0) 
 - **Redis** - Caching (redis[hiredis]>=6.2.0)
 - **Phoenix** - Telemetry and monitoring (arize-phoenix>=10.12.0)
+- **uv** - Package and environment management (recommended over pip)
 
 ### Request/Response Schema
 All endpoints use:
@@ -146,11 +158,20 @@ All endpoints use:
 
 ## Development Workflow
 
+**📖 Note**: For detailed setup instructions, see `docs/SETUP.md` which provides a complete bootstrap walkthrough.
+
 ### Initial Setup
-1. **Environment Activation (REQUIRED)**: `source .venv/bin/activate` 
-2. `docker-compose up -d` - Start infrastructure (Qdrant, Redis, Phoenix)
-3. Create `.env` file with required API keys (`OPENAI_API_KEY`, `COHERE_API_KEY`)
-4. `uv sync` - Install dependencies
+1. **Environment Setup (REQUIRED)**: 
+   ```bash
+   # Create and activate virtual environment using uv
+   uv venv
+   source .venv/bin/activate  # Linux/Mac
+   # OR
+   .venv\Scripts\activate  # Windows
+   ```
+2. `uv sync --dev` - Install all dependencies including dev tools
+3. `docker-compose up -d` - Start infrastructure (Qdrant, Redis, Phoenix)
+4. Create `.env` file with required API keys (`OPENAI_API_KEY`, `COHERE_API_KEY`)
 5. `python scripts/ingestion/csv_ingestion_pipeline.py` - Load sample data
 6. `python run.py` - Start FastAPI server
 7. `python src/mcp/server.py` - Start MCP Tools server (separate terminal)
@@ -169,14 +190,21 @@ All endpoints use:
 - Services: Qdrant (6333), Redis (6379), Phoenix (6006)
 - Optional: `OPENAI_MODEL_NAME` (default: "gpt-4.1-mini"), `EMBEDDING_MODEL_NAME` (default: "text-embedding-3-small")
 
-### Monitoring
-- Phoenix telemetry at http://localhost:6006
-- Automatic tracing for all retrieval operations
-- Redis caching with TTL configuration
+### Monitoring & AI Agent Observability
+- **Phoenix telemetry** at http://localhost:6006 - **Critical for understanding agent behavior**
+- **Automatic tracing** for all retrieval operations and agent decision points
+- **Experiment tracking** with `johnwick_golden_testset` for performance analysis
+- **Redis caching** with TTL configuration and performance monitoring
+
+### Key Telemetry Use Cases (Following Samuel Colvin's MCP Pattern)
+- **Agent Performance Analysis**: Query Phoenix via MCP to understand retrieval strategy effectiveness
+- **Debugging Agent Decisions**: Trace through agent reasoning with full context
+- **Performance Optimization**: Identify bottlenecks in agent workflows using live telemetry data
+- **Experiment Comparison**: Compare different RAG strategies with quantified metrics from `johnwick_golden_testset`
 
 ## MCP Integration
 
-This system implements **three distinct MCP interfaces** with different purposes and patterns:
+This system implements **dual MCP interfaces** plus external MCP ecosystem integration:
 
 ### 1. MCP Tools Server (`src/mcp/server.py`)
 **Purpose**: Converts FastAPI endpoints to MCP tools using zero-duplication pattern
@@ -190,11 +218,11 @@ This system implements **three distinct MCP interfaces** with different purposes
 - **Interface**: MCP Resources for optimized data access
 - **Use Case**: Query operations with LLM-formatted responses
 
-### 3. MCP Client Wrappers (`src/integrations/*_mcp.py`)
-**Purpose**: Client code that consumes external MCP servers
-- **Pattern**: MCP client connections to external services
-- **Interface**: Integration with external Phoenix, Qdrant MCP servers
-- **Use Case**: Cross-system data exchange and validation
+### 3. External MCP Ecosystem
+**Purpose**: Access external MCP services via Claude Code CLI
+- **Pattern**: Use configured external MCP servers directly
+- **Interface**: qdrant-code-snippets, qdrant-semantic-memory, ai-docs-server, etc.
+- **Use Case**: Code patterns, semantic memory, documentation access
 
 ### MCP Tools vs Resources Architecture
 
@@ -230,20 +258,13 @@ python tests/integration/test_cqrs_resources.py
 DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/resources.py
 ```
 
-**Note**: The resources server provides both standard retrieval resources and direct CQRS-compliant Qdrant access via `qdrant_resources_claude_code.py`
+**Note**: The resources server provides native FastMCP resources for optimized read-only access to the RAG system's data
 
 **Available Resources** (Query Pattern):
 - `retriever://naive_retriever/{query}` - Direct access to naive results
 - `retriever://semantic_retriever/{query}` - Direct semantic processing
 - `retriever://ensemble_retriever/{query}` - Direct hybrid results
 - `system://health` - System status and configuration
-
-**Plus CQRS Qdrant Resources**:
-- `qdrant://collections` - List all collections
-- `qdrant://collections/{collection_name}` - Collection metadata
-- `qdrant://collections/{collection_name}/documents/{point_id}` - Document retrieval
-- `qdrant://collections/{collection_name}/search?query={text}&limit={n}` - Raw search
-- `qdrant://collections/{collection_name}/stats` - Collection statistics
 
 ### FastMCP Inspector Commands
 
@@ -361,15 +382,23 @@ Claude Code has access to the following MCP servers defined in `mcp_client_confi
   - Remember learned patterns and user preferences
   - Collection: `semantic-memory`
 
+- **`memory`**: Official MCP knowledge graph memory
+  - Persistent entity-relationship storage across sessions
+  - Structured user modeling and project knowledge
+  - Complements semantic memory with graph-based relationships
+  - Setup: `claude mcp add memory -- npx -y @modelcontextprotocol/server-memory`
+  - **Storage**: Default `memory.json` in npm package directory (see configuration below)
+
 - **`redis-mcp`**: Redis database operations
   - Cache management and session storage
   - Integration with existing Redis infrastructure
 
 ### Observability & Analysis  
-- **`phoenix`** (localhost:6006): Experiment tracking
-  - Access Phoenix UI data and experiments
-  - Analyze RAG performance and metrics
-  - Integration with existing telemetry
+- **`phoenix`** (localhost:6006): **Critical for AI agent observability**
+  - Access Phoenix UI data and experiments via MCP
+  - Analyze RAG performance and agent behavior patterns
+  - Query `johnwick_golden_testset` experiment results
+  - Essential for understanding agent decision-making and performance optimization
 
 ### Utility Services
 - **`mcp-server-time`**: Time and timezone operations
@@ -378,7 +407,7 @@ Claude Code has access to the following MCP servers defined in `mcp_client_confi
 
 ### MCP Tools Usage for Claude Code CLI
 
-**CRITICAL**: Claude Code CLI requires explicit permissions for MCP tool access. See `claude-md-mcp-guide.md` for complete usage patterns and tested commands.
+**CRITICAL**: Claude Code CLI requires explicit permissions for MCP tool access. See `claude_code_mcp_guide.md` for complete usage patterns and tested commands.
 
 #### Verified Working Commands
 ```bash
@@ -393,6 +422,9 @@ claude -p --allowedTools "qdrant-find" "Search qdrant-code-snippets for FastMCP 
 
 # Store project decisions (requires permission)
 claude -p --allowedTools "qdrant-store" "Store in qdrant-semantic-memory: Decision - [ARCHITECTURAL_DECISION]"
+
+# Create structured knowledge entities (no permissions needed)
+"Create entity in memory: John_Smith, person, [works on RAG optimization, prefers semantic retrieval]"
 ```
 
 #### Interactive Session (Recommended)
@@ -416,6 +448,9 @@ claude -p --allowedTools "qdrant-find" "Search qdrant-semantic-memory for previo
 # 3. Store learnings during development
 claude -p --allowedTools "qdrant-store" "Store in qdrant-semantic-memory: [LEARNING_OR_DECISION]"
 
+# 3b. Create structured knowledge entities
+"Create entity in memory: [PROJECT_NAME], project, [key insights and decisions]"
+
 # 4. Validate storage worked
 claude -p --allowedTools "qdrant-find" "Find the [TOPIC] pattern I just stored"
 ```
@@ -433,6 +468,35 @@ claude -p --allowedTools "qdrant-find" "Find the [TOPIC] pattern I just stored"
 - **Documentation**: AI docs server provides comprehensive reference material
 - **Permissions**: Use `--allowedTools` flag or interactive mode with permission prompts
 
+### Memory Server Storage Configuration
+
+The Memory MCP server stores data in a JSON file. Configure custom storage location:
+
+```bash
+# Option 1: Set environment variable globally
+export MEMORY_FILE_PATH="/home/donbr/ghcp/adv-rag/data/memory.json"
+
+# Option 2: Configure via Claude Code settings (recommended for project)
+# Add to ~/.claude/config.json under the memory server entry:
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_FILE_PATH": "/home/donbr/ghcp/adv-rag/data/memory.json"
+      }
+    }
+  }
+}
+```
+
+**Recommended for Advanced RAG**: Store memory file in project `data/` directory for:
+- ✅ Project-specific knowledge persistence
+- ✅ Easier backup and version control
+- ✅ Team collaboration on shared knowledge
+- ✅ Clear data organization alongside other project data
+
 ### MCP Success Metrics
 **Effective MCP usage when:**
 - ✅ Store and retrieve patterns without permission errors
@@ -441,7 +505,34 @@ claude -p --allowedTools "qdrant-find" "Find the [TOPIC] pattern I just stored"
 - ✅ Use `/mcp` command to check server status when needed
 - ✅ Build context across development sessions
 
+### Comprehensive Memory Architecture
+
+This project now provides **three-tier memory and observability**:
+
+1. **Knowledge Graph Memory** (`memory`): Structured entities, relationships, and observations
+   - User preferences and project team modeling
+   - Experiment relationships and configuration tracking
+   - Cross-session persistence of structured knowledge
+
+2. **Semantic Memory** (`qdrant-semantic-memory`): Contextual insights and patterns
+   - Unstructured learning insights and decisions
+   - Pattern recognition across development sessions
+   - Contextual project knowledge
+
+3. **Telemetry Data** (`phoenix`): Performance metrics and experiment tracking
+   - Real-time agent behavior analysis
+   - `johnwick_golden_testset` performance benchmarking
+   - Quantified retrieval strategy effectiveness
+
+This creates a comprehensive agentic AI observability platform following Samuel Colvin's MCP telemetry patterns.
+
 These MCP servers provide a rich ecosystem for development, testing, and analysis that should be actively used alongside the project's own MCP implementations.
+
+**📖 Documentation References**:
+- `docs/SETUP.md` - Complete bootstrap walkthrough
+- `docs/FUNCTIONAL_OVERVIEW.md` - System architecture details  
+- `docs/MCP_COMMAND_LINE_GUIDE.md` - MCP CLI usage patterns
+- `claude_code_mcp_guide.md` - Claude Code MCP integration guide
 
 ## Development Decision Matrix
 
@@ -449,16 +540,17 @@ These MCP servers provide a rich ecosystem for development, testing, and analysi
 |------------------|---------------------|------------------------|-------|
 | **Add new retrieval strategy** | FastAPI endpoint → auto-converts to MCP tool | `src/api/app.py` + `src/rag/` | Zero duplication via FastMCP |
 | **Direct data access for LLMs** | CQRS Resource | `src/mcp/resources.py` | 3-5x faster than full pipeline |
-| **External service integration** | MCP Client Wrapper | `src/integrations/*_mcp.py` | Phoenix, Qdrant external access |
-| **Read-only query operations** | MCP Resources | `src/mcp/qdrant_resources_claude_code.py` | Direct Qdrant access |
+| **Phoenix telemetry integration** | Integration Module | `src/integrations/phoenix_mcp.py` | Phoenix experiment tracking |
+| **Read-only query operations** | MCP Resources | `src/mcp/resources.py` | Direct RAG data access |
 | **Command operations with processing** | MCP Tools (FastAPI) | Automatic via `src/mcp/server.py` | Full RAG pipeline execution |
 | **Cache integration** | Redis client | `src/integrations/redis_client.py` | Built-in TTL management |
 
 ## Environment Validation Checklist
 
 ```bash
-# 1. Verify virtual environment
+# 1. Verify virtual environment and uv
 which python  # Should show .venv path
+uv --version  # Should show uv version >= 0.5.0
 
 # 2. Check Docker services
 docker-compose ps  # All services should be Up
@@ -466,6 +558,7 @@ curl http://localhost:6333/health    # Qdrant: {"status":"ok"}
 curl http://localhost:6379           # Redis: +PONG
 curl http://localhost:6006           # Phoenix: HTML response
 curl http://localhost:8000/health    # FastAPI: {"status":"healthy"}
+# RedisInsight: http://localhost:5540 (web interface)
 
 # 3. Validate API keys
 python src/core/settings.py         # Check environment variables
@@ -476,6 +569,15 @@ curl http://localhost:6333/collections  # Should show johnwick collections
 # 5. Verify MCP servers
 python tests/integration/verify_mcp.py  # MCP tools validation
 python tests/integration/test_cqrs_resources.py  # CQRS resources check
+
+# 6. Check memory server storage (if configured)
+ls -la data/memory.json  # Should exist if custom path configured
+
+# 7. Verify Python version compatibility
+python --version  # Should show Python >= 3.13 (required by pyproject.toml)
+
+# 8. Check RedisInsight (optional)
+curl -s http://localhost:5540 > /dev/null && echo "RedisInsight available" || echo "RedisInsight not running"
 ```
 
 ## MCP Interface Selection Guide
@@ -492,15 +594,24 @@ python tests/integration/test_cqrs_resources.py  # CQRS resources check
 - **Performance critical**: 3-5x faster than full pipeline
 - **LLM consumption**: Pre-formatted data for AI processing
 
-### Use MCP Client Wrappers When:
-- **External service integration**: Phoenix experiments, external Qdrant
-- **Cross-system validation**: Data consistency across services
-- **Service orchestration**: Coordinating multiple external MCP servers
+### Use External MCP Services When:
+- **Code pattern management**: Use `qdrant-code-snippets` MCP via Claude Code CLI
+- **Semantic memory**: Use `qdrant-semantic-memory` MCP via Claude Code CLI  
+- **External data access**: Use dedicated MCP servers rather than Python wrappers
 
-## Data Sources
-- Sample dataset: John Wick movie reviews (CSV format)
-- Two vector collections: `johnwick_baseline` and `johnwick_semantic`
-- Semantic chunking for advanced retrieval strategies
+## Data Sources & Telemetry
+
+### Core Datasets
+- **Sample dataset**: John Wick movie reviews (CSV format in `data/raw/`)
+- **Vector collections**: `johnwick_baseline` and `johnwick_semantic`
+- **Semantic chunking**: Advanced retrieval strategies with different chunk sizes
+- **Ingestion pipeline**: `scripts/ingestion/csv_ingestion_pipeline.py` for data loading
+
+### Golden Test Sets & Experiment Tracking
+- **`johnwick_golden_testset`**: Curated evaluation dataset for RAG performance
+- **Phoenix integration**: Automatic experiment tracking and agent behavior analysis
+- **Performance benchmarking**: Compare retrieval strategies with quantified metrics
+- **AI Agent Observability**: Following Samuel Colvin's MCP telemetry patterns for understanding agent decision-making
 
 ## Error Handling & Debugging
 
@@ -518,7 +629,7 @@ python tests/integration/test_cqrs_resources.py  # CQRS resources check
 ### Monitoring
 - **Logs**: API server logs to console
 - **Telemetry**: Phoenix dashboard at http://localhost:6006
-- **Caching**: Redis monitoring via RedisInsight (if available)
+- **Caching**: Redis monitoring via RedisInsight at http://localhost:5540
 
 ## MCP Troubleshooting
 
@@ -605,3 +716,5 @@ ls -la .env && cat .env | grep -E "(OPENAI|COHERE)_API_KEY"
 # Test environment loading
 python -c "from src.core.settings import get_settings; print(bool(get_settings().openai_api_key))"
 ```
+
+NOTE:  remember to always mask sensitive information from `.env` files when output in logs and never commit them to version control.

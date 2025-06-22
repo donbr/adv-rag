@@ -36,6 +36,7 @@
 ### Dual Interface Architecture
 - **FastAPI REST API** (`/invoke/semantic_retriever`, etc.)
 - **MCP Tools** (automatic conversion via FastMCP)
+- **MCP Resources** (direct access via `retriever://{operation_id}/{query}`)
 - **Zero code duplication** between interfaces
 
 ### Production Features
@@ -48,7 +49,7 @@
 
 ### Prerequisites
 - Docker & Docker Compose
-- Python 3.11+ with uv
+- Python 3.13+ with uv
 - OpenAI API key
 - Cohere API key (for reranking)
 
@@ -79,8 +80,11 @@ curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
 # Verify MCP tools are working
 python tests/integration/verify_mcp.py
 
-# Start MCP server for Claude Desktop
+# Start MCP Tools server (FastAPI conversion)
 python src/mcp/server.py
+
+# Start MCP Resources server (CQRS implementation)
+python src/mcp/resources.py
 ```
 
 ### Available MCP Tools
@@ -90,6 +94,12 @@ python src/mcp/server.py
 - `semantic_retriever` - Advanced semantic search
 - `contextual_compression_retriever` - AI reranking
 - `multi_query_retriever` - Query expansion
+
+### Available MCP Resources (CQRS)
+- `retriever://naive_retriever/{query}` - Direct retrieval results
+- `retriever://semantic_retriever/{query}` - Semantic search results
+- `retriever://ensemble_retriever/{query}` - Hybrid search results
+- `system://health` - System status and configuration
 
 ## 📊 Evaluation & Benchmarking
 
@@ -110,7 +120,7 @@ graph TB
     B --> D[6 Retrieval Strategies]
     B --> E[LangChain LCEL]
     B --> F[Qdrant Vector DB]
-    C --> G[Claude Desktop]
+    C --> G[MCP Clients]
     
     classDef api fill:#e8f5e8
     classDef rag fill:#fff3e0
@@ -139,7 +149,7 @@ graph TB
 
 ### Production Integration
 - REST API for application integration
-- MCP tools for AI assistant workflows
+- MCP tools and resources for AI assistant workflows
 - Containerized deployment
 
 ### Research & Learning
@@ -202,8 +212,11 @@ bash tests/integration/test_api_endpoints.sh
 # Start development server
 python run.py
 
-# Start MCP server
+# Start MCP Tools server
 python src/mcp/server.py
+
+# Start MCP Resources server
+python src/mcp/resources.py
 
 # Run benchmarks
 python scripts/evaluation/retrieval_method_comparison.py
@@ -228,13 +241,15 @@ from src.mcp.server import mcp
 
 ## 📚 Documentation
 
-- **[FUNCTIONAL_OVERVIEW.md](FUNCTIONAL_OVERVIEW.md)** - Technical system overview
+- **[docs/SETUP.md](docs/SETUP.md)** - Complete setup guide  
+- **[docs/FUNCTIONAL_OVERVIEW.md](docs/FUNCTIONAL_OVERVIEW.md)** - Technical system overview
 - **[docs/project-structure.md](docs/project-structure.md)** - Detailed architecture
-- **[tests/README.md](tests/README.md)** - Testing guide
+- **[docs/CQRS_IMPLEMENTATION_SUMMARY.md](docs/CQRS_IMPLEMENTATION_SUMMARY.md)** - MCP Resources implementation
+- **[docs/MCP_COMMAND_LINE_GUIDE.md](docs/MCP_COMMAND_LINE_GUIDE.md)** - MCP testing guide
 
 ## 🤝 Contributing
 
-1. Follow the tiered architecture patterns in `.cursor/rules/`
+1. Follow the tiered architecture patterns in the codebase
 2. Add tests for new functionality
 3. Update documentation for API changes
 4. Validate MCP schema compliance

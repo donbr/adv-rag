@@ -8,7 +8,7 @@ This guide walks you through setting up the complete Advanced RAG system from sc
 ```bash
 # Required software
 - Docker & Docker Compose
-- Python 3.11+
+- Python 3.13+ (required by pyproject.toml)
 - uv (recommended) or pip
 - OpenAI API key
 - Cohere API key (for reranking)
