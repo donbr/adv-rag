@@ -257,3 +257,7 @@ from src.mcp.server import mcp
 ## 📄 License
 
 [Add your license here]
+
+---
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/donbr/adv-rag)

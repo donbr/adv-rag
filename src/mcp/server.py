@@ -157,7 +157,45 @@ logger.info("🚀 Creating Advanced RAG MCP Server with Enhanced Phoenix Tracing
 
 try:
     mcp = create_mcp_server()
-    logger.info("✅ MCP Server created successfully with Phoenix observability")
+    
+    # Add CQRS-compliant Qdrant Resources
+    logger.info("Adding CQRS-compliant Qdrant Resources...")
+    
+    # Import CQRS resources
+    from src.mcp.qdrant_resources import (
+        get_collection_info_resource,
+        get_document_resource,
+        search_collection_resource,
+        get_collection_stats_resource,
+        list_collections_resource
+    )
+    
+    # Register CQRS Resources following claude_code_instructions.md patterns
+    # Resources handle queries (read operations), Tools handle commands (write operations)
+    
+    # Collection listing resource
+    mcp.resource("qdrant://collections")(list_collections_resource)
+    
+    # Collection information resource
+    mcp.resource("qdrant://collections/{collection_name}")(get_collection_info_resource)
+    
+    # Document retrieval resource
+    mcp.resource("qdrant://collections/{collection_name}/documents/{point_id}")(get_document_resource)
+    
+    # Search resource (with query parameters)
+    @mcp.resource("qdrant://collections/{collection_name}/search")
+    async def search_resource_with_params(collection_name: str, query: str = "", limit: int = 5) -> str:
+        """Search collection with query parameters."""
+        if not query:
+            return f"Error: query parameter is required for search in collection {collection_name}"
+        return await search_collection_resource(collection_name, query, limit)
+    
+    # Collection statistics resource
+    mcp.resource("qdrant://collections/{collection_name}/stats")(get_collection_stats_resource)
+    
+    logger.info("✅ CQRS Resources registered: collections, search, documents, stats")
+    logger.info("✅ MCP Server created successfully with Phoenix observability and CQRS Resources")
+    
 except Exception as e:
     logger.error(f"❌ Failed to create MCP server: {e}")
     raise
@@ -186,7 +224,15 @@ def get_server_health() -> dict:
                 "system_info": {
                     "python_path_configured": True,
                     "fastapi_app_imported": True,
-                    "mcp_server_ready": True
+                    "mcp_server_ready": True,
+                    "cqrs_resources_enabled": True
+                },
+                "cqrs_resources": {
+                    "collections_list": "qdrant://collections",
+                    "collection_info": "qdrant://collections/{collection_name}",
+                    "document_retrieval": "qdrant://collections/{collection_name}/documents/{point_id}",
+                    "search": "qdrant://collections/{collection_name}/search?query={text}&limit={n}",
+                    "statistics": "qdrant://collections/{collection_name}/stats"
                 }
             }
             

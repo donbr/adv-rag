@@ -3,14 +3,54 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **System Version**: Advanced RAG with CQRS MCP Resources v2.4  
-**Last Updated**: 2025-06-22  
+**Last Updated**: 2025-06-23  
 **Key Feature**: Dual MCP interface (Tools + Resources) with zero duplication + external MCP ecosystem + feedback analysis capabilities  
-**Python Requirement**: Python >=3.13 (as specified in pyproject.toml)
+**Python Requirement**: Python >=3.13 (runtime), py311 target (tooling compatibility)
+
+## Architectural Constraints (IMMUTABLE)
+
+This system follows a **tier-based architecture** with strict modification rules. Understanding these tiers is critical for maintaining system integrity.
+
+### Tier Hierarchy (Non-Negotiable)
+1. **Tier 1: Project Core** - Model pinning, import conventions, configuration (IMMUTABLE)
+2. **Tier 2: Development Workflow** - Environment setup, testing, quality (REQUIRED)  
+3. **Tier 3: RAG Foundation** - LangChain patterns, retrieval strategies (IMMUTABLE)
+4. **Tier 4: MCP Interface** - FastAPI→MCP conversion, interface layer only (INTERFACE ONLY)
+5. **Tier 5: Schema Management** - Export, validation, compliance (TOOLING)
+
+### Critical Constraints (Never Modify)
+- **Model Pinning**: Always use `ChatOpenAI(model="gpt-4.1-mini")` and `OpenAIEmbeddings(model="text-embedding-3-small")` - these are part of the public contract for deterministic responses and stable embedding dimensions
+- **MCP Interface Rule**: MCP serves as interface only - never modify core RAG business logic in `src/rag/`
+- **Virtual Environment Activation**: REQUIRED for all development work - system will fail without proper environment
+- **Import Convention**: Use absolute imports from `src` package structure consistently
+
+### What You Can vs. Cannot Modify
+
+#### ✅ **Safe to Modify (Interface & Tooling Layers)**
+- `src/api/app.py` - Add new FastAPI endpoints (auto-converts to MCP tools)
+- `src/mcp/server.py` - MCP server configuration and wrapper logic
+- `src/mcp/resources.py` - MCP resources for CQRS data access
+- `scripts/` - Evaluation, ingestion, and migration scripts
+- `tests/` - All test files and test data
+- Docker configuration and infrastructure setup
+
+#### ❌ **Never Modify (Core & Foundation)**
+- `src/rag/` - Core RAG pipeline components (modify breaks contracts)
+- `src/core/settings.py` - Model pinning configurations
+- `src/integrations/llm_models.py` - Model instantiation logic
+- LangChain LCEL chain patterns in `src/rag/chain.py`
+- Retrieval factory patterns in `src/rag/retriever.py`
 
 ## Essential Commands
 
+⚠️  **CRITICAL**: Always activate virtual environment first: `source .venv/bin/activate`
+
 ### Development Server
 ```bash
+# Verify environment activation (REQUIRED)
+which python  # Should show .venv path
+source .venv/bin/activate  # If not already activated
+
 # Start FastAPI server (port 8000)
 python run.py
 
@@ -38,10 +78,10 @@ bash tests/integration/test_api_endpoints.sh
 # Test MCP conversion
 python tests/integration/verify_mcp.py
 
-# Run specific test categories
-pytest tests/ -m unit -v          # Unit tests
-pytest tests/ -m integration -v   # Integration tests  
-pytest tests/ -m requires_llm -v  # Tests needing API keys
+# Run specific test categories (defined in pytest.ini)
+pytest tests/ -m unit -v          # Unit tests - isolated component testing
+pytest tests/ -m integration -v   # Integration tests - cross-system validation
+pytest tests/ -m requires_llm -v  # Tests needing API keys - LLM-dependent tests
 ```
 
 ### Data Pipeline
@@ -90,6 +130,108 @@ ruff check src/ tests/ --fix
 # Install development dependencies
 uv sync --dev
 ```
+
+## Implementation Patterns (Foundation)
+
+These patterns are established in the RAG foundation layer and should be followed when extending the system.
+
+### LangChain LCEL Chain Construction
+```python
+# Standard RAG chain pattern (src/rag/chain.py)
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+
+def create_rag_chain(
+    retriever: BaseRetriever,
+    llm: BaseChatModel,
+    prompt_template: str = None
+) -> Runnable:
+    """Create LCEL RAG chain with proper composition"""
+    
+    # Default RAG prompt
+    if not prompt_template:
+        prompt_template = """Answer the question based on the context below.
+        
+Context: {context}
+Question: {question}
+Answer:"""
+    
+    prompt = ChatPromptTemplate.from_template(prompt_template)
+    
+    # LCEL chain with parallel retrieval and context formatting
+    rag_chain = (
+        RunnableParallel({
+            "context": retriever | format_docs,
+            "question": RunnablePassthrough()
+        })
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+    
+    return rag_chain
+```
+
+### Retrieval Factory Pattern
+```python
+# Standard retrieval interface (src/rag/retriever.py)
+def create_retriever(
+    retrieval_type: str,
+    vectorstore: VectorStore,
+    search_kwargs: dict = None
+) -> BaseRetriever:
+    """Factory function for consistent retriever creation"""
+    
+    # Supported types: similarity, mmr, hybrid, contextual
+    match retrieval_type:
+        case "similarity":
+            return vectorstore.as_retriever(search_kwargs=search_kwargs)
+        case "mmr":
+            return vectorstore.as_retriever(
+                search_type="mmr", search_kwargs=search_kwargs
+            )
+        case "hybrid":
+            return create_hybrid_retriever(vectorstore, search_kwargs)
+        case _:
+            raise ValueError(f"Unsupported retrieval type: {retrieval_type}")
+```
+
+### Error Handling with Fallbacks
+```python
+# Resilient chain pattern
+from langchain_core.runnables import RunnableWithFallbacks
+
+def create_resilient_rag_chain(
+    primary_retriever: BaseRetriever,
+    fallback_retriever: BaseRetriever,
+    llm: BaseChatModel
+) -> Runnable:
+    """RAG chain with fallback mechanisms"""
+    
+    # Primary chain
+    primary_chain = create_rag_chain(primary_retriever, llm)
+    
+    # Fallback chain with simpler retrieval
+    fallback_chain = create_rag_chain(fallback_retriever, llm)
+    
+    # Chain with fallbacks
+    resilient_chain = RunnableWithFallbacks(
+        runnable=primary_chain,
+        fallbacks=[fallback_chain],
+        exception_key="error"
+    )
+    
+    return resilient_chain
+```
+
+### Adding New Retrieval Strategies
+When adding new retrieval strategies, follow this pattern:
+
+1. **Add FastAPI endpoint** in `src/api/app.py` (auto-converts to MCP tool)
+2. **Implement retriever** in `src/rag/retriever.py` using factory pattern
+3. **Create LCEL chain** in `src/rag/chain.py` following established patterns
+4. **Never modify** existing retrieval logic - only add new strategies
 
 ## Architecture Overview
 
@@ -276,7 +418,53 @@ DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/resources.py
 - `tests/integration/test_cqrs_resources_with_assertions.py` - Same import issue
 - `tests/integration/test_cqrs_structure_validation.py` - Validates non-existent file structure
 
-**Action Required**: Update these tests to reference current `src/mcp/resources.py` implementation or remove if obsolete.
+**Action Required**: Retrieve and reintroduce these files from Github history. The `test_cqrs_structure_validation.py` code highlight an essential usecase for agent centric data retrieval from `johnwick_baseline` and `johnwick_semantic` collections.
+
+### Schema Management (Tier 5)
+
+#### Native Schema Discovery (RECOMMENDED)
+Use native MCP discovery instead of legacy export methods:
+
+```bash
+# Start server with streamable HTTP
+python src/mcp/server.py
+
+# Native schema discovery via HTTP
+curl -X POST http://127.0.0.1:8000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
+
+# Or via FastMCP client
+python -c "
+import asyncio
+from fastmcp import Client
+
+async def get_schema():
+    async with Client('http://127.0.0.1:8000/mcp', transport='streamable-http') as client:
+        return await client.discover()
+
+print(asyncio.run(get_schema()))
+"
+```
+
+#### Legacy Schema Export (Development Only)
+```bash
+# Generate both legacy and official MCP schemas
+python scripts/mcp/export_mcp_schema.py
+
+# Outputs:
+# - mcp_server_schema.json (legacy/community format)
+# - mcp_server_official.json (official MCP format - RECOMMENDED)
+
+# Validate schemas against MCP 2025-03-26 specification
+python scripts/mcp/validate_mcp_schema.py
+```
+
+#### Configuration-Driven Schema Management
+Edit `scripts/mcp/mcp_config.toml` to configure:
+- MCP specification version and schema URLs
+- Tool annotations and governance policies
+- Validation settings and compliance requirements
 
 ### FastMCP Inspector Commands
 
@@ -331,7 +519,7 @@ DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/resources.py
 ```bash
 # Test both servers independently
 python tests/integration/verify_mcp.py                    # Tools server
-# NOTE: CQRS resources tests are currently broken - see Invalid Tests section
+# NOTE: CQRS resources tests are currently broken and need to be reintroduced - see Invalid Tests section
 
 # Schema validation
 python scripts/mcp/export_mcp_schema_stdio.py            # Tools schema
@@ -549,49 +737,66 @@ These MCP servers provide a rich ecosystem for development, testing, and analysi
 
 ## Development Decision Matrix
 
-| Development Task | Recommended Approach | Implementation Location | Notes |
-|------------------|---------------------|------------------------|-------|
-| **Add new retrieval strategy** | FastAPI endpoint → auto-converts to MCP tool | `src/api/app.py` + `src/rag/` | Zero duplication via FastMCP |
-| **Direct data access for LLMs** | CQRS Resource | `src/mcp/resources.py` | 3-5x faster than full pipeline |
-| **Phoenix telemetry integration** | Integration Module | `src/integrations/phoenix_mcp.py` | Phoenix experiment tracking |
-| **Read-only query operations** | MCP Resources | `src/mcp/resources.py` | Direct RAG data access |
-| **Command operations with processing** | MCP Tools (FastAPI) | Automatic via `src/mcp/server.py` | Full RAG pipeline execution |
-| **Cache integration** | Redis client | `src/integrations/redis_client.py` | Built-in TTL management |
+| Development Task | Tier Level | Recommended Approach | Implementation Location | Modification Rule |
+|------------------|------------|---------------------|------------------------|-------------------|
+| **Add new retrieval strategy** | Tier 4 (Interface) | FastAPI endpoint → auto-converts to MCP tool | `src/api/app.py` + `src/rag/` | ✅ Safe - adds new functionality |
+| **Direct data access for LLMs** | Tier 4 (Interface) | CQRS Resource | `src/mcp/resources.py` | ✅ Safe - interface layer only |
+| **Phoenix telemetry integration** | Tier 2 (Workflow) | Integration Module | `src/integrations/phoenix_mcp.py` | ✅ Safe - monitoring enhancement |
+| **Modify existing retrieval logic** | Tier 3 (Foundation) | **FORBIDDEN** | `src/rag/` | ❌ Never - breaks contracts |
+| **Change model configurations** | Tier 1 (Core) | **FORBIDDEN** | `src/core/settings.py` | ❌ Never - public contract |
+| **Read-only query operations** | Tier 4 (Interface) | MCP Resources | `src/mcp/resources.py` | ✅ Safe - data access layer |
+| **Command operations with processing** | Tier 4 (Interface) | MCP Tools (FastAPI) | Automatic via `src/mcp/server.py` | ✅ Safe - wrapper functionality |
+| **Cache integration** | Tier 2 (Workflow) | Redis client | `src/integrations/redis_client.py` | ✅ Safe - performance optimization |
+| **Schema export and validation** | Tier 5 (Tooling) | Configuration-driven | `scripts/mcp/` | ✅ Safe - tooling layer |
+
+### Decision Framework
+1. **Identify the tier** of your intended change
+2. **Check modification rules** for that tier  
+3. **Use interface layers** (Tier 4) to expose new functionality
+4. **Never modify** foundation layers (Tier 1-3) without architectural review
 
 ## Environment Validation Checklist
 
+**CRITICAL**: Run these checks in order - each tier depends on the previous ones.
+
 ```bash
-# 1. Verify virtual environment and uv
-which python  # Should show .venv path
+# Tier 1: Core Environment (REQUIRED)
+which python  # Should show .venv path - MUST be virtual environment
+python --version  # Should show Python >= 3.13 (runtime requirement)
 uv --version  # Should show uv version >= 0.5.0
 
-# 2. Check Docker services
+# Validate model pinning contracts
+python -c "from src.core.settings import get_settings; s=get_settings(); print(f'OpenAI: {bool(s.openai_api_key)}, Cohere: {bool(s.cohere_api_key)}')"
+
+# Tier 2: Development Workflow  
+python src/core/settings.py         # Check environment variables and configuration
+
+# Tier 3: RAG Foundation (Infrastructure)
 docker-compose ps  # All services should be Up
 curl http://localhost:6333/health    # Qdrant: {"status":"ok"}
-curl http://localhost:6379           # Redis: +PONG
+curl http://localhost:6379           # Redis: +PONG  
 curl http://localhost:6006           # Phoenix: HTML response
-curl http://localhost:8000/health    # FastAPI: {"status":"healthy"}
-# RedisInsight: http://localhost:5540 (web interface)
-
-# 3. Validate API keys
-python src/core/settings.py         # Check environment variables
-
-# 4. Test data pipeline
 curl http://localhost:6333/collections  # Should show johnwick collections
 
-# 5. Verify MCP servers
+# Tier 4: MCP Interface Layer
+curl http://localhost:8000/health    # FastAPI: {"status":"healthy"}
 python tests/integration/verify_mcp.py  # MCP tools validation
-# CQRS resources tests are broken - see Invalid Tests section
 
-# 6. Check memory server storage (if configured)
+# Tier 5: Schema Management & Tooling
+python scripts/mcp/validate_mcp_schema.py  # Schema compliance check
+# Optional: Check memory server storage (if configured)
 ls -la data/memory.json  # Should exist if custom path configured
 
-# 7. Verify Python version compatibility
-python --version  # Should show Python >= 3.13 (required by pyproject.toml)
-
-# 8. Check RedisInsight (optional)
+# Additional Infrastructure (Optional)
 curl -s http://localhost:5540 > /dev/null && echo "RedisInsight available" || echo "RedisInsight not running"
 ```
+
+### Validation Failure Recovery
+- **Tier 1 failure**: Fix virtual environment activation before proceeding
+- **Tier 2 failure**: Check `.env` file and API keys
+- **Tier 3 failure**: Restart Docker services: `docker-compose down && docker-compose up -d`
+- **Tier 4 failure**: Check FastAPI server status and MCP conversion
+- **Tier 5 failure**: Regenerate schemas: `python scripts/mcp/export_mcp_schema.py`
 
 ## MCP Interface Selection Guide
 
