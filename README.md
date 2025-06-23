@@ -48,68 +48,191 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
-- Python 3.13+ with uv
-- OpenAI API key
-- Cohere API key (for reranking)
+- **Docker & Docker Compose** - Infrastructure services
+- **Python 3.13+** with **uv package manager** 
+- **OpenAI API key** - Required for LLM and embeddings
+- **Cohere API key** - Required for reranking (optional for basic functionality)
+
+⚠️ **CRITICAL**: Virtual environment activation is REQUIRED for all development work
 
 ### 30-Second Demo
 ```bash
-# Start infrastructure
+# 1. Start infrastructure services
 docker-compose up -d
 
-# Install dependencies
-uv sync && source .venv/bin/activate
+# 2. Setup Python environment (REQUIRED)
+uv venv && source .venv/bin/activate
+uv sync --dev
 
-# Ingest sample data
+# 3. Configure environment
+cp .env.example .env
+# Edit .env with your API keys:
+# OPENAI_API_KEY=your_key_here
+# COHERE_API_KEY=your_key_here
+
+# 4. Verify services are running
+curl http://localhost:6333/health    # Qdrant
+curl http://localhost:6006           # Phoenix  
+curl http://localhost:6379           # Redis
+
+# 5. Ingest sample data (John Wick movie reviews)
 python scripts/ingestion/csv_ingestion_pipeline.py
 
-# Start API server
+# 6. Start API server
 python run.py
 
-# Test retrieval
+# 7. Test retrieval strategies
 curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
      -H "Content-Type: application/json" \
      -d '{"question": "What makes John Wick movies popular?"}'
+
+# 8. Start MCP servers (optional - for MCP integration)
+# Terminal 2:
+python src/mcp/server.py
+# Terminal 3:  
+python src/mcp/resources.py
+```
+
+### Verification Checklist
+```bash
+# Environment validation (run in order)
+which python  # Should show .venv path
+python --version  # Should show Python >= 3.13
+docker-compose ps  # All services should be "Up"
+curl http://localhost:8000/health  # Should return {"status":"healthy"}
 ```
 
 ## 🔌 MCP Integration
 
-### Command-Line Testing
-```bash
-# Verify MCP tools are working
-python tests/integration/verify_mcp.py
+This system implements a **dual MCP interface architecture** with zero-duplication patterns:
 
-# Start MCP Tools server (FastAPI conversion)
+### 🔧 MCP Tools Server (Command Pattern)
+**Purpose**: Full RAG pipeline execution with LLM synthesis
+```bash
+# Start MCP Tools server (FastAPI→MCP conversion)
 python src/mcp/server.py
 
-# Start MCP Resources server (CQRS implementation)
+# Test MCP tools
+python tests/integration/verify_mcp.py
+```
+
+**Available Tools**:
+- `naive_retriever` - Basic vector search with full RAG pipeline
+- `bm25_retriever` - Keyword search with response formatting  
+- `ensemble_retriever` - Hybrid approach with AI processing
+- `semantic_retriever` - Advanced semantic search with context
+- `contextual_compression_retriever` - AI reranking with filtering
+- `multi_query_retriever` - Query expansion with synthesis
+
+### 📊 MCP Resources Server (Query Pattern - CQRS)
+**Purpose**: Direct data access for high-performance retrieval (3-5x faster)
+```bash
+# Start MCP Resources server (native FastMCP resources)
 python src/mcp/resources.py
 ```
 
-### Available MCP Tools
-- `naive_retriever` - Basic vector search
-- `bm25_retriever` - Keyword search
-- `ensemble_retriever` - Hybrid approach
-- `semantic_retriever` - Advanced semantic search
-- `contextual_compression_retriever` - AI reranking
-- `multi_query_retriever` - Query expansion
-
-### Available MCP Resources (CQRS)
-- `retriever://naive_retriever/{query}` - Direct retrieval results
-- `retriever://semantic_retriever/{query}` - Semantic search results
-- `retriever://ensemble_retriever/{query}` - Hybrid search results
+**Available Resources**:
+- `retriever://naive_retriever/{query}` - Direct vector search results
+- `retriever://semantic_retriever/{query}` - Direct semantic processing
+- `retriever://ensemble_retriever/{query}` - Direct hybrid results  
 - `system://health` - System status and configuration
+
+### 🌐 External MCP Ecosystem Integration
+
+The system integrates with external MCP servers for enhanced capabilities:
+
+**Data Storage & Memory**:
+- `qdrant-code-snippets` (Port 8002) - Code pattern storage and retrieval
+- `qdrant-semantic-memory` (Port 8003) - Contextual insights and project decisions
+- `memory` - Official MCP knowledge graph for structured relationships
+
+**Observability & Analysis**:  
+- `phoenix` (localhost:6006) - **Critical for AI agent observability** and experiment tracking
+- Access Phoenix UI data and experiments via MCP for agent behavior analysis
+
+**Development Tools**:
+- `ai-docs-server` - Comprehensive documentation access (Cursor, PydanticAI, MCP Protocol, etc.)
+- `sequential-thinking` - Enhanced reasoning capabilities for complex problem-solving
+
+### 🔄 Schema Management (MCP 2025-03-26 Compliance)
+
+**Native Schema Discovery** (Recommended):
+```bash
+# Start server with streamable HTTP
+python src/mcp/server.py
+
+# Native MCP discovery
+curl -X POST http://127.0.0.1:8000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
+```
+
+**Legacy Schema Export** (Development):
+```bash
+# Generate MCP-compliant schemas
+python scripts/mcp/export_mcp_schema.py
+
+# Validate against MCP 2025-03-26 specification  
+python scripts/mcp/validate_mcp_schema.py
+```
 
 ## 📊 Evaluation & Benchmarking
 
+### Retrieval Strategy Comparison
 ```bash
-# Compare all retrieval strategies
+# Compare all 6 retrieval strategies with quantified metrics
 python scripts/evaluation/retrieval_method_comparison.py
 
-# View results in Phoenix dashboard
+# Run semantic architecture benchmark
+python scripts/evaluation/semantic_architecture_benchmark.py
+
+# View detailed results in Phoenix dashboard
 open http://localhost:6006
 ```
+
+### 🔍 AI Agent Observability (Phoenix Integration)
+
+This system implements **Samuel Colvin's MCP telemetry patterns** for comprehensive AI agent observability:
+
+**Key Features**:
+- **Automatic Tracing**: All retrieval operations and agent decision points  
+- **Experiment Tracking**: `johnwick_golden_testset` for performance analysis
+- **Real-time Monitoring**: Agent behavior analysis and performance optimization
+- **Cross-session Memory**: Three-tier memory architecture with external MCP services
+
+**Telemetry Use Cases**:
+- **Agent Performance Analysis**: Query Phoenix via MCP to understand retrieval strategy effectiveness
+- **Debugging Agent Decisions**: Trace through agent reasoning with full context  
+- **Performance Optimization**: Identify bottlenecks in agent workflows using live telemetry data
+- **Experiment Comparison**: Compare different RAG strategies with quantified metrics
+
+**Access Patterns**:
+```bash
+# Direct Phoenix UI access
+curl http://localhost:6006
+
+# MCP-based Phoenix integration (via Claude Code CLI)
+# Access Phoenix experiment data through MCP interface
+# Query performance metrics across retrieval strategies
+# Analyze agent decision patterns and effectiveness
+```
+
+### 🧠 Three-Tier Memory Architecture
+
+**1. Knowledge Graph Memory** (`memory` MCP):
+- Structured entities, relationships, and observations
+- User preferences and project team modeling  
+- Cross-session persistence of structured knowledge
+
+**2. Semantic Memory** (`qdrant-semantic-memory`):
+- Unstructured learning insights and decisions
+- Pattern recognition across development sessions
+- Contextual project knowledge
+
+**3. Telemetry Data** (`phoenix`):
+- Real-time agent behavior analysis
+- `johnwick_golden_testset` performance benchmarking
+- Quantified retrieval strategy effectiveness
 
 ## 🏗️ Architecture
 
@@ -256,7 +379,15 @@ from src.mcp.server import mcp
 
 ## 📄 License
 
-[Add your license here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### MIT License Summary
+- ✅ **Commercial use** - Use in commercial projects
+- ✅ **Modification** - Modify and distribute modified versions
+- ✅ **Distribution** - Distribute original or modified versions
+- ✅ **Private use** - Use privately without restrictions
+- ⚠️ **Attribution required** - Include copyright notice and license
+- ❌ **No warranty** - Software provided "as is"
 
 ---
 
