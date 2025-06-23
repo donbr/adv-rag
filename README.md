@@ -1,10 +1,66 @@
-# Advanced RAG with MCP Integration
+# Advanced RAG with Dual MCP Interface Architecture
 
-## 🎯 What Problem This Solves
+## 🎯 The RAG Development Challenge
 
-**Problem**: Developers need to test and compare different RAG (Retrieval-Augmented Generation) strategies, but building evaluation infrastructure is time-consuming and complex.
+**The Problem**: Building production-ready RAG systems requires solving multiple complex challenges:
+- **Strategy Comparison**: Testing different retrieval approaches (vector vs keyword vs hybrid)
+- **Interface Flexibility**: Supporting both traditional APIs and modern AI agent protocols  
+- **Performance Optimization**: Balancing comprehensive processing with high-speed data access
+- **Evaluation Infrastructure**: Measuring and comparing retrieval effectiveness
 
-**Solution**: A production-ready RAG system that provides **6 different retrieval strategies** accessible via both REST API and MCP (Model Context Protocol) tools, with built-in caching, telemetry, and evaluation capabilities.
+**The Solution**: A **Dual Interface Architecture** that eliminates code duplication while providing:
+- 🔄 **FastAPI → MCP automatic conversion** (zero duplication patterns)
+- ⚡ **Command vs Query optimization** (full processing vs direct data access)
+- 📊 **6 retrieval strategies** with built-in benchmarking
+- 🔍 **Comprehensive observability** via Phoenix telemetry integration
+
+## 🏗️ Why Dual Interface Architecture?
+
+### The Zero-Duplication Principle
+
+Traditional systems require maintaining separate codebases for different interfaces. Our **Dual Interface Architecture** solves this with:
+
+```mermaid
+graph TB
+    A[FastAPI Endpoints] --> B[Automatic Conversion]
+    B --> C[MCP Tools Server]
+    A --> D[RAG Pipeline]
+    D --> E[MCP Resources Server]
+    
+    subgraph "Command Pattern - Full Processing"
+        C --> F[Complete RAG Pipeline]
+        F --> G[LLM Synthesis]
+        G --> H[Formatted Response]
+    end
+    
+    subgraph "Query Pattern - Direct Access"
+        E --> I[Vector Search Only]
+        I --> J[Raw Results]
+        J --> K[3-5x Faster Response]
+    end
+    
+    style A fill:#e8f5e8
+    style C fill:#fff3e0
+    style E fill:#f3e5f5
+    style H fill:#e3f2fd
+    style K fill:#ffebee
+```
+
+### Command vs Query: CQRS Explained Simply
+
+**Command Pattern (MCP Tools)**: 
+- **Use Case**: When you need complete RAG processing with LLM synthesis
+- **What Happens**: Full pipeline → retrieval → synthesis → formatted answer
+- **Example**: `"What makes John Wick popular?"` → Full analysis with context
+
+**Query Pattern (MCP Resources)**:
+- **Use Case**: When you need fast, direct data access for further processing  
+- **What Happens**: Vector search only → raw results → no synthesis
+- **Example**: `retriever://semantic/{query}` → Raw documents for agent consumption
+
+**Key Benefit**: Same underlying system, optimized interfaces for different needs.
+
+📖 **Deep Dive**: See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for complete technical details and [CQRS_IMPLEMENTATION_SUMMARY.md](docs/CQRS_IMPLEMENTATION_SUMMARY.md) for implementation specifics.
 
 ## 🔍 Core Value Proposition
 
@@ -25,19 +81,68 @@
 
 ## 🛠️ What This System Provides
 
-### 6 Retrieval Strategies
-1. **Naive Retriever** - Basic vector similarity
-2. **BM25 Retriever** - Keyword-based search  
-3. **Contextual Compression** - AI-powered reranking
-4. **Multi-Query** - Query expansion and variation
-5. **Ensemble** - Weighted combination of multiple methods
-6. **Semantic** - Advanced semantic chunking
+### 6 Retrieval Strategies: Choose Your Approach
 
-### Dual Interface Architecture
-- **FastAPI REST API** (`/invoke/semantic_retriever`, etc.)
-- **MCP Tools** (automatic conversion via FastMCP)
-- **MCP Resources** (direct access via `retriever://{operation_id}/{query}`)
-- **Zero code duplication** between interfaces
+```mermaid
+graph LR
+    Q[Query: "John Wick action scenes"] --> S1[Naive<br/>Vector Similarity]
+    Q --> S2[BM25<br/>Keyword Search]
+    Q --> S3[Contextual<br/>AI Reranking]
+    Q --> S4[Multi-Query<br/>Expansion]
+    Q --> S5[Ensemble<br/>Hybrid Mix]
+    Q --> S6[Semantic<br/>Advanced Chunks]
+    
+    S1 --> R1[Fast, Direct<br/>Embedding Match]
+    S2 --> R2[Traditional IR<br/>Term Frequency]
+    S3 --> R3[LLM-Powered<br/>Relevance Scoring]
+    S4 --> R4[Multiple Queries<br/>Synthesized Results]
+    S5 --> R5[Best of All<br/>Weighted Combination]
+    S6 --> R6[Context-Aware<br/>Semantic Chunks]
+    
+    style S1 fill:#e8f5e8
+    style S2 fill:#fff3e0
+    style S3 fill:#f3e5f5
+    style S4 fill:#e3f2fd
+    style S5 fill:#ffebee
+    style S6 fill:#f0f8f0
+```
+
+**Strategy Details**:
+1. **Naive Retriever** - Pure vector similarity, fastest baseline approach
+2. **BM25 Retriever** - Traditional keyword matching, excellent for exact term queries  
+3. **Contextual Compression** - AI reranks results for relevance, highest quality
+4. **Multi-Query** - Generates query variations, best coverage
+5. **Ensemble** - Combines multiple methods, balanced performance
+6. **Semantic** - Advanced chunking strategy, context-optimized
+
+### Dual Interface Architecture: One System, Two Optimized APIs
+
+```mermaid
+graph TB
+    A[Single RAG Codebase] --> B[FastAPI Endpoints]
+    A --> C[Shared Pipeline]
+    
+    B --> D[FastMCP Automatic Conversion]
+    C --> E[Direct Resource Access]
+    
+    D --> F[MCP Tools Server<br/>Command Pattern]
+    E --> G[MCP Resources Server<br/>Query Pattern]
+    
+    F --> H[Complete Processing<br/>LLM + Context + Synthesis<br/>~20-30 seconds]
+    G --> I[Direct Data Access<br/>Vector Search Only<br/>~3-5 seconds ⚡]
+    
+    style A fill:#e8f5e8
+    style F fill:#fff3e0
+    style G fill:#f3e5f5
+    style H fill:#e3f2fd
+    style I fill:#ffebee
+```
+
+**Interface Benefits**:
+- **FastAPI REST API** - Traditional HTTP endpoints for web integration
+- **MCP Tools** - AI agent workflows with full processing pipeline
+- **MCP Resources** - High-speed data access for agent consumption
+- **Zero Code Duplication** - Single codebase, multiple optimized interfaces
 
 ### Production Features
 - **Redis caching** for performance
@@ -73,40 +178,97 @@ curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
 
 📖 **For complete setup instructions, troubleshooting, and MCP integration**: See **[docs/SETUP.md](docs/SETUP.md)**
 
-## 🔌 MCP Integration
+## 🔌 MCP Integration: AI Agent Workflows Made Simple
 
-This system implements a **dual MCP interface architecture** with zero-duplication patterns:
+### When to Use Which Interface?
 
-### 🔧 MCP Tools Server (Command Pattern)
-**Purpose**: Full RAG pipeline execution with LLM synthesis
-```bash
-# Start MCP Tools server (FastAPI→MCP conversion)
-python src/mcp/server.py
+```mermaid
+flowchart TD
+    A[AI Agent Task] --> B{Need complete<br/>processed answer?}
+    B -->|Yes| C[MCP Tools<br/>Command Pattern]
+    B -->|No| D[MCP Resources<br/>Query Pattern]
+    
+    C --> E[Use Case: Research Assistant<br/>Agent needs full analysis<br/>with citations and synthesis]
+    D --> F[Use Case: Data Gatherer<br/>Agent collecting raw data<br/>for further processing]
+    
+    E --> G[Tool: semantic_retriever<br/>Input: Question<br/>Output: Complete answer]
+    F --> H[Resource: retriever://semantic/{query}<br/>Input: Query<br/>Output: Raw documents]
+    
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style E fill:#e3f2fd
+    style F fill:#ffebee
+```
 
-# Test MCP tools
-python tests/integration/verify_mcp.py
+### 🔧 MCP Tools Server: Complete AI Agent Processing
+
+**When to Use**: Your AI agent needs a **complete, ready-to-use answer**
+- ✅ Research and analysis workflows  
+- ✅ Question-answering systems
+- ✅ Content generation with citations
+- ✅ User-facing responses
+
+**Real Example**:
+```python
+# Agent Task: "Analyze John Wick's popularity"
+tool_result = mcp_client.call_tool("semantic_retriever", {
+    "question": "What makes John Wick movies so popular?"
+})
+# Returns: Complete analysis with context and citations
 ```
 
 **Available Tools**:
-- `naive_retriever` - Basic vector search with full RAG pipeline
-- `bm25_retriever` - Keyword search with response formatting  
-- `ensemble_retriever` - Hybrid approach with AI processing
-- `semantic_retriever` - Advanced semantic search with context
-- `contextual_compression_retriever` - AI reranking with filtering
-- `multi_query_retriever` - Query expansion with synthesis
+- `semantic_retriever` - Advanced semantic analysis with full context
+- `ensemble_retriever` - Hybrid approach combining multiple strategies
+- `contextual_compression_retriever` - AI-ranked results with filtering
+- `multi_query_retriever` - Query expansion for comprehensive coverage
+- `naive_retriever` - Fast baseline vector search
+- `bm25_retriever` - Traditional keyword-based retrieval
 
-### 📊 MCP Resources Server (Query Pattern - CQRS)
-**Purpose**: Direct data access for high-performance retrieval (3-5x faster)
-```bash
-# Start MCP Resources server (native FastMCP resources)
-python src/mcp/resources.py
+### 📊 MCP Resources Server: High-Speed Data Access
+
+**When to Use**: Your AI agent needs **raw data for further processing** (3-5x faster)
+- ⚡ Multi-step workflows where agent processes data further
+- ⚡ Bulk data collection and analysis
+- ⚡ Performance-critical applications
+- ⚡ Custom synthesis pipelines
+
+**Real Example**:
+```python
+# Agent Task: "Collect movie data for trend analysis"
+raw_docs = mcp_client.read_resource("retriever://semantic/action movies")
+# Returns: Raw documents for agent's custom analysis pipeline
 ```
 
 **Available Resources**:
-- `retriever://naive_retriever/{query}` - Direct vector search results
-- `retriever://semantic_retriever/{query}` - Direct semantic processing
-- `retriever://ensemble_retriever/{query}` - Direct hybrid results  
+- `retriever://semantic_retriever/{query}` - Context-aware document retrieval
+- `retriever://ensemble_retriever/{query}` - Multi-strategy hybrid results
+- `retriever://naive_retriever/{query}` - Direct vector similarity search
 - `system://health` - System status and configuration
+
+### 🎯 Performance Comparison
+
+| Interface | Processing Time | Use Case | Output Format |
+|-----------|----------------|----------|---------------|
+| **MCP Tools** | ~20-30 seconds | Complete analysis | Formatted answer + context |
+| **MCP Resources** | ~3-5 seconds ⚡ | Raw data collection | Document list + metadata |
+| **FastAPI** | ~15-25 seconds | HTTP integration | JSON response |
+
+### 🚀 Getting Started with MCP
+
+```bash
+# 1. Start both MCP servers
+python src/mcp/server.py     # Tools (Command Pattern)
+python src/mcp/resources.py  # Resources (Query Pattern)
+
+# 2. Test the interfaces
+python tests/integration/verify_mcp.py  # Verify tools work
+python tests/integration/test_cqrs_resources.py  # Verify resources work
+
+# 3. Use with Claude Desktop or other MCP clients
+# Tools: For complete AI assistant responses
+# Resources: For high-speed data collection workflows
+```
 
 ### 🌐 External MCP Ecosystem Integration
 
@@ -205,25 +367,77 @@ curl http://localhost:6006
 - `johnwick_golden_testset` performance benchmarking
 - Quantified retrieval strategy effectiveness
 
-## 🏗️ Architecture
+## 🏗️ Complete System Architecture
+
+### End-to-End Request Flow
 
 ```mermaid
 graph TB
-    A[FastAPI Endpoints] --> B[RAG Pipeline]
-    A --> C[MCP Server]
-    B --> D[6 Retrieval Strategies]
-    B --> E[LangChain LCEL]
-    B --> F[Qdrant Vector DB]
-    C --> G[MCP Clients]
+    subgraph "Client Interfaces"
+        A[HTTP Clients<br/>curl, apps]
+        B[MCP Clients<br/>Claude Desktop, AI Agents]
+    end
     
-    classDef api fill:#e8f5e8
-    classDef rag fill:#fff3e0
-    classDef mcp fill:#f3e5f5
+    subgraph "Dual Interface Layer"
+        C[FastAPI Server<br/>REST Endpoints]
+        D[MCP Tools Server<br/>Command Pattern]
+        E[MCP Resources Server<br/>Query Pattern]
+    end
     
-    class A api
-    class B,D,E,F rag
-    class C,G mcp
+    subgraph "RAG Pipeline Core"
+        F[6 Retrieval Strategies]
+        G[LangChain LCEL Chains]
+        H[OpenAI LLM Integration]
+        I[Embedding Models]
+    end
+    
+    subgraph "Data & Infrastructure"
+        J[Qdrant Vector DB<br/>johnwick collections]
+        K[Redis Cache<br/>Performance Layer]
+        L[Phoenix Telemetry<br/>Observability]
+    end
+    
+    A --> C
+    B --> D
+    B --> E
+    C -.->|FastMCP Conversion| D
+    
+    D --> F
+    E --> J
+    F --> G
+    G --> H
+    G --> I
+    F --> J
+    
+    G --> K
+    C --> L
+    D --> L
+    E --> L
+    
+    style A fill:#e8f5e8
+    style B fill:#e3f2fd
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style E fill:#ffebee
+    style F fill:#f0f8f0
 ```
+
+### System Components Deep Dive
+
+**Interface Layer** ([Full Details](docs/ARCHITECTURE.md)):
+- **FastAPI Server**: Traditional REST API with 6 retrieval endpoints
+- **MCP Tools**: Automatic FastAPI→MCP conversion using FastMCP
+- **MCP Resources**: Native CQRS implementation for direct data access
+
+**RAG Processing Core** ([Implementation Guide](docs/CQRS_IMPLEMENTATION_SUMMARY.md)):
+- **Strategy Factory**: 6 different retrieval approaches (naive → ensemble)
+- **LangChain LCEL**: Composable chain patterns for all strategies  
+- **Model Integration**: OpenAI GPT-4.1-mini + text-embedding-3-small
+
+**Data & Observability** ([Setup Guide](docs/SETUP.md)):
+- **Qdrant Collections**: Vector storage with semantic chunking
+- **Redis Caching**: Performance optimization with TTL management
+- **Phoenix Telemetry**: Complete request tracing and experiment tracking
 
 ## 📁 Project Structure
 
@@ -234,22 +448,106 @@ graph TB
 - **`tests/`** - Comprehensive test suite
 - **`scripts/`** - Data ingestion and evaluation utilities
 
-## 🎯 Use Cases
+## 🎯 Real-World Use Cases
 
-### Development & Testing
-- Test different RAG strategies with real data
-- Benchmark retrieval performance
-- Validate MCP tool implementations
+### 🔬 RAG Strategy Research & Development
 
-### Production Integration
-- REST API for application integration
-- MCP tools and resources for AI assistant workflows
-- Containerized deployment
+**Scenario**: You're building a document analysis system and need to find the optimal retrieval approach.
 
-### Research & Learning
-- Study RAG implementation patterns
-- Compare retrieval strategy effectiveness
-- Learn MCP protocol integration
+**Workflow**:
+```bash
+# 1. Test all strategies with your domain data
+python scripts/evaluation/retrieval_method_comparison.py
+
+# 2. Compare performance in Phoenix dashboard
+open http://localhost:6006
+
+# 3. Choose the best strategy for your use case
+# Naive: Fast baseline | BM25: Exact keywords | Ensemble: Best overall
+```
+
+**Value**: Compare 6 different approaches with quantified metrics instead of guessing.
+
+### 🤖 AI Agent Integration (Claude Desktop, Custom Agents)
+
+**Scenario**: Your AI agent needs intelligent document retrieval for research tasks.
+
+**Command Pattern** (Complete Analysis):
+```python
+# Agent: "Analyze this topic comprehensively"
+response = await mcp_client.call_tool("semantic_retriever", {
+    "question": "What are the key themes in John Wick movies?"
+})
+# Returns: Complete analysis with citations ready for user
+```
+
+**Query Pattern** (Data Collection):
+```python
+# Agent: "Gather data for multi-step analysis"
+docs = await mcp_client.read_resource("retriever://ensemble/action movies")
+# Returns: Raw documents for agent's custom synthesis pipeline
+```
+
+**Value**: Choose optimal interface based on agent workflow needs.
+
+### 🌐 Production Application Integration
+
+**Scenario**: You're building a customer support system that needs contextual responses.
+
+**HTTP API Integration**:
+```bash
+# Real-time customer query processing
+curl -X POST "http://localhost:8000/invoke/contextual_compression_retriever" \
+     -H "Content-Type: application/json" \
+     -d '{"question": "How do I troubleshoot connection issues?"}'
+```
+
+**Benefits**:
+- **Redis Caching**: Sub-second responses for repeated queries
+- **Phoenix Telemetry**: Monitor query patterns and performance
+- **Multiple Strategies**: A/B test different retrieval approaches
+
+### 📊 Performance-Critical AI Workflows
+
+**Scenario**: You're building an AI system that processes hundreds of queries per hour.
+
+**Interface Selection Strategy**:
+- **MCP Resources** (3-5 sec): Bulk data collection, preprocessing pipelines
+- **MCP Tools** (20-30 sec): User-facing analysis, final report generation  
+- **FastAPI** (15-25 sec): Traditional web application integration
+
+**Scaling Pattern**:
+```mermaid
+graph LR
+    A[High Volume Queries] --> B[MCP Resources<br/>Fast Data Collection]
+    B --> C[Agent Processing Pipeline]
+    C --> D[MCP Tools<br/>Final Synthesis]
+    D --> E[User Response]
+    
+    style B fill:#ffebee
+    style D fill:#fff3e0
+```
+
+### 🧪 Academic Research & Benchmarking
+
+**Scenario**: You're researching RAG effectiveness for your domain.
+
+**Research Workflow**:
+```bash
+# 1. Ingest your domain data
+python scripts/ingestion/csv_ingestion_pipeline.py
+
+# 2. Run comprehensive benchmarks
+python scripts/evaluation/semantic_architecture_benchmark.py
+
+# 3. Export Phoenix experiment data
+# Use Phoenix MCP integration to query results programmatically
+```
+
+**Published Capabilities**:
+- **Reproducible Experiments**: Deterministic model pinning
+- **Quantified Comparisons**: All 6 strategies with performance metrics
+- **Open Architecture**: Extend with your own retrieval methods
 
 ---
 
@@ -361,5 +659,48 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ❌ **No warranty** - Software provided "as is"
 
 ---
+
+## 🚀 Ready to Get Started?
+
+### Quick Decision Tree
+
+```mermaid
+flowchart TD
+    A[I want to...] --> B[Try RAG strategies<br/>with sample data]
+    A --> C[Integrate with<br/>my AI agent]
+    A --> D[Build a production<br/>application]
+    A --> E[Research RAG<br/>effectiveness]
+    
+    B --> F[🚀 Quick Start<br/>4-step setup above]
+    C --> G[📖 MCP Integration<br/>Claude Desktop guide]
+    D --> H[🏗️ Architecture Docs<br/>docs/ARCHITECTURE.md]
+    E --> I[📊 Evaluation Scripts<br/>Phoenix telemetry]
+    
+    style F fill:#e8f5e8
+    style G fill:#fff3e0
+    style H fill:#f3e5f5
+    style I fill:#ffebee
+```
+
+### 📚 Documentation Roadmap
+
+- **Start Here**: [4-Step Quick Start](#-quick-start) - Get running in 5 minutes
+- **Understand the Architecture**: [Why Dual Interface?](#%EF%B8%8F-why-dual-interface-architecture) - Core concepts explained
+- **Deep Technical Details**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Complete system design
+- **MCP Implementation**: [docs/CQRS_IMPLEMENTATION_SUMMARY.md](docs/CQRS_IMPLEMENTATION_SUMMARY.md) - Command vs Query patterns
+- **Production Setup**: [docs/SETUP.md](docs/SETUP.md) - Complete installation guide
+- **Troubleshooting**: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Common issues and solutions
+
+### 🎯 Next Steps
+
+1. **Try the System** - Follow the 4-step quick start above
+2. **Explore Strategies** - Run `python scripts/evaluation/retrieval_method_comparison.py`
+3. **Integrate with Agents** - Connect to Claude Desktop or build custom MCP clients
+4. **Scale to Production** - Use Docker deployment and Redis caching
+5. **Contribute** - Submit issues, improvements, or new retrieval strategies
+
+---
+
+**⭐ Star this repo if it's useful!** | **🤝 [Contribute](docs/CONTRIBUTING.md)** | **📖 [Full Documentation](docs/)**
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/donbr/adv-rag)
