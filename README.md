@@ -27,13 +27,13 @@ graph TB
     A --> D[RAG Pipeline]
     D --> E[MCP Resources Server]
     
-    subgraph "Command Pattern - Full Processing"
+    subgraph Command ["Command Pattern - Full Processing"]
         C --> F[Complete RAG Pipeline]
         F --> G[LLM Synthesis]
         G --> H[Formatted Response]
     end
     
-    subgraph "Query Pattern - Direct Access"
+    subgraph Query ["Query Pattern - Direct Access"]
         E --> I[Vector Search Only]
         I --> J[Raw Results]
         J --> K[3-5x Faster Response]
@@ -85,19 +85,19 @@ graph TB
 
 ```mermaid
 graph LR
-    Q[Query: "John Wick action scenes"] --> S1[Naive<br/>Vector Similarity]
-    Q --> S2[BM25<br/>Keyword Search]
-    Q --> S3[Contextual<br/>AI Reranking]
-    Q --> S4[Multi-Query<br/>Expansion]
-    Q --> S5[Ensemble<br/>Hybrid Mix]
-    Q --> S6[Semantic<br/>Advanced Chunks]
+    Q[Query: John Wick action scenes] --> S1[Naive Vector Similarity]
+    Q --> S2[BM25 Keyword Search]
+    Q --> S3[Contextual AI Reranking]
+    Q --> S4[Multi-Query Expansion]
+    Q --> S5[Ensemble Hybrid Mix]
+    Q --> S6[Semantic Advanced Chunks]
     
-    S1 --> R1[Fast, Direct<br/>Embedding Match]
-    S2 --> R2[Traditional IR<br/>Term Frequency]
-    S3 --> R3[LLM-Powered<br/>Relevance Scoring]
-    S4 --> R4[Multiple Queries<br/>Synthesized Results]
-    S5 --> R5[Best of All<br/>Weighted Combination]
-    S6 --> R6[Context-Aware<br/>Semantic Chunks]
+    S1 --> R1[Fast Direct Embedding Match]
+    S2 --> R2[Traditional IR Term Frequency]
+    S3 --> R3[LLM-Powered Relevance Scoring]
+    S4 --> R4[Multiple Queries Synthesized]
+    S5 --> R5[Best of All Weighted Combination]
+    S6 --> R6[Context-Aware Semantic Chunks]
     
     style S1 fill:#e8f5e8
     style S2 fill:#fff3e0
@@ -125,11 +125,11 @@ graph TB
     B --> D[FastMCP Automatic Conversion]
     C --> E[Direct Resource Access]
     
-    D --> F[MCP Tools Server<br/>Command Pattern]
-    E --> G[MCP Resources Server<br/>Query Pattern]
+    D --> F[MCP Tools Server Command Pattern]
+    E --> G[MCP Resources Server Query Pattern]
     
-    F --> H[Complete Processing<br/>LLM + Context + Synthesis<br/>~20-30 seconds]
-    G --> I[Direct Data Access<br/>Vector Search Only<br/>~3-5 seconds ⚡]
+    F --> H[Complete Processing 20-30 seconds]
+    G --> I[Direct Data Access 3-5 seconds]
     
     style A fill:#e8f5e8
     style F fill:#fff3e0
@@ -184,15 +184,15 @@ curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
 
 ```mermaid
 flowchart TD
-    A[AI Agent Task] --> B{Need complete<br/>processed answer?}
-    B -->|Yes| C[MCP Tools<br/>Command Pattern]
-    B -->|No| D[MCP Resources<br/>Query Pattern]
+    A[AI Agent Task] --> B{Need complete processed answer?}
+    B -->|Yes| C[MCP Tools: Command Pattern]
+    B -->|No| D[MCP Resources: Query Pattern]
     
-    C --> E[Use Case: Research Assistant<br/>Agent needs full analysis<br/>with citations and synthesis]
-    D --> F[Use Case: Data Gatherer<br/>Agent collecting raw data<br/>for further processing]
+    C --> E[Use Case: Research Assistant]
+    D --> F[Use Case: Data Gatherer]
     
-    E --> G[Tool: semantic_retriever<br/>Input: Question<br/>Output: Complete answer]
-    F --> H[Resource: retriever://semantic/{query}<br/>Input: Query<br/>Output: Raw documents]
+    E --> G[Tool: semantic_retriever]
+    F --> H[Resource: retriever://semantic/query]
     
     style C fill:#fff3e0
     style D fill:#f3e5f5
@@ -373,28 +373,28 @@ curl http://localhost:6006
 
 ```mermaid
 graph TB
-    subgraph "Client Interfaces"
-        A[HTTP Clients<br/>curl, apps]
-        B[MCP Clients<br/>Claude Desktop, AI Agents]
+    subgraph Clients ["Client Interfaces"]
+        A[HTTP Clients: curl, apps]
+        B[MCP Clients: Claude Desktop, AI Agents]
     end
     
-    subgraph "Dual Interface Layer"
-        C[FastAPI Server<br/>REST Endpoints]
-        D[MCP Tools Server<br/>Command Pattern]
-        E[MCP Resources Server<br/>Query Pattern]
+    subgraph Interface ["Dual Interface Layer"]
+        C[FastAPI Server REST Endpoints]
+        D[MCP Tools Server Command Pattern]
+        E[MCP Resources Server Query Pattern]
     end
     
-    subgraph "RAG Pipeline Core"
+    subgraph Pipeline ["RAG Pipeline Core"]
         F[6 Retrieval Strategies]
         G[LangChain LCEL Chains]
         H[OpenAI LLM Integration]
         I[Embedding Models]
     end
     
-    subgraph "Data & Infrastructure"
-        J[Qdrant Vector DB<br/>johnwick collections]
-        K[Redis Cache<br/>Performance Layer]
-        L[Phoenix Telemetry<br/>Observability]
+    subgraph Infrastructure ["Data & Infrastructure"]
+        J[Qdrant Vector DB johnwick collections]
+        K[Redis Cache Performance Layer]
+        L[Phoenix Telemetry Observability]
     end
     
     A --> C
@@ -519,9 +519,9 @@ curl -X POST "http://localhost:8000/invoke/contextual_compression_retriever" \
 **Scaling Pattern**:
 ```mermaid
 graph LR
-    A[High Volume Queries] --> B[MCP Resources<br/>Fast Data Collection]
+    A[High Volume Queries] --> B[MCP Resources Fast Data Collection]
     B --> C[Agent Processing Pipeline]
-    C --> D[MCP Tools<br/>Final Synthesis]
+    C --> D[MCP Tools Final Synthesis]
     D --> E[User Response]
     
     style B fill:#ffebee
@@ -666,15 +666,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ```mermaid
 flowchart TD
-    A[I want to...] --> B[Try RAG strategies<br/>with sample data]
-    A --> C[Integrate with<br/>my AI agent]
-    A --> D[Build a production<br/>application]
-    A --> E[Research RAG<br/>effectiveness]
+    A[I want to...] --> B[Try RAG strategies with sample data]
+    A --> C[Integrate with my AI agent]
+    A --> D[Build a production application]
+    A --> E[Research RAG effectiveness]
     
-    B --> F[🚀 Quick Start<br/>4-step setup above]
-    C --> G[📖 MCP Integration<br/>Claude Desktop guide]
-    D --> H[🏗️ Architecture Docs<br/>docs/ARCHITECTURE.md]
-    E --> I[📊 Evaluation Scripts<br/>Phoenix telemetry]
+    B --> F[Quick Start 4-step setup above]
+    C --> G[MCP Integration Claude Desktop guide]
+    D --> H[Architecture Docs ARCHITECTURE.md]
+    E --> I[Evaluation Scripts Phoenix telemetry]
     
     style F fill:#e8f5e8
     style G fill:#fff3e0
