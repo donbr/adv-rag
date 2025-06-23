@@ -1,0 +1,143 @@
+[1m🔍 Advanced RAG System Status Check[0m
+============================================================
+
+[94mTier 1: Environment & Dependencies[0m
+  ✅ Virtual Environment: Active
+     Path: /home/donbr/ghcp/adv-rag/.venv
+  ✅ Python Version: 3.13.2 (OK)
+  ✅ Package Manager (uv): Available
+  🔑 API Keys:
+     ✅ OPENAI_API_KEY: Configured
+     ✅ COHERE_API_KEY: Configured
+  🔒 Model Pinning (IMMUTABLE):
+     ✅ OpenAI LLM: Correct
+     ✅ Embedding: Correct
+
+[94mTier 2: Infrastructure Services[0m
+  ✅ Docker: Running
+  ✅ Qdrant: Healthy
+  ✅ Phoenix: Healthy
+  ✅ Redis: Healthy
+  ✅ Redisinsight: Healthy
+
+[94mTier 3: Core RAG Application[0m
+  ✅ Fastapi: Running
+     PID: 124491, Command: python run.py
+
+[94mTier 4: MCP Interface Layer[0m
+  ✅ Mcp Tools: Running
+     PID: 125401, Command: python src/mcp/server.py
+  ✅ Mcp Resources: Running
+     PID: 126086, Command: python src/mcp/resources.py
+
+[94mTier 5: Data & Validation[0m
+  ✅ Qdrant Collections: 2 John Wick collections
+     - johnwick_semantic
+     - johnwick_baseline
+
+[1mSummary[0m
+============================================================
+  Tier 1 (Environment): ✅ Ready
+  Tier 2 (Infrastructure): ✅ All Services Running
+  Tier 3 (Application): ✅ FastAPI Running
+  Tier 4 (MCP Interface): ✅ MCP Servers Available
+  Tier 5 (Data): ✅ Collections Loaded
+
+  Overall: ✅ System Ready
+{
+  "tier1_environment": {
+    "virtual_env_active": true,
+    "virtual_env_path": "/home/donbr/ghcp/adv-rag/.venv",
+    "python_version": "3.13.2",
+    "python_version_ok": true,
+    "uv_available": true,
+    "api_keys": {
+      "OPENAI_API_KEY": true,
+      "COHERE_API_KEY": true
+    },
+    "model_pinning": {
+      "openai_model": true,
+      "embedding_model": true,
+      "expected_openai": "gpt-4.1-mini",
+      "actual_openai": "gpt-4.1-mini",
+      "expected_embedding": "text-embedding-3-small",
+      "actual_embedding": "text-embedding-3-small"
+    }
+  },
+  "tier2_infrastructure": {
+    "qdrant": {
+      "port_open": true,
+      "healthy": true,
+      "docker_status": "running",
+      "status": "Healthy"
+    },
+    "phoenix": {
+      "port_open": true,
+      "healthy": true,
+      "docker_status": "running",
+      "status": "Healthy"
+    },
+    "redis": {
+      "port_open": true,
+      "healthy": true,
+      "docker_status": "running",
+      "status": "Healthy"
+    },
+    "redisinsight": {
+      "port_open": true,
+      "healthy": true,
+      "docker_status": "running",
+      "status": "Healthy"
+    }
+  },
+  "tier3_application": {
+    "fastapi": {
+      "running": true,
+      "port": 8000,
+      "port_in_use": true,
+      "process": {
+        "pid": 124491,
+        "name": "python",
+        "cmdline": [
+          "python",
+          "run.py"
+        ]
+      }
+    }
+  },
+  "tier4_mcp_interface": {
+    "mcp_tools": {
+      "running": true,
+      "process": {
+        "pid": 125401,
+        "name": "python",
+        "cmdline": [
+          "python",
+          "src/mcp/server.py"
+        ]
+      }
+    },
+    "mcp_resources": {
+      "running": true,
+      "process": {
+        "pid": 126086,
+        "name": "python",
+        "cmdline": [
+          "python",
+          "src/mcp/resources.py"
+        ]
+      }
+    }
+  },
+  "tier5_data": {
+    "collections": {
+      "total": 4,
+      "johnwick_collections": 2,
+      "names": [
+        "johnwick_semantic",
+        "johnwick_baseline"
+      ]
+    }
+  },
+  "timestamp": "2025-06-23T02:16:57.535596"
+}

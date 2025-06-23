@@ -1,0 +1,20 @@
+{
+    "result": {
+        "collections": [
+            {
+                "name": "code-snippets"
+            },
+            {
+                "name": "johnwick_semantic"
+            },
+            {
+                "name": "johnwick_baseline"
+            },
+            {
+                "name": "semantic-memory"
+            }
+        ]
+    },
+    "status": "ok",
+    "time": 4.661e-6
+}

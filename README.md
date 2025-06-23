@@ -686,18 +686,42 @@ flowchart TD
 
 - **Start Here**: [4-Step Quick Start](#-quick-start) - Get running in 5 minutes
 - **Understand the Architecture**: [Why Dual Interface?](#%EF%B8%8F-why-dual-interface-architecture) - Core concepts explained
+- **System Validation**: [docs/SYSTEM_VALIDATION.md](docs/SYSTEM_VALIDATION.md) - **Comprehensive validation results with evidence**
 - **Deep Technical Details**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Complete system design
 - **MCP Implementation**: [docs/CQRS_IMPLEMENTATION_SUMMARY.md](docs/CQRS_IMPLEMENTATION_SUMMARY.md) - Command vs Query patterns
 - **Production Setup**: [docs/SETUP.md](docs/SETUP.md) - Complete installation guide
 - **Troubleshooting**: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
+### ✅ System Validation
+
+**Current Status**: ✅ **FULLY OPERATIONAL** (Validated 2025-06-23)
+
+**Quick Validation Check**:
+```bash
+# Run complete validation suite (recommended)
+bash scripts/validation/run_existing_validations.sh
+
+# Quick system status only
+python scripts/status.py --verbose
+```
+
+**What's Validated**:
+- ✅ All 5 Tiers: Environment → Infrastructure → Application → MCP → Data
+- ✅ All 6 Retrieval Strategies: Working with proper context (3-10 docs per query)
+- ✅ Dual MCP Interfaces: 8 Tools + 5 Resources functional  
+- ✅ Performance: Sub-30 second response times verified
+- ✅ Phoenix Telemetry: Real-time tracing and experiment tracking
+
+📊 **[Complete Validation Report](docs/SYSTEM_VALIDATION.md)** - Evidence-based results with actual command outputs
+
 ### 🎯 Next Steps
 
 1. **Try the System** - Follow the 4-step quick start above
-2. **Explore Strategies** - Run `python scripts/evaluation/retrieval_method_comparison.py`
-3. **Integrate with Agents** - Connect to Claude Desktop or build custom MCP clients
-4. **Scale to Production** - Use Docker deployment and Redis caching
-5. **Contribute** - Submit issues, improvements, or new retrieval strategies
+2. **Validate Your Setup** - Run `bash scripts/validation/run_existing_validations.sh`
+3. **Explore Strategies** - Run `python scripts/evaluation/retrieval_method_comparison.py`
+4. **Integrate with Agents** - Connect to Claude Desktop or build custom MCP clients
+5. **Scale to Production** - Use Docker deployment and Redis caching
+6. **Contribute** - Submit issues, improvements, or new retrieval strategies
 
 ---
 
