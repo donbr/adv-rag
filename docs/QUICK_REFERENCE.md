@@ -1,36 +1,61 @@
 # Advanced RAG Quick Reference Guide
 
+📖 **For complete setup instructions**: See **[SETUP.md](SETUP.md)**
+
 ## 🚀 Essential Commands
 
-### Environment Setup (REQUIRED FIRST)
+### System Status & Management (NEW)
 ```bash
-# Virtual environment activation - REQUIRED for all work
+# Check complete system status (RECOMMENDED)
+python scripts/status.py                    # Comprehensive 5-tier status validation
+python scripts/status.py --json             # JSON output for automation
+
+# Expected output shows all tiers:
+# Tier 1 (Environment): ✅ Ready
+# Tier 2 (Infrastructure): ✅ All Services Running  
+# Tier 3 (Application): ✅ FastAPI Running
+# Tier 4 (MCP Interface): ✅ MCP Servers Available
+# Tier 5 (Data): ✅ Collections Loaded
+
+# Manage application tiers
+python scripts/manage.py start              # Start all services
+python scripts/manage.py stop               # Stop all services
+python scripts/manage.py restart            # Restart everything
+python scripts/manage.py clean              # Clean up orphaned processes
+
+# Tier-specific management
+python scripts/manage.py start --tier 2     # Start infrastructure only
+python scripts/manage.py stop --tier 3      # Stop FastAPI server only
+python scripts/manage.py restart --tier 4   # Restart MCP servers only
+```
+
+### Environment & Dependencies
+```bash
+# Virtual environment (REQUIRED for all work)
 source .venv/bin/activate
-
-# Verify setup
 which python  # Must show .venv path
-python --version  # Must be >= 3.13
-
-# Install dependencies
 uv sync --dev
 ```
 
 ### Service Management
 ```bash
-# Start all infrastructure
+# Infrastructure services
 docker-compose up -d
+docker-compose ps
+docker-compose restart
 
-# Health checks
+# Health checks (or use python scripts/status.py)
 curl http://localhost:6333/health    # Qdrant
 curl http://localhost:6006           # Phoenix  
 curl http://localhost:6379           # Redis
 curl http://localhost:8000/health    # FastAPI
 ```
 
-### Development Servers
+### Application Servers
 ```bash
-# Main API server
-python run.py
+# Main API server (with port conflict detection)
+python run.py                               # Default port 8000
+PORT=8001 python run.py                     # Use alternate port
 
 # MCP Tools server (Command Pattern)
 python src/mcp/server.py
@@ -39,28 +64,38 @@ python src/mcp/server.py
 python src/mcp/resources.py
 ```
 
-## 🏗️ Tier-Based Architecture (CRITICAL)
+### Data Pipeline
+```bash
+# Data ingestion (required before first run)
+python scripts/ingestion/csv_ingestion_pipeline.py
 
-| Tier | Components | Modification Rule | Examples |
-|------|------------|------------------|----------|
-| **Tier 1: Core** | Model pinning, imports | 🔒 **IMMUTABLE** | `src/core/settings.py` |
-| **Tier 2: Workflow** | Environment, testing | ⚠️ **REQUIRED** | Testing, linting |
-| **Tier 3: RAG Foundation** | LangChain, retrievers | 🔒 **IMMUTABLE** | `src/rag/` |
-| **Tier 4: MCP Interface** | FastAPI→MCP conversion | 🔌 **INTERFACE ONLY** | `src/mcp/`, `src/api/` |
-| **Tier 5: Tooling** | Schema, validation | 🛠️ **TOOLING** | `scripts/mcp/` |
+# Evaluation and benchmarking
+python scripts/evaluation/retrieval_method_comparison.py
+python scripts/evaluation/semantic_architecture_benchmark.py
+```
 
-### ✅ Safe to Modify
-- `src/api/app.py` - Add new FastAPI endpoints
-- `src/mcp/server.py` - MCP server configuration  
-- `src/mcp/resources.py` - MCP resources for CQRS
-- `scripts/` - Data ingestion and evaluation
-- `tests/` - All test files
+## 🏗️ Tier-Based Architecture (FUNCTIONAL)
+
+**Status Check**: `python scripts/status.py` validates all tiers
+
+| Tier | Components | Modification Rule | Status Validation |
+|------|------------|------------------|-------------------|
+| **Tier 1: Environment** | Virtual env, Python 3.13+, API keys | ⚠️ **REQUIRED** | Environment activation, uv availability |
+| **Tier 2: Infrastructure** | Docker, Qdrant, Phoenix, Redis | 🏗️ **FOUNDATION** | Service health endpoints |
+| **Tier 3: RAG Application** | FastAPI server, 6 endpoints | 🔒 **IMMUTABLE PATTERNS** | Process detection, health check |
+| **Tier 4: MCP Interface** | MCP Tools & Resources servers | 🔌 **INTERFACE ONLY** | Process pattern matching |
+| **Tier 5: Data & Validation** | Vector collections, schemas | 🛠️ **VALIDATION** | Collection existence, data integrity |
+
+### ✅ Safe to Modify (By Tier)
+- **Tier 1**: `.env` file, environment variables
+- **Tier 3**: `src/api/app.py` - Add new FastAPI endpoints (auto-converts to MCP tools)
+- **Tier 4**: `src/mcp/server.py`, `src/mcp/resources.py` - MCP server configuration
+- **Tier 5**: `scripts/` - Data ingestion and evaluation, `tests/` - All test files
 
 ### ❌ Never Modify (Breaks Contracts)
-- `src/rag/` - Core RAG pipeline components
-- `src/core/settings.py` - Model pinning configurations
-- LangChain LCEL patterns in `src/rag/chain.py`
-- Retrieval factory patterns in `src/rag/retriever.py`
+- **Tier 3**: `src/rag/` - Core RAG pipeline components
+- **Tier 3**: `src/core/settings.py` - Model pinning (`gpt-4.1-mini`, `text-embedding-3-small`)
+- **Tier 3**: LangChain LCEL patterns in `src/rag/chain.py`
 
 ## 🔄 6 Retrieval Strategies
 

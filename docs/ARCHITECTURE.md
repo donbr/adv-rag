@@ -4,51 +4,78 @@
 
 This document provides a comprehensive architectural overview of the Advanced RAG system, designed for AI agents, developers, and researchers working with Retrieval-Augmented Generation (RAG) systems and Model Context Protocol (MCP) integration.
 
-## Tier-Based Architecture (IMMUTABLE FOUNDATION)
+## Tier-Based Architecture (FUNCTIONAL FOUNDATION)
 
-The system follows a strict **5-tier hierarchy** where each tier has specific modification rules:
+The system follows a strict **5-tier functional hierarchy** where each tier represents operational components:
 
 ```mermaid
 graph TB
-    T1[Tier 1: Project Core<br/>Model Pinning, Import Conventions<br/>🔒 IMMUTABLE]
-    T2[Tier 2: Development Workflow<br/>Environment, Testing, Quality<br/>⚠️ REQUIRED]
-    T3[Tier 3: RAG Foundation<br/>LangChain Patterns, Retrieval Strategies<br/>🔒 IMMUTABLE]
-    T4[Tier 4: MCP Interface<br/>FastAPI→MCP Conversion<br/>🔌 INTERFACE ONLY]
-    T5[Tier 5: Schema Management<br/>Export, Validation, Compliance<br/>🛠️ TOOLING]
+    T1[Tier 1: Environment & Dependencies<br/>Virtual Env, Python, API Keys<br/>⚠️ REQUIRED]
+    T2[Tier 2: Infrastructure Services<br/>Docker, Qdrant, Phoenix, Redis<br/>🏗️ FOUNDATION]
+    T3[Tier 3: Core RAG Application<br/>FastAPI Server, RAG Endpoints<br/>🔒 IMMUTABLE PATTERNS]
+    T4[Tier 4: MCP Interface Layer<br/>MCP Tools & Resources Servers<br/>🔌 INTERFACE ONLY]
+    T5[Tier 5: Data & Validation<br/>Vector Collections, Schema Compliance<br/>🛠️ VALIDATION]
     
     T1 --> T2
     T2 --> T3
     T3 --> T4
     T4 --> T5
     
-    classDef immutable fill:#ffebee
     classDef required fill:#fff3e0
+    classDef foundation fill:#e3f2fd
+    classDef immutable fill:#ffebee
     classDef interface fill:#e8f5e8
-    classDef tooling fill:#f3e5f5
+    classDef validation fill:#f3e5f5
     
-    class T1,T3 immutable
-    class T2 required
+    class T1 required
+    class T2 foundation
+    class T3 immutable
     class T4 interface
-    class T5 tooling
+    class T5 validation
 ```
 
-### Critical Architectural Constraints
+### Tier Definitions and Constraints
 
-#### 🔒 **IMMUTABLE (Never Modify)**
+#### **Tier 1: Environment & Dependencies** ⚠️ REQUIRED
+- **Virtual Environment**: Python 3.13+ activation required for all development
+- **Package Management**: uv for dependency management (preferred over pip)
+- **API Keys**: OpenAI and Cohere API keys properly configured in .env
+- **Status Check**: `python scripts/status.py` validates all environment requirements
+
+#### **Tier 2: Infrastructure Services** 🏗️ FOUNDATION
+- **Docker Services**: Qdrant (6333), Phoenix (6006), Redis (6379), RedisInsight (5540)
+- **Service Health**: All infrastructure must be healthy before application startup
+- **Container Management**: Docker Compose orchestrates all service dependencies
+- **Status Check**: Validates Docker running and all service health endpoints
+
+#### **Tier 3: Core RAG Application** 🔒 IMMUTABLE PATTERNS
+- **FastAPI Server**: 6 retrieval endpoints with LangChain LCEL patterns
 - **Model Pinning**: `ChatOpenAI(model="gpt-4.1-mini")` and `OpenAIEmbeddings(model="text-embedding-3-small")`
-- **RAG Foundation**: Core retrieval strategies and LangChain LCEL patterns in `src/rag/`
+- **RAG Foundation**: Core retrieval strategies in `src/rag/` (NEVER modify existing patterns)
 - **Import Conventions**: Absolute imports from `src` package structure
+- **Status Check**: Validates FastAPI process and health endpoint
 
-#### 🔌 **INTERFACE ONLY (MCP Layer)**
-- **MCP serves as wrapper only** - never modify core RAG business logic
-- **FastAPI→MCP conversion** provides zero-duplication architecture
-- **CQRS pattern** for read-only data access via MCP Resources
+#### **Tier 4: MCP Interface Layer** 🔌 INTERFACE ONLY
+- **MCP Tools Server**: FastAPI→MCP conversion via FastMCP (Command pattern)
+- **MCP Resources Server**: Direct data access via CQRS (Query pattern)
+- **Zero Duplication**: MCP serves as wrapper only - never modify core RAG business logic
+- **Status Check**: Validates both MCP server processes are running
 
-#### ✅ **SAFE TO MODIFY**
-- `src/api/app.py` - Add new FastAPI endpoints (auto-converts to MCP tools)
-- `src/mcp/` - MCP server configuration and resources
-- `scripts/` - Evaluation, ingestion, and migration utilities
-- `tests/` - All test files and test data
+#### **Tier 5: Data & Validation** 🛠️ VALIDATION
+- **Vector Collections**: John Wick datasets (johnwick_baseline, johnwick_semantic)
+- **Schema Compliance**: MCP protocol validation and governance
+- **Data Pipeline**: Ingestion and evaluation scripts in `scripts/`
+- **Status Check**: Validates Qdrant collections exist and are populated
+
+### ✅ **SAFE TO MODIFY (By Tier)**
+- **Tier 1**: Environment variables, API key configuration
+- **Tier 3**: `src/api/app.py` - Add new FastAPI endpoints (auto-converts to MCP tools)
+- **Tier 4**: `src/mcp/` - MCP server configuration and resources
+- **Tier 5**: `scripts/` - Evaluation, ingestion, and migration utilities, `tests/` - All test files
+
+### ❌ **NEVER MODIFY (Breaks Contracts)**
+- **Tier 3**: `src/rag/` - Core RAG pipeline components, `src/core/settings.py` - Model pinning
+- **Tier 3**: LangChain LCEL patterns in `src/rag/chain.py`, Retrieval factory patterns
 
 ## Dual MCP Interface Architecture
 

@@ -53,54 +53,25 @@
 - **OpenAI API key** - Required for LLM and embeddings
 - **Cohere API key** - Required for reranking (optional for basic functionality)
 
-⚠️ **CRITICAL**: Virtual environment activation is REQUIRED for all development work
-
-### 30-Second Demo
+### 4-Step Setup
 ```bash
-# 1. Start infrastructure services
-docker-compose up -d
+# 1. Environment & Dependencies
+uv venv && source .venv/bin/activate && uv sync --dev
 
-# 2. Setup Python environment (REQUIRED)
-uv venv && source .venv/bin/activate
-uv sync --dev
+# 2. Infrastructure & Configuration
+docker-compose up -d && cp .env.example .env
+# Edit .env with your API keys
 
-# 3. Configure environment
-cp .env.example .env
-# Edit .env with your API keys:
-# OPENAI_API_KEY=your_key_here
-# COHERE_API_KEY=your_key_here
+# 3. Data & Server
+python scripts/ingestion/csv_ingestion_pipeline.py && python run.py
 
-# 4. Verify services are running
-curl http://localhost:6333/health    # Qdrant
-curl http://localhost:6006           # Phoenix  
-curl http://localhost:6379           # Redis
-
-# 5. Ingest sample data (John Wick movie reviews)
-python scripts/ingestion/csv_ingestion_pipeline.py
-
-# 6. Start API server
-python run.py
-
-# 7. Test retrieval strategies
+# 4. Test (in another terminal)
 curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
      -H "Content-Type: application/json" \
      -d '{"question": "What makes John Wick movies popular?"}'
-
-# 8. Start MCP servers (optional - for MCP integration)
-# Terminal 2:
-python src/mcp/server.py
-# Terminal 3:  
-python src/mcp/resources.py
 ```
 
-### Verification Checklist
-```bash
-# Environment validation (run in order)
-which python  # Should show .venv path
-python --version  # Should show Python >= 3.13
-docker-compose ps  # All services should be "Up"
-curl http://localhost:8000/health  # Should return {"status":"healthy"}
-```
+📖 **For complete setup instructions, troubleshooting, and MCP integration**: See **[docs/SETUP.md](docs/SETUP.md)**
 
 ## 🔌 MCP Integration
 

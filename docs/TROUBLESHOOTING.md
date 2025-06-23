@@ -2,7 +2,23 @@
 
 ## Quick Diagnostic Commands
 
-### System Health Check
+### Comprehensive System Status Check
+```bash
+# Check all tiers at once (NEW - Recommended)
+python scripts/status.py
+
+# Get detailed JSON output
+python scripts/status.py --json
+
+# Manage system state
+python scripts/manage.py status              # Check status
+python scripts/manage.py start               # Start all services
+python scripts/manage.py stop --tier 4       # Stop application servers
+python scripts/manage.py restart             # Restart everything
+python scripts/manage.py clean               # Clean up orphaned processes
+```
+
+### Manual Health Checks
 ```bash
 # Tier-based validation (run in order)
 which python  # Should show .venv path
@@ -21,7 +37,9 @@ python -c "from src.core.settings import get_settings; s=get_settings(); print(f
 
 ## Common Issues by Tier
 
-### Tier 1: Core Environment Issues
+Use `python scripts/status.py` to diagnose issues across all tiers.
+
+### Tier 1: Environment & Dependencies Issues
 
 #### ❌ Virtual Environment Not Activated
 **Symptoms**: `ModuleNotFoundError`, wrong Python path
@@ -61,7 +79,42 @@ cp .env.example .env
 # COHERE_API_KEY=your_cohere_key_here
 ```
 
-### Tier 2: Development Workflow Issues
+#### ❌ Model Pinning Violations
+**Symptoms**: Status script shows "WRONG" for model pinning
+```bash
+# Problem
+python scripts/status.py  # Shows incorrect models
+
+# Solution
+# Check your .env file for overrides:
+grep -E "(OPENAI_MODEL|EMBEDDING_MODEL)" .env
+
+# Required values (IMMUTABLE):
+# OPENAI_MODEL_NAME=gpt-4.1-mini
+# EMBEDDING_MODEL_NAME=text-embedding-3-small
+```
+
+### Tier 2: Infrastructure Services Issues
+
+#### ❌ Docker Services Won't Start
+**Symptoms**: Connection refused, port conflicts
+```bash
+# Problem diagnosis
+docker-compose ps  # Shows unhealthy services
+netstat -tulpn | grep -E ":(6333|6379|6006|8000)"  # Port conflicts
+
+# Solution
+docker-compose down
+docker system prune -f  # Clean up
+docker-compose up -d
+
+# Check logs
+docker-compose logs qdrant
+docker-compose logs redis
+docker-compose logs phoenix
+```
+
+### Tier 3: Core RAG Application Issues
 
 #### ❌ Package Installation Failures
 **Symptoms**: `uv sync` fails, dependency conflicts
@@ -90,25 +143,6 @@ pytest tests/ -v
 python -m pytest tests/ -v
 ```
 
-### Tier 3: RAG Foundation Issues
-
-#### ❌ Docker Services Won't Start
-**Symptoms**: Connection refused, port conflicts
-```bash
-# Problem diagnosis
-docker-compose ps  # Shows unhealthy services
-netstat -tulpn | grep -E ":(6333|6379|6006|8000)"  # Port conflicts
-
-# Solution
-docker-compose down
-docker system prune -f  # Clean up
-docker-compose up -d
-
-# Check logs
-docker-compose logs qdrant
-docker-compose logs redis
-docker-compose logs phoenix
-```
 
 #### ❌ Qdrant Collection Missing
 **Symptoms**: Empty search results, collection errors
@@ -135,22 +169,33 @@ sleep 10  # Wait for startup
 curl http://localhost:6333/health
 ```
 
-### Tier 4: MCP Interface Issues
+### Tier 4: MCP Interface Layer Issues
 
-#### ❌ FastAPI Server Not Starting
-**Symptoms**: Port already in use, startup errors
+#### ❌ FastAPI Server Not Starting (Port Already in Use)
+**Symptoms**: Error: `[Errno 98] error while attempting to bind on address ('0.0.0.0', 8000): address already in use`
+
+This is a common issue when FastAPI is already running from a previous session.
+
+**Quick Solutions**:
 ```bash
-# Problem diagnosis
-lsof -i :8000  # Check what's using port 8000
+# Option 1: Use the management script (RECOMMENDED)
+python scripts/manage.py restart --tier 4
 
-# Solution
-# Kill existing process or use different port
-pkill -f "python run.py"
-python run.py
+# Option 2: Check what's running and stop it
+python scripts/status.py                    # See what's running
+python scripts/manage.py stop --tier 4      # Stop application servers
+python run.py                               # Start fresh
 
-# Or specify different port
-uvicorn src.api.app:app --port 8001
+# Option 3: Use a different port
+PORT=8001 python run.py
+
+# Option 4: Manual cleanup
+lsof -i :8000                              # Find process using port 8000
+kill -9 <PID>                              # Kill the process
+python run.py                              # Start fresh
 ```
+
+**Prevention**: The updated `run.py` now checks for port conflicts before starting and provides helpful options.
 
 #### ❌ MCP Tool Execution Failures
 **Symptoms**: MCP tools fail, conversion errors
@@ -181,7 +226,7 @@ curl http://localhost:6333/collections
 python src/mcp/resources.py
 ```
 
-### Tier 5: Schema Management Issues
+### Tier 5: Data & Validation Issues
 
 #### ❌ Schema Validation Failures
 **Symptoms**: Invalid MCP schemas, compliance errors

@@ -2,17 +2,18 @@
 
 ## 🚀 Master Bootstrap Walkthrough
 
+**This is the authoritative setup guide** - all other documentation references this file for complete instructions.
+
 This guide walks you through setting up the complete Advanced RAG system from scratch, including Docker infrastructure, data ingestion, FastAPI server, MCP integration, and telemetry-driven evaluation.
 
 ### Prerequisites
-```bash
-# Required software
-- Docker & Docker Compose
-- Python 3.13+ (required by pyproject.toml)
-- uv (recommended) or pip
-- OpenAI API key
-- Cohere API key (for reranking)
-```
+- **Docker & Docker Compose** - Infrastructure services
+- **Python 3.13+** - Runtime requirement (specified in pyproject.toml)
+- **uv package manager** - Recommended for dependency management
+- **OpenAI API key** - Required for LLM and embeddings
+- **Cohere API key** - Required for reranking (optional for basic functionality)
+
+⚠️ **CRITICAL**: Virtual environment activation is REQUIRED for all development work
 
 ## 🔄 Step-by-Step Bootstrap Process
 
@@ -21,8 +22,15 @@ This guide walks you through setting up the complete Advanced RAG system from sc
 # Clone and setup environment
 git clone <repository>
 cd adv-rag
-source .venv/bin/activate  # or create if needed
-uv sync
+
+# Create and activate virtual environment (REQUIRED)
+uv venv
+source .venv/bin/activate  # Linux/Mac
+# OR
+# .venv\Scripts\activate  # Windows
+
+# Install dependencies
+uv sync --dev
 
 # Configure environment
 cp .env.example .env
@@ -117,7 +125,19 @@ python src/mcp/server.py
 }
 ```
 
-### 6. **Telemetry-Driven Evaluation** (2-3 minutes)
+### 6. **System Status Verification** (NEW)
+```bash
+# Run comprehensive system status check
+python scripts/status.py
+
+# Should show all green checkmarks for:
+# - Tier 1 (Environment): ✅ Ready
+# - Tier 3 (Infrastructure): ✅ All Services Running  
+# - Tier 4 (Application): ✅ FastAPI Running
+# - Data: ✅ Collections Loaded
+```
+
+### 7. **Telemetry-Driven Evaluation** (2-3 minutes)
 ```bash
 # Run comprehensive retrieval strategy evaluation
 python scripts/evaluation/retrieval_method_comparison.py
