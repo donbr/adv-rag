@@ -9,6 +9,8 @@ optimizing RAG pipeline performance through observability.
 import os
 import asyncio
 import logging
+import time
+import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from dataclasses import dataclass
@@ -68,6 +70,10 @@ class Config:
     # Model settings
     model_name: str = "gpt-4.1-mini"
     embedding_model: str = "text-embedding-3-small"
+    
+    # Cache configuration for A/B testing
+    cache_enabled: bool = True
+    cache_mode: str = "default"  # "enabled", "disabled", or "default"
     
     # Data settings
     data_urls: List[tuple] = None
@@ -218,20 +224,72 @@ def create_rag_chain(retriever, llm, method_name: str):
         "span_attributes": {"retriever": method_name}
     })
 
-async def run_evaluation(question: str, chains: Dict[str, Any]) -> Dict[str, str]:
-    """Run evaluation across all retrieval strategies"""
+async def run_evaluation(question: str, chains: Dict[str, Any], cache_mode: str = "default") -> Dict[str, Any]:
+    """Run evaluation across all retrieval strategies with cache mode tracking"""
     results = {}
     
     for method_name, chain in chains.items():
+        start_time = time.time()
         try:
             result = await chain.ainvoke({"question": question})
             response_content = result["response"].content
-            results[method_name] = response_content
+            context_count = len(result.get("context", []))
+            
+            end_time = time.time()
+            latency = (end_time - start_time) * 1000  # ms
+            
+            results[method_name] = {
+                "response": response_content,
+                "latency_ms": latency,
+                "context_count": context_count,
+                "cache_mode": cache_mode,
+                "timestamp": datetime.now().isoformat()
+            }
         except Exception as e:
             logger.error(f"Error with {method_name}: {e}")
-            results[method_name] = f"Error: {str(e)}"
+            results[method_name] = {
+                "error": str(e),
+                "cache_mode": cache_mode,
+                "timestamp": datetime.now().isoformat()
+            }
     
     return results
+
+async def run_cache_comparison(question: str, chains: Dict[str, Any], config: Config) -> Dict[str, Any]:
+    """Run evaluation with different cache modes for A/B testing"""
+    comparison_results = {
+        "question": question,
+        "experiment_id": f"exp_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "cache_enabled_results": {},
+        "cache_disabled_results": {},
+        "comparison_metrics": {}
+    }
+    
+    # Run with cache enabled
+    if config.cache_mode in ["default", "both"]:
+        os.environ["CACHE_ENABLED"] = "true"
+        logger.info("🟢 Running evaluation with cache ENABLED")
+        comparison_results["cache_enabled_results"] = await run_evaluation(question, chains, "enabled")
+    
+    # Run with cache disabled
+    if config.cache_mode in ["disabled", "both"]:
+        os.environ["CACHE_ENABLED"] = "false"
+        logger.info("🔴 Running evaluation with cache DISABLED")
+        comparison_results["cache_disabled_results"] = await run_evaluation(question, chains, "disabled")
+    
+    # Calculate comparison metrics
+    if config.cache_mode == "both":
+        for method in chains.keys():
+            enabled = comparison_results["cache_enabled_results"].get(method, {})
+            disabled = comparison_results["cache_disabled_results"].get(method, {})
+            
+            if "latency_ms" in enabled and "latency_ms" in disabled:
+                comparison_results["comparison_metrics"][method] = {
+                    "cache_speedup": disabled["latency_ms"] - enabled["latency_ms"],
+                    "cache_speedup_percentage": ((disabled["latency_ms"] - enabled["latency_ms"]) / disabled["latency_ms"] * 100) if disabled["latency_ms"] > 0 else 0
+                }
+    
+    return comparison_results
 
 async def main():
     """Main execution function"""
@@ -272,13 +330,44 @@ async def main():
         logger.info("🔍 Running evaluation...")
         question = "Did people generally like John Wick?"
         
-        results = await run_evaluation(question, chains)
+        # Check if we're doing cache comparison
+        cache_mode = os.getenv("CACHE_MODE", "both")  # default to both for A/B testing
+        config.cache_mode = cache_mode
         
-        # Log results
-        logger.info("\n📊 Retrieval Strategy Results:")
-        logger.info("=" * 50)
-        for method, response in results.items():
-            logger.info(f"\n{method:15} {response}")
+        if cache_mode == "both":
+            # Run cache comparison
+            comparison_results = await run_cache_comparison(question, chains, config)
+            
+            # Log comparison results
+            logger.info("\n📊 Cache A/B Testing Results:")
+            logger.info("=" * 70)
+            
+            # Save structured results
+            output_file = Path("processed") / f"cache_comparison_{comparison_results['experiment_id']}.json"
+            output_file.parent.mkdir(exist_ok=True)
+            with open(output_file, "w") as f:
+                json.dump(comparison_results, f, indent=2, default=str)
+            
+            logger.info(f"💾 Detailed results saved to: {output_file}")
+            
+            # Display summary
+            if comparison_results.get("comparison_metrics"):
+                logger.info("\n⚡ Cache Performance Impact:")
+                for method, metrics in comparison_results["comparison_metrics"].items():
+                    logger.info(f"{method}: {metrics['cache_speedup_percentage']:.1f}% speedup with cache")
+        else:
+            # Run single mode evaluation
+            results = await run_evaluation(question, chains, cache_mode)
+            
+            # Log results
+            logger.info(f"\n📊 Retrieval Strategy Results (Cache {cache_mode.upper()}):")
+            logger.info("=" * 50)
+            for method, data in results.items():
+                if "response" in data:
+                    logger.info(f"\n{method:15} Latency: {data['latency_ms']:.0f}ms")
+                    logger.info(f"{'':15} Response: {data['response'][:100]}...")
+                else:
+                    logger.info(f"\n{method:15} Error: {data.get('error', 'Unknown')}")
         
         logger.info(f"\n✅ Evaluation complete! View traces at: {config.phoenix_endpoint}")
         

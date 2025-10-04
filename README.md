@@ -571,7 +571,7 @@ COHERE_API_KEY=your_key_here
 docker-compose up -d
 
 # Verify services
-curl http://localhost:6333/health    # Qdrant
+curl http://localhost:6333           # Qdrant
 curl http://localhost:6006           # Phoenix
 curl http://localhost:6379           # Redis
 ```
@@ -634,10 +634,9 @@ from src.mcp.server import mcp
 ## 📚 Documentation
 
 - **[docs/SETUP.md](docs/SETUP.md)** - Complete setup guide  
-- **[docs/FUNCTIONAL_OVERVIEW.md](docs/FUNCTIONAL_OVERVIEW.md)** - Technical system overview
-- **[docs/project-structure.md](docs/project-structure.md)** - Detailed architecture
-- **[docs/CQRS_IMPLEMENTATION_SUMMARY.md](docs/CQRS_IMPLEMENTATION_SUMMARY.md)** - MCP Resources implementation
-- **[docs/MCP_COMMAND_LINE_GUIDE.md](docs/MCP_COMMAND_LINE_GUIDE.md)** - MCP testing guide
+- **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Daily commands and validation
+- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Problem-solving guide
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Deep technical details
 
 ## 🤝 Contributing
 
@@ -686,10 +685,9 @@ flowchart TD
 
 - **Start Here**: [4-Step Quick Start](#-quick-start) - Get running in 5 minutes
 - **Understand the Architecture**: [Why Dual Interface?](#%EF%B8%8F-why-dual-interface-architecture) - Core concepts explained
-- **System Validation**: [docs/SYSTEM_VALIDATION.md](docs/SYSTEM_VALIDATION.md) - **Comprehensive validation results with evidence**
-- **Deep Technical Details**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Complete system design
-- **MCP Implementation**: [docs/CQRS_IMPLEMENTATION_SUMMARY.md](docs/CQRS_IMPLEMENTATION_SUMMARY.md) - Command vs Query patterns
 - **Production Setup**: [docs/SETUP.md](docs/SETUP.md) - Complete installation guide
+- **Daily Commands**: [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) - Commands and validation
+- **Deep Technical Details**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Complete system design
 - **Troubleshooting**: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
 ### ✅ System Validation
@@ -699,7 +697,7 @@ flowchart TD
 **Quick Validation Check**:
 ```bash
 # Run complete validation suite (recommended)
-bash scripts/validation/run_existing_validations.sh
+bash scripts/validation/run_system_health_check.sh
 
 # Quick system status only
 python scripts/status.py --verbose
@@ -712,12 +710,12 @@ python scripts/status.py --verbose
 - ✅ Performance: Sub-30 second response times verified
 - ✅ Phoenix Telemetry: Real-time tracing and experiment tracking
 
-📊 **[Complete Validation Report](docs/SYSTEM_VALIDATION.md)** - Evidence-based results with actual command outputs
+📊 **System validated 2025-06-23** - All 5 tiers operational, 6 retrieval strategies functional
 
 ### 🎯 Next Steps
 
 1. **Try the System** - Follow the 4-step quick start above
-2. **Validate Your Setup** - Run `bash scripts/validation/run_existing_validations.sh`
+2. **Validate Your Setup** - Run `bash scripts/validation/run_system_health_check.sh`
 3. **Explore Strategies** - Run `python scripts/evaluation/retrieval_method_comparison.py`
 4. **Integrate with Agents** - Connect to Claude Desktop or build custom MCP clients
 5. **Scale to Production** - Use Docker deployment and Redis caching

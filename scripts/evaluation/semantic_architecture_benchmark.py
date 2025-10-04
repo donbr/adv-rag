@@ -15,6 +15,7 @@ NOTE: requires resources.py script to launch both resource and tool capabilities
 import asyncio
 import time
 import statistics
+import os
 from typing import List, Dict, Any, Tuple
 import json
 from pathlib import Path
@@ -37,7 +38,8 @@ class SemanticArchitectureBenchmark:
             "resources_performance": {},
             "caching_analysis": {},
             "transport_comparison": {},
-            "edge_readiness": {}
+            "edge_readiness": {},
+            "cache_mode_comparison": {}
         }
         
         # Test queries for consistent benchmarking
@@ -48,6 +50,9 @@ class SemanticArchitectureBenchmark:
             # "Why do audiences love revenge stories?",
             # "What makes a good action hero?"
         ]
+        
+        # Cache configuration
+        self.cache_enabled = os.getenv("CACHE_ENABLED", "true").lower() == "true"
     
     async def benchmark_tools_approach(self) -> Dict[str, Any]:
         """
@@ -275,6 +280,129 @@ class SemanticArchitectureBenchmark:
             score += 5
         
         return min(score, 100)  # Cap at 100
+
+    async def benchmark_cache_modes(self) -> Dict[str, Any]:
+        """
+        Benchmark performance with cache enabled vs disabled
+        """
+        print("💾 Benchmarking Cache Modes (Enabled vs Disabled)...")
+        
+        cache_comparison = {
+            "cache_enabled_performance": {},
+            "cache_disabled_performance": {},
+            "cache_impact_analysis": {}
+        }
+        
+        retrieval_methods = [
+            "naive_retriever",
+            "bm25_retriever", 
+            "semantic_retriever",
+            "ensemble_retriever"
+        ]
+        
+        # Test with cache enabled
+        print("  🟢 Testing with cache ENABLED...")
+        for method in retrieval_methods:
+            latencies = []
+            cache_hits = 0
+            
+            for i, query in enumerate(self.test_queries * 2):  # 4 total runs
+                start_time = time.perf_counter()
+                
+                try:
+                    async with httpx.AsyncClient() as client:
+                        response = await client.post(
+                            f"http://127.0.0.1:8000/invoke/{method}",
+                            json={"question": query},
+                            timeout=30.0,
+                            headers={"X-Cache-Mode": "enabled"}
+                        )
+                        response.raise_for_status()
+                        result = response.json()
+                    
+                    end_time = time.perf_counter()
+                    latency = (end_time - start_time) * 1000
+                    latencies.append(latency)
+                    
+                    # Simple cache hit detection (very fast responses likely cached)
+                    if i > 0 and latency < 50:  # Under 50ms likely cached
+                        cache_hits += 1
+                        
+                except Exception as e:
+                    print(f"    Error testing {method} with cache enabled: {e}")
+                    continue
+            
+            if latencies:
+                cache_comparison["cache_enabled_performance"][method] = {
+                    "avg_latency_ms": sum(latencies) / len(latencies),
+                    "min_latency_ms": min(latencies),
+                    "max_latency_ms": max(latencies),
+                    "cache_hit_rate": cache_hits / len(latencies),
+                    "total_requests": len(latencies),
+                    "cache_mode": "enabled"
+                }
+        
+        # Test with cache disabled (set environment variable)
+        print("  🔴 Testing with cache DISABLED...")
+        original_cache_setting = os.environ.get("CACHE_ENABLED", "true")
+        os.environ["CACHE_ENABLED"] = "false"
+        
+        # Wait a moment for setting to take effect
+        await asyncio.sleep(1)
+        
+        for method in retrieval_methods:
+            latencies = []
+            
+            for query in self.test_queries * 2:  # 4 total runs
+                start_time = time.perf_counter()
+                
+                try:
+                    async with httpx.AsyncClient() as client:
+                        response = await client.post(
+                            f"http://127.0.0.1:8000/invoke/{method}",
+                            json={"question": query},
+                            timeout=30.0,
+                            headers={"X-Cache-Mode": "disabled"}
+                        )
+                        response.raise_for_status()
+                        result = response.json()
+                    
+                    end_time = time.perf_counter()
+                    latency = (end_time - start_time) * 1000
+                    latencies.append(latency)
+                        
+                except Exception as e:
+                    print(f"    Error testing {method} with cache disabled: {e}")
+                    continue
+            
+            if latencies:
+                cache_comparison["cache_disabled_performance"][method] = {
+                    "avg_latency_ms": sum(latencies) / len(latencies),
+                    "min_latency_ms": min(latencies),
+                    "max_latency_ms": max(latencies),
+                    "cache_hit_rate": 0.0,  # No cache when disabled
+                    "total_requests": len(latencies),
+                    "cache_mode": "disabled"
+                }
+        
+        # Restore original cache setting
+        os.environ["CACHE_ENABLED"] = original_cache_setting
+        
+        # Calculate cache impact analysis
+        for method in retrieval_methods:
+            enabled = cache_comparison["cache_enabled_performance"].get(method, {})
+            disabled = cache_comparison["cache_disabled_performance"].get(method, {})
+            
+            if enabled and disabled:
+                cache_comparison["cache_impact_analysis"][method] = {
+                    "speedup_ms": disabled["avg_latency_ms"] - enabled["avg_latency_ms"],
+                    "speedup_percentage": ((disabled["avg_latency_ms"] - enabled["avg_latency_ms"]) / disabled["avg_latency_ms"] * 100) if disabled["avg_latency_ms"] > 0 else 0,
+                    "cache_effectiveness": enabled.get("cache_hit_rate", 0),
+                    "baseline_latency": disabled["avg_latency_ms"],
+                    "cached_latency": enabled["avg_latency_ms"]
+                }
+        
+        return cache_comparison
     
     async def run_comprehensive_benchmark(self) -> Dict[str, Any]:
         """
@@ -287,6 +415,9 @@ class SemanticArchitectureBenchmark:
         tools_results = await self.benchmark_tools_approach()
         resources_results = await self.benchmark_resources_approach()
         
+        # Benchmark cache modes
+        cache_mode_results = await self.benchmark_cache_modes()
+        
         # Analyze results
         caching_analysis = self.analyze_caching_effectiveness(tools_results, resources_results)
         transport_comparison = self.compare_transport_performance(tools_results, resources_results)
@@ -296,23 +427,26 @@ class SemanticArchitectureBenchmark:
             "benchmark_metadata": {
                 "timestamp": time.time(),
                 "test_queries": self.test_queries,
-                "runs_per_method": len(self.test_queries) * 3
+                "runs_per_method": len(self.test_queries) * 3,
+                "cache_enabled": self.cache_enabled
             },
             "tools_performance": tools_results,
             "resources_performance": resources_results,
             "caching_analysis": caching_analysis,
             "transport_comparison": transport_comparison,
-            "summary": self._generate_summary(tools_results, resources_results, transport_comparison)
+            "cache_mode_comparison": cache_mode_results,
+            "summary": self._generate_summary(tools_results, resources_results, transport_comparison, cache_mode_results)
         }
         
         return self.results
     
-    def _generate_summary(self, tools_results: Dict, resources_results: Dict, transport_comparison: Dict) -> Dict[str, Any]:
+    def _generate_summary(self, tools_results: Dict, resources_results: Dict, transport_comparison: Dict, cache_mode_results: Dict = None) -> Dict[str, Any]:
         """
         Generate executive summary of benchmark results
         """
         summary = {
             "performance_winner": {},
+            "cache_impact": {},
             "key_insights": [],
             "recommendations": []
         }
@@ -332,14 +466,29 @@ class SemanticArchitectureBenchmark:
                     "improvement_percentage": (improvement / max(tool_latency, resource_latency)) * 100
                 }
         
+        # Analyze cache impact
+        if cache_mode_results and "cache_impact_analysis" in cache_mode_results:
+            for method, analysis in cache_mode_results["cache_impact_analysis"].items():
+                summary["cache_impact"][method] = {
+                    "speedup_percentage": analysis.get("speedup_percentage", 0),
+                    "cache_effectiveness": analysis.get("cache_effectiveness", 0),
+                    "recommendation": "beneficial" if analysis.get("speedup_percentage", 0) > 10 else "minimal"
+                }
+        
         # Generate insights
         improvement_percentages = [
             data["improvement_percentage"] for data in summary["performance_winner"].values()
         ]
         avg_resource_improvement = statistics.mean(improvement_percentages) if improvement_percentages else 0
         
+        cache_speedups = [
+            data["speedup_percentage"] for data in summary["cache_impact"].values()
+        ] if summary["cache_impact"] else []
+        avg_cache_speedup = statistics.mean(cache_speedups) if cache_speedups else 0
+        
         summary["key_insights"] = [
             f"Resources show {avg_resource_improvement:.1f}% average latency improvement",
+            f"Cache provides {avg_cache_speedup:.1f}% average speedup when enabled",
             "URI-based caching enables better edge deployment",
             "Semantic correctness aligns with performance optimization",
             "Resources are more suitable for CDN caching strategies"
@@ -347,6 +496,7 @@ class SemanticArchitectureBenchmark:
         
         summary["recommendations"] = [
             "Migrate all retrieval operations to Resources",
+            "Enable cache for production workloads" if avg_cache_speedup > 10 else "Evaluate cache overhead vs benefits",
             "Preserve indexing/mutation operations as Tools", 
             "Implement URI-based caching for Resources",
             "Consider edge deployment for Resource endpoints",

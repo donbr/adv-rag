@@ -44,7 +44,7 @@ venv.bak/
 .env.test.local
 .env.production.local
 # Allow env.example template file
-!env.example
+!.env.example
 
 # IDE and editor files
 .idea/

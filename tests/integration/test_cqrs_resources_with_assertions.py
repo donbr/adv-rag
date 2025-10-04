@@ -395,7 +395,7 @@ if __name__ == "__main__":
             print(f"  1. Ensure Qdrant is running: docker-compose up -d")
             print(f"  2. Check data ingestion: python scripts/ingestion/csv_ingestion_pipeline.py") 
             print(f"  3. Verify dependencies: uv sync")
-            print(f"  4. Check service health: curl http://localhost:6333/health")
+            print(f"  4. Check service health: curl http://localhost:6333")
             
             sys.exit(1)
         else:

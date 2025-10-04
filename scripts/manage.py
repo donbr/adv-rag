@@ -258,7 +258,7 @@ class TierManager:
     def _check_services_health(self) -> bool:
         """Check if all infrastructure services are healthy"""
         services = [
-            ("Qdrant", 6333, "http://localhost:6333/health"),
+            ("Qdrant", 6333, "http://localhost:6333"),
             ("Phoenix", 6006, "http://localhost:6006"),
             ("Redis", 6379, None)
         ]

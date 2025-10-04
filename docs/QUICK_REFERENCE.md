@@ -1,317 +1,201 @@
-# Advanced RAG Quick Reference Guide
+# Advanced RAG Quick Reference
 
-📖 **For complete setup instructions**: See **[SETUP.md](SETUP.md)**
+📖 **First time?** See **[SETUP.md](SETUP.md)** for complete setup  
+📘 **Development guide**: See **[CLAUDE.md](../CLAUDE.md)** for architecture constraints and patterns  
+🚨 **Problems?** See **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** for solutions
 
-## 🚀 Essential Commands
+## ⚡ Most Common Commands
 
-### System Status & Management (NEW)
+### Quick Status Check
 ```bash
-# Check complete system status (RECOMMENDED)
-python scripts/status.py                    # Comprehensive 5-tier status validation
-python scripts/status.py --json             # JSON output for automation
+# Single command to check everything
+python scripts/status.py
 
-# Expected output shows all tiers:
-# Tier 1 (Environment): ✅ Ready
-# Tier 2 (Infrastructure): ✅ All Services Running  
-# Tier 3 (Application): ✅ FastAPI Running
-# Tier 4 (MCP Interface): ✅ MCP Servers Available
-# Tier 5 (Data): ✅ Collections Loaded
-
-# Manage application tiers
-python scripts/manage.py start              # Start all services
-python scripts/manage.py stop               # Stop all services
-python scripts/manage.py restart            # Restart everything
-python scripts/manage.py clean              # Clean up orphaned processes
-
-# Tier-specific management
-python scripts/manage.py start --tier 2     # Start infrastructure only
-python scripts/manage.py stop --tier 3      # Stop FastAPI server only
-python scripts/manage.py restart --tier 4   # Restart MCP servers only
+# Expected: All ✅ (Environment, Infrastructure, Application, MCP, Data)
 ```
 
-### Environment & Dependencies
+### System Validation ✅
 ```bash
-# Virtual environment (REQUIRED for all work)
-source .venv/bin/activate
-which python  # Must show .venv path
-uv sync --dev
+# Complete validation (recommended after setup)
+bash scripts/validation/run_system_health_check.sh
+
+# Quick health checks
+curl http://localhost:6333           # Qdrant: {"title":"qdrant - vector search engine"}
+curl http://localhost:8000/health    # FastAPI: {"status":"healthy"}
+curl http://localhost:6006           # Phoenix: HTML response
 ```
+
+### Daily Development
+```bash
+# Start system (in this order)
+source .venv/bin/activate        # REQUIRED first step
+docker-compose up -d             # Start infrastructure 
+python run.py                    # Start API server (separate terminal)
+
+# Quick test
+curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
+     -H "Content-Type: application/json" \
+     -d '{"question": "test query"}'
+```
+
+### Emergency Reset
+```bash
+# If everything breaks
+docker-compose down -v && docker-compose up -d
+python scripts/ingestion/csv_ingestion_pipeline.py && python run.py
+```
+
+## 🛠️ Command Categories
 
 ### Service Management
 ```bash
-# Infrastructure services
-docker-compose up -d
-docker-compose ps
-docker-compose restart
+# Infrastructure
+docker-compose up -d                 # Start all Docker services
+docker-compose ps                    # Check service status
+curl http://localhost:6333           # Qdrant health
+curl http://localhost:8000/health    # FastAPI health
 
-# Health checks (or use python scripts/status.py)
-curl http://localhost:6333/health    # Qdrant
-curl http://localhost:6006           # Phoenix  
-curl http://localhost:6379           # Redis
-curl http://localhost:8000/health    # FastAPI
+# Application servers  
+python run.py                        # Main API server (port 8000)
+python src/mcp/server.py             # MCP Tools server 
+python src/mcp/resources.py          # MCP Resources server
 ```
 
-### Application Servers
+### Data & Testing
 ```bash
-# Main API server (with port conflict detection)
-python run.py                               # Default port 8000
-PORT=8001 python run.py                     # Use alternate port
-
-# MCP Tools server (Command Pattern)
-python src/mcp/server.py
-
-# MCP Resources server (Query Pattern - CQRS)
-python src/mcp/resources.py
-```
-
-### Data Pipeline
-```bash
-# Data ingestion (required before first run)
+# Load data (required once)
 python scripts/ingestion/csv_ingestion_pipeline.py
 
-# Evaluation and benchmarking
+# Run tests
+pytest tests/ -v                     # All tests
+python tests/integration/verify_mcp.py  # MCP validation
+
+# Benchmarks
 python scripts/evaluation/retrieval_method_comparison.py
-python scripts/evaluation/semantic_architecture_benchmark.py
 ```
 
-## 🏗️ Tier-Based Architecture (FUNCTIONAL)
+## 🏗️ What You Can/Cannot Modify
 
-**Status Check**: `python scripts/status.py` validates all tiers
+📘 **Full details**: See [CLAUDE.md](../CLAUDE.md) for complete architectural constraints
 
-| Tier | Components | Modification Rule | Status Validation |
-|------|------------|------------------|-------------------|
-| **Tier 1: Environment** | Virtual env, Python 3.13+, API keys | ⚠️ **REQUIRED** | Environment activation, uv availability |
-| **Tier 2: Infrastructure** | Docker, Qdrant, Phoenix, Redis | 🏗️ **FOUNDATION** | Service health endpoints |
-| **Tier 3: RAG Application** | FastAPI server, 6 endpoints | 🔒 **IMMUTABLE PATTERNS** | Process detection, health check |
-| **Tier 4: MCP Interface** | MCP Tools & Resources servers | 🔌 **INTERFACE ONLY** | Process pattern matching |
-| **Tier 5: Data & Validation** | Vector collections, schemas | 🛠️ **VALIDATION** | Collection existence, data integrity |
+### ✅ Safe to Modify
+- **Interface Layer**: `src/api/app.py`, `src/mcp/` - Add new endpoints/features  
+- **Configuration**: `.env` file, environment variables
+- **Scripts**: `scripts/`, `tests/` - All tooling and testing
+- **Documentation**: All `.md` files
 
-### ✅ Safe to Modify (By Tier)
-- **Tier 1**: `.env` file, environment variables
-- **Tier 3**: `src/api/app.py` - Add new FastAPI endpoints (auto-converts to MCP tools)
-- **Tier 4**: `src/mcp/server.py`, `src/mcp/resources.py` - MCP server configuration
-- **Tier 5**: `scripts/` - Data ingestion and evaluation, `tests/` - All test files
+### ❌ Never Modify (Breaks System)
+- **Core RAG**: `src/rag/` - Retrieval pipeline components
+- **Settings**: `src/core/settings.py` - Model pinning (gpt-4.1-mini, text-embedding-3-small)
+- **Chain Patterns**: `src/rag/chain.py` - LangChain LCEL foundations
 
-### ❌ Never Modify (Breaks Contracts)
-- **Tier 3**: `src/rag/` - Core RAG pipeline components
-- **Tier 3**: `src/core/settings.py` - Model pinning (`gpt-4.1-mini`, `text-embedding-3-small`)
-- **Tier 3**: LangChain LCEL patterns in `src/rag/chain.py`
+**Rule**: Add new features via interface layers, never modify existing core components
 
 ## 🔄 6 Retrieval Strategies
 
-| Strategy | Complexity | Performance | Command |
-|----------|------------|-------------|---------|
-| **Naive** | Low | High | `curl -X POST localhost:8000/invoke/naive_retriever` |
-| **BM25** | Low | High | `curl -X POST localhost:8000/invoke/bm25_retriever` |
-| **Semantic** | Medium | Medium | `curl -X POST localhost:8000/invoke/semantic_retriever` |
-| **Ensemble** | High | Medium | `curl -X POST localhost:8000/invoke/ensemble_retriever` |
-| **Contextual Compression** | High | Low | `curl -X POST localhost:8000/invoke/contextual_compression_retriever` |
-| **Multi-Query** | High | Low | `curl -X POST localhost:8000/invoke/multi_query_retriever` |
+| Strategy | Use Case | Endpoint |
+|----------|----------|----------|
+| **Naive** | Fast baseline | `/invoke/naive_retriever` |
+| **BM25** | Keyword search | `/invoke/bm25_retriever` |
+| **Semantic** | Best overall | `/invoke/semantic_retriever` |
+| **Ensemble** | Hybrid approach | `/invoke/ensemble_retriever` |
+| **Compression** | Quality focus | `/invoke/contextual_compression_retriever` |
+| **Multi-Query** | Comprehensive | `/invoke/multi_query_retriever` |
 
-### Request Format (All Endpoints)
-```json
-{"question": "What makes John Wick movies popular?"}
-```
-
-### Response Format (All Endpoints)
-```json
-{
-  "answer": "Generated response based on retrieved context",
-  "context_document_count": 5
-}
-```
-
-## 🔌 MCP Integration Patterns
-
-### Dual MCP Architecture
-```mermaid
-graph LR
-    A[FastAPI Endpoints] --> B[MCP Tools<br/>Command Pattern]
-    A --> C[MCP Resources<br/>Query Pattern]
-    B --> D[Full RAG Pipeline<br/>LLM Processing]
-    C --> E[Direct Data Access<br/>3-5x Faster]
-```
-
-### MCP Tools (Command Pattern)
-- **Purpose**: Full RAG pipeline with LLM synthesis
-- **Pattern**: `FastMCP.from_fastapi()` zero-duplication
-- **Use Cases**: Answer generation, context processing
-
-### MCP Resources (Query Pattern - CQRS)  
-- **Purpose**: Direct data access for performance
-- **Pattern**: Native FastMCP resource registration
-- **Use Cases**: Raw search results, metadata extraction
-
-## 🧪 Testing Commands
-
+### Quick Test Template
 ```bash
-# All tests
-pytest tests/ -v
+curl -X POST "http://localhost:8000/invoke/STRATEGY_NAME" \
+     -H "Content-Type: application/json" \
+     -d '{"question": "YOUR_QUESTION"}'
 
-# By category (defined in pytest.ini)
-pytest tests/ -m unit -v          # Unit tests
-pytest tests/ -m integration -v   # Integration tests  
-pytest tests/ -m requires_llm -v  # Tests needing API keys
-
-# MCP validation
-python tests/integration/verify_mcp.py
-
-# API endpoints
-bash tests/integration/test_api_endpoints.sh
+# Returns: {"answer": "...", "context_document_count": N}
 ```
 
-## 📊 Data Pipeline
+## 🔌 MCP Integration
 
-### Ingestion
+📘 **Full MCP details**: See [CLAUDE.md](../CLAUDE.md) MCP section
+
+### Quick MCP Usage
 ```bash
-# Load John Wick movie reviews data
-python scripts/ingestion/csv_ingestion_pipeline.py
-
-# Verify collections created
-curl http://localhost:6333/collections
-```
-
-### Evaluation
-```bash
-# Compare all retrieval strategies
-python scripts/evaluation/retrieval_method_comparison.py
-
-# Semantic architecture benchmark  
-python scripts/evaluation/semantic_architecture_benchmark.py
-
-# View results
-open http://localhost:6006  # Phoenix dashboard
-```
-
-## 🔍 Schema Management (MCP 2025-03-26)
-
-### Native Discovery (Recommended)
-```bash
-# Start server with streamable HTTP
+# Start MCP Tools server (Command pattern - full processing)
 python src/mcp/server.py
 
-# Native MCP discovery
-curl -X POST http://127.0.0.1:8000/mcp \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
+# Start MCP Resources server (Query pattern - direct data)  
+python src/mcp/resources.py
+
+# Test MCP functionality
+python tests/integration/verify_mcp.py
 ```
 
-### Legacy Export (Development)
+**Interface Selection**:
+- **MCP Tools**: Need complete answers with AI processing (~20-30 sec)
+- **MCP Resources**: Need raw data for further processing (~3-5 sec)
+
+## 🧪 Testing & Validation
+
 ```bash
-# Generate schemas
-python scripts/mcp/export_mcp_schema.py
+# Quick tests
+pytest tests/ -v                           # All tests
+pytest tests/ -m unit -v                   # Unit tests only
+pytest tests/ -m integration -v            # Integration tests
 
-# Validate compliance
-python scripts/mcp/validate_mcp_schema.py
+# System validation  
+python tests/integration/verify_mcp.py     # MCP functionality
+bash tests/integration/test_api_endpoints.sh  # API endpoints
+python scripts/status.py                   # Complete system check
 ```
 
-## 🌐 External MCP Ecosystem
+## 📊 Performance & Monitoring
 
-### Available MCP Servers
-- `qdrant-code-snippets` (Port 8002) - Code pattern management
-- `qdrant-semantic-memory` (Port 8003) - Contextual insights
-- `ai-docs-server` - Documentation access
-- `phoenix` (localhost:6006) - **Critical for AI agent observability**
-- `memory` - Official MCP knowledge graph
-
-### Claude Code CLI Usage
 ```bash
-# Store patterns (requires permission)
-claude -p --allowedTools "qdrant-store" "Store this pattern..."
+# Compare retrieval strategies
+python scripts/evaluation/retrieval_method_comparison.py
 
-# Interactive mode (recommended)
-claude --verbose
+# Phoenix telemetry dashboard
+open http://localhost:6006
+
+# Redis cache monitoring  
+open http://localhost:5540  # RedisInsight
 ```
-
-## 🚨 Critical Constraints
-
-### Model Pinning (IMMUTABLE)
-- **LLM**: `ChatOpenAI(model="gpt-4.1-mini")`
-- **Embeddings**: `OpenAIEmbeddings(model="text-embedding-3-small")`
-- **Reason**: Public contract for deterministic responses
-
-### Environment Requirements
-- **Virtual Environment**: REQUIRED activation for all work
-- **Python Version**: >= 3.13 (runtime), py311 (tooling compatibility)
-- **Package Manager**: uv (recommended over pip)
-
-### MCP Interface Rule
-- **MCP serves as interface only**
-- **Never modify core RAG business logic in `src/rag/`**
-- **Use interface layers (Tier 4) to expose new functionality**
 
 ## 🔧 Code Quality
-
 ```bash
-# Format code
+# Format and lint (before commits)
 black src/ tests/ --line-length 88
-
-# Lint and fix
 ruff check src/ tests/ --fix
-
-# Quality pipeline
-ruff check src/ tests/ --fix && black src/ tests/ --line-length 88
 ```
 
-## 📋 Environment Variables
-
-### Required
+## 📋 Required Environment Variables
 ```bash
+# In .env file
 OPENAI_API_KEY=your_openai_key_here
-COHERE_API_KEY=your_cohere_key_here  # Optional for basic functionality
-```
-
-### Optional
-```bash
-OPENAI_MODEL_NAME=gpt-4.1-mini  # Default
-EMBEDDING_MODEL_NAME=text-embedding-3-small  # Default
-MEMORY_FILE_PATH=/path/to/memory.json  # MCP memory storage
+COHERE_API_KEY=your_cohere_key_here
 ```
 
 ## 🎯 Quick Troubleshooting
 
-### Service Issues
-```bash
-# Restart all services
-docker-compose restart
+| Problem | Solution |
+|---------|----------|
+| Port 8000 in use | `lsof -ti :8000 | xargs kill -9` or use `PORT=8001 python run.py` |
+| Virtual env not active | `source .venv/bin/activate` |
+| Services not running | `docker-compose restart` |
+| MCP tools fail | `python tests/integration/verify_mcp.py` |
+| Tests fail | Check API keys: `python src/core/settings.py` |
 
-# Check logs
-docker-compose logs qdrant redis phoenix
-```
+**For detailed solutions**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
-### Environment Issues
-```bash
-# Verify virtual environment
-which python  # Must show .venv path
+## 🔄 Adding New Features
 
-# Reinstall dependencies
-rm -rf .venv && uv venv && source .venv/bin/activate && uv sync --dev
-```
+**Safe Pattern**: Add new endpoints to `src/api/app.py` → auto-converts to MCP tools  
+**Never modify**: `src/rag/` (core components) or `src/core/settings.py` (model pinning)
 
-### MCP Issues
-```bash
-# Test MCP conversion
-python tests/integration/verify_mcp.py
+📘 **Full constraints**: See [CLAUDE.md](../CLAUDE.md) Development Decision Matrix
 
-# Restart MCP servers
-pkill -f "src/mcp/server.py" && python src/mcp/server.py &
-pkill -f "src/mcp/resources.py" && python src/mcp/resources.py &
-```
+---
 
-## 📚 Documentation References
+## 📚 Documentation Navigation
 
-- **CLAUDE.md** - Comprehensive Claude Code guidance
-- **docs/ARCHITECTURE.md** - System architecture details
-- **docs/TROUBLESHOOTING.md** - Common issues and solutions
-- **README.md** - Project overview and quick start
-- **Phoenix Dashboard** - http://localhost:6006 (AI agent observability)
-
-## 🔄 Adding New Retrieval Strategies
-
-1. **Add FastAPI endpoint** in `src/api/app.py` (auto-converts to MCP tool)
-2. **Implement retriever** in `src/rag/retriever.py` using factory pattern
-3. **Create LCEL chain** in `src/rag/chain.py` following established patterns  
-4. **Never modify** existing retrieval logic - only add new strategies
-5. **Test both interfaces** - FastAPI endpoint and MCP tool conversion
-
-Remember: Follow the tier-based architecture - interface layers only, never modify foundation components!
+- **[CLAUDE.md](../CLAUDE.md)** - Main developer guide with all commands and architecture
+- **[SETUP.md](SETUP.md)** - Initial setup walkthrough  
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem-solving by component
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Deep technical architecture details

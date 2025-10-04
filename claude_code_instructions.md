@@ -1,8 +1,5 @@
 # Optimized Claude Code Instructions for CQRS-MCP Architectures
 
-**Last Verified:** 2025-06-20 13:43 PST via ai-docs-server, brave-search, and fetch tools  
-**Status:** CORRECTED - Claude Code supports full MCP specification including Resources
-
 ## Core Understanding Framework
 
 ### 1. CQRS-MCP Architecture Recognition

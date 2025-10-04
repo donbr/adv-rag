@@ -1,327 +1,508 @@
 # Advanced RAG System Architecture
 
-## Overview
+📖 **For development guide**: See [CLAUDE.md](../CLAUDE.md) - essential commands and constraints  
+📋 **For daily use**: See [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - command reference
 
-This document provides a comprehensive architectural overview of the Advanced RAG system, designed for AI agents, developers, and researchers working with Retrieval-Augmented Generation (RAG) systems and Model Context Protocol (MCP) integration.
+## Deep Technical Architecture
 
-## Tier-Based Architecture (FUNCTIONAL FOUNDATION)
+This document provides detailed technical implementation details for the Advanced RAG system's architecture, focusing on internal patterns and design decisions.
 
-The system follows a strict **5-tier functional hierarchy** where each tier represents operational components:
+## Implementation Architecture Patterns
 
-```mermaid
-graph TB
-    T1[Tier 1: Environment & Dependencies<br/>Virtual Env, Python, API Keys<br/>⚠️ REQUIRED]
-    T2[Tier 2: Infrastructure Services<br/>Docker, Qdrant, Phoenix, Redis<br/>🏗️ FOUNDATION]
-    T3[Tier 3: Core RAG Application<br/>FastAPI Server, RAG Endpoints<br/>🔒 IMMUTABLE PATTERNS]
-    T4[Tier 4: MCP Interface Layer<br/>MCP Tools & Resources Servers<br/>🔌 INTERFACE ONLY]
-    T5[Tier 5: Data & Validation<br/>Vector Collections, Schema Compliance<br/>🛠️ VALIDATION]
-    
-    T1 --> T2
-    T2 --> T3
-    T3 --> T4
-    T4 --> T5
-    
-    classDef required fill:#fff3e0
-    classDef foundation fill:#e3f2fd
-    classDef immutable fill:#ffebee
-    classDef interface fill:#e8f5e8
-    classDef validation fill:#f3e5f5
-    
-    class T1 required
-    class T2 foundation
-    class T3 immutable
-    class T4 interface
-    class T5 validation
-```
+📝 **Note**: Basic tier rules covered in [CLAUDE.md](../CLAUDE.md) - this section covers technical implementation details.
 
-### Tier Definitions and Constraints
+## Zero-Duplication MCP Architecture
 
-#### **Tier 1: Environment & Dependencies** ⚠️ REQUIRED
-- **Virtual Environment**: Python 3.13+ activation required for all development
-- **Package Management**: uv for dependency management (preferred over pip)
-- **API Keys**: OpenAI and Cohere API keys properly configured in .env
-- **Status Check**: `python scripts/status.py` validates all environment requirements
+### Technical Implementation
 
-#### **Tier 2: Infrastructure Services** 🏗️ FOUNDATION
-- **Docker Services**: Qdrant (6333), Phoenix (6006), Redis (6379), RedisInsight (5540)
-- **Service Health**: All infrastructure must be healthy before application startup
-- **Container Management**: Docker Compose orchestrates all service dependencies
-- **Status Check**: Validates Docker running and all service health endpoints
-
-#### **Tier 3: Core RAG Application** 🔒 IMMUTABLE PATTERNS
-- **FastAPI Server**: 6 retrieval endpoints with LangChain LCEL patterns
-- **Model Pinning**: `ChatOpenAI(model="gpt-4.1-mini")` and `OpenAIEmbeddings(model="text-embedding-3-small")`
-- **RAG Foundation**: Core retrieval strategies in `src/rag/` (NEVER modify existing patterns)
-- **Import Conventions**: Absolute imports from `src` package structure
-- **Status Check**: Validates FastAPI process and health endpoint
-
-#### **Tier 4: MCP Interface Layer** 🔌 INTERFACE ONLY
-- **MCP Tools Server**: FastAPI→MCP conversion via FastMCP (Command pattern)
-- **MCP Resources Server**: Direct data access via CQRS (Query pattern)
-- **Zero Duplication**: MCP serves as wrapper only - never modify core RAG business logic
-- **Status Check**: Validates both MCP server processes are running
-
-#### **Tier 5: Data & Validation** 🛠️ VALIDATION
-- **Vector Collections**: John Wick datasets (johnwick_baseline, johnwick_semantic)
-- **Schema Compliance**: MCP protocol validation and governance
-- **Data Pipeline**: Ingestion and evaluation scripts in `scripts/`
-- **Status Check**: Validates Qdrant collections exist and are populated
-
-### ✅ **SAFE TO MODIFY (By Tier)**
-- **Tier 1**: Environment variables, API key configuration
-- **Tier 3**: `src/api/app.py` - Add new FastAPI endpoints (auto-converts to MCP tools)
-- **Tier 4**: `src/mcp/` - MCP server configuration and resources
-- **Tier 5**: `scripts/` - Evaluation, ingestion, and migration utilities, `tests/` - All test files
-
-### ❌ **NEVER MODIFY (Breaks Contracts)**
-- **Tier 3**: `src/rag/` - Core RAG pipeline components, `src/core/settings.py` - Model pinning
-- **Tier 3**: LangChain LCEL patterns in `src/rag/chain.py`, Retrieval factory patterns
-
-## Dual MCP Interface Architecture
-
-The system implements a unique **dual MCP interface** pattern:
-
-```mermaid
-graph LR
-    A[FastAPI App<br/>6 Retrieval Endpoints] --> B[MCP Tools Server<br/>Command Pattern]
-    A --> C[MCP Resources Server<br/>Query Pattern]
-    
-    B --> D[Full RAG Pipeline<br/>LLM Processing]
-    C --> E[Direct Data Access<br/>3-5x Faster]
-    
-    B --> F[MCP Clients<br/>Claude, etc.]
-    C --> F
-    
-    classDef fastapi fill:#e3f2fd
-    classDef mcp fill:#f3e5f5
-    classDef access fill:#e8f5e8
-    
-    class A fastapi
-    class B,C mcp
-    class D,E access
-```
-
-### MCP Tools (Command Pattern)
-- **Purpose**: Execute full RAG pipelines with LLM synthesis
-- **Pattern**: `FastMCP.from_fastapi()` zero-duplication conversion
-- **Use Cases**: Answer generation, context processing, AI-optimized responses
-
-### MCP Resources (Query Pattern - CQRS)
-- **Purpose**: Direct data access for high-performance retrieval
-- **Pattern**: Native FastMCP resource registration
-- **Use Cases**: Raw vector search, metadata-rich results, LLM consumption
-
-## Six Retrieval Strategies
-
-Each strategy implements the factory pattern with consistent interfaces:
-
-```mermaid
-graph TD
-    RF[Retrieval Factory] --> NS[Naive Similarity<br/>Basic vector search]
-    RF --> BM[BM25 Retriever<br/>Keyword-based search]
-    RF --> SC[Semantic Retriever<br/>Advanced semantic chunking]
-    RF --> EN[Ensemble Retriever<br/>Hybrid vector + keyword]
-    RF --> CC[Contextual Compression<br/>AI-powered reranking]
-    RF --> MQ[Multi-Query Retriever<br/>Query expansion]
-    
-    NS --> VC[Vector Collection]
-    BM --> KC[Keyword Collection]
-    SC --> AC[Advanced Collection]
-    EN --> HC[Hybrid Collection]
-    CC --> RC[Reranked Collection]
-    MQ --> EC[Expanded Collection]
-    
-    classDef strategy fill:#e8f5e8
-    classDef collection fill:#fff3e0
-    
-    class NS,BM,SC,EN,CC,MQ strategy
-    class VC,KC,AC,HC,RC,EC collection
-```
-
-### Strategy Characteristics
-
-| Strategy | Complexity | Performance | Use Case |
-|----------|------------|-------------|----------|
-| **Naive Similarity** | Low | High | Simple vector matching |
-| **BM25** | Low | High | Keyword-focused search |
-| **Semantic** | Medium | Medium | Context-aware retrieval |
-| **Ensemble** | High | Medium | Balanced hybrid approach |
-| **Contextual Compression** | High | Low | Quality over quantity |
-| **Multi-Query** | High | Low | Comprehensive coverage |
-
-## LangChain LCEL Implementation
-
-All retrieval strategies use LangChain Expression Language (LCEL) for composable, streaming-capable chains:
+The system achieves zero code duplication through a sophisticated conversion pattern:
 
 ```python
-# Standard LCEL Pattern (IMMUTABLE)
-rag_chain = (
-    RunnableParallel({
+# src/mcp/server.py - Core conversion mechanism
+from fastmcp import FastMCP
+from src.api.app import app
+
+# Single line converts entire FastAPI app to MCP server
+mcp = FastMCP.from_fastapi(app=app)
+
+# Result: 6 FastAPI endpoints → 6 MCP tools automatically
+# Tools: naive_retriever, bm25_retriever, semantic_retriever, etc.
+```
+
+### CQRS Implementation Detail
+
+**Command Pattern (MCP Tools)**: 
+- Inherits all FastAPI route handlers unchanged
+- Maintains request/response schemas via Pydantic
+- Preserves middleware chain (Phoenix tracing, Redis caching)
+
+**Query Pattern (MCP Resources)**:
+- Native FastMCP resource handlers in `src/mcp/resources.py`
+- Direct Qdrant access bypassing LangChain pipeline
+- URI pattern matching: `retriever://strategy_name/{query}`
+
+### Performance Characteristics
+
+| Interface | Processing Time | Memory Usage | Use Case |
+|-----------|----------------|--------------|----------|
+| **FastAPI Direct** | 15-25 sec | Medium | HTTP integrations |
+| **MCP Tools** | 20-30 sec | Medium | AI agent commands |
+| **MCP Resources** | 3-5 sec | Low | AI agent queries |
+
+## Retrieval Strategy Implementation Details
+
+### Factory Pattern Implementation
+
+```python
+# src/rag/retriever.py - Strategy factory
+def create_retriever(strategy: str, vectorstore: VectorStore, **kwargs) -> BaseRetriever:
+    """Factory function with consistent interfaces across all strategies"""
+    
+    strategies = {
+        "naive": lambda: vectorstore.as_retriever(search_kwargs=kwargs),
+        "bm25": lambda: BM25Retriever.from_documents(documents, **kwargs),
+        "semantic": lambda: SemanticRetriever(vectorstore, chunk_size=200, **kwargs),
+        "ensemble": lambda: EnsembleRetriever(
+            retrievers=[vectorstore.as_retriever(), bm25_retriever],
+            weights=[0.7, 0.3]
+        ),
+        "contextual_compression": lambda: ContextualCompressionRetriever(
+            base_compressor=CohereRerank(),
+            base_retriever=vectorstore.as_retriever()
+        ),
+        "multi_query": lambda: MultiQueryRetriever.from_llm(
+            retriever=vectorstore.as_retriever(),
+            llm=ChatOpenAI(model="gpt-4.1-mini")
+        )
+    }
+    
+    return strategies[strategy]()
+```
+
+### Performance Optimization Techniques
+
+| Strategy | Optimization | Technical Detail |
+|----------|-------------|-----------------|
+| **Naive** | Vector similarity caching | Redis cache with embedding hash keys |
+| **BM25** | Term frequency precomputation | Sparse matrix storage in memory |
+| **Semantic** | Chunk size optimization | 200-token chunks with 50-token overlap |
+| **Ensemble** | Weighted score fusion | Linear combination with normalized scores |
+| **Compression** | Cohere reranking | Top-K filtering before LLM reranking |
+| **Multi-Query** | Query variation caching | Cache query expansions by semantic similarity |
+
+## LangChain LCEL Implementation Internals
+
+### Core Chain Architecture
+
+```python
+# src/rag/chain.py - LCEL implementation pattern
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableWithFallbacks
+from langchain_core.output_parsers import StrOutputParser
+
+def create_rag_chain(retriever: BaseRetriever, llm: BaseChatModel) -> Runnable:
+    """Production LCEL chain with parallel processing and error handling"""
+    
+    # Parallel execution for performance
+    context_chain = RunnableParallel({
         "context": retriever | format_docs,
-        "question": RunnablePassthrough()
+        "question": RunnablePassthrough(),
+        "metadata": retriever | extract_metadata
     })
-    | prompt
-    | llm
-    | StrOutputParser()
-)
+    
+    # Main processing chain
+    main_chain = (
+        context_chain
+        | ChatPromptTemplate.from_template(RAG_PROMPT_TEMPLATE)
+        | llm
+        | StrOutputParser()
+    )
+    
+    # Fallback chain for error resilience
+    fallback_chain = (
+        RunnableParallel({"question": RunnablePassthrough()})
+        | ChatPromptTemplate.from_template(FALLBACK_PROMPT_TEMPLATE)
+        | llm
+        | StrOutputParser()
+    )
+    
+    # Combined resilient chain
+    return RunnableWithFallbacks(
+        runnable=main_chain,
+        fallbacks=[fallback_chain],
+        exception_key="error"
+    )
 ```
 
-### Chain Composition Patterns
+### Advanced Chain Features
 
-#### Basic RAG Chain
+#### Streaming Implementation
 ```python
-def create_rag_chain(retriever, llm, prompt_template=None):
-    """Standard RAG chain with parallel retrieval"""
-    # Implementation follows LCEL patterns
+# Async streaming support with backpressure handling
+async def stream_rag_response(chain: Runnable, query: str):
+    async for chunk in chain.astream({"question": query}):
+        yield chunk
 ```
 
-#### Resilient Chain with Fallbacks
+#### Caching Integration
 ```python
-def create_resilient_rag_chain(primary_retriever, fallback_retriever, llm):
-    """RAG chain with automatic fallback mechanisms"""
-    # Uses RunnableWithFallbacks for error handling
+# Redis-backed LCEL caching
+from langchain.cache import RedisCache
+import langchain
+
+langchain.llm_cache = RedisCache(redis_=redis_client)
 ```
 
-#### Streaming Chain
+#### Phoenix Tracing Integration
 ```python
-async def create_streaming_rag_chain(retriever, llm):
-    """Async RAG chain with streaming support"""
-    # Supports real-time response streaming
+# Automatic LCEL operation tracing
+@tracer.start_as_current_span("rag_chain_execution")
+def execute_chain(chain: Runnable, input_data: dict) -> str:
+    span = tracer.get_current_span()
+    span.set_attribute("retrieval_strategy", input_data.get("strategy"))
+    return chain.invoke(input_data)
 ```
 
-## External MCP Ecosystem Integration
+## Data Architecture & Storage Patterns
 
-The system integrates with external MCP servers for enhanced capabilities:
+### Vector Storage Implementation (Qdrant)
 
-```mermaid
-graph LR
-    AR[Advanced RAG<br/>Local System] --> ES[External MCP<br/>Ecosystem]
+```python
+# src/rag/vectorstore.py - Production Qdrant configuration
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+
+def create_qdrant_collection(collection_name: str, vector_size: int = 1536):
+    """Production-optimized Qdrant collection setup"""
     
-    ES --> CS[qdrant-code-snippets<br/>:8002]
-    ES --> SM[qdrant-semantic-memory<br/>:8003]
-    ES --> AD[ai-docs-server<br/>Documentation]
-    ES --> PH[phoenix<br/>:6006<br/>Telemetry]
-    ES --> ME[memory<br/>Knowledge Graph]
+    client = QdrantClient("localhost", port=6333)
     
-    classDef local fill:#e3f2fd
-    classDef external fill:#f3e5f5
-    
-    class AR local
-    class CS,SM,AD,PH,ME external
+    client.create_collection(
+        collection_name=collection_name,
+        vectors_config=VectorParams(
+            size=vector_size,  # text-embedding-3-small dimensions
+            distance=Distance.COSINE,
+            on_disk=True  # Persist to disk for durability
+        ),
+        # Production optimizations
+        optimizers_config=models.OptimizersConfig(
+            default_segment_number=2,
+            max_segment_size=20000,
+            memmap_threshold=20000,
+            indexing_threshold=20000,
+        ),
+        hnsw_config=models.HnswConfig(
+            m=16,  # Number of connections per layer
+            ef_construct=200,  # Size of dynamic candidate list
+            full_scan_threshold=10000  # Threshold for full scan vs HNSW
+        )
+    )
 ```
 
-### Three-Tier Memory Architecture
+### Caching Strategy Implementation
 
-1. **Knowledge Graph Memory** (`memory` MCP): Structured entities, relationships, observations
-2. **Semantic Memory** (`qdrant-semantic-memory`): Contextual insights and patterns  
-3. **Telemetry Data** (`phoenix`): Performance metrics and experiment tracking
-
-## Data Architecture
-
-### Vector Storage (Qdrant)
-- **Collections**: `johnwick_baseline`, `johnwick_semantic`
-- **Embedding Model**: `text-embedding-3-small` (IMMUTABLE)
-- **Index Configuration**: Optimized for production retrieval performance
-
-### Caching Strategy (Redis)
-- **LRU Cache**: Repeated query optimization
-- **TTL Configuration**: Configurable expiration policies
-- **Performance Monitoring**: Built-in metrics via RedisInsight
-
-### Document Processing Pipeline
-```mermaid
-graph LR
-    CSV[CSV Data<br/>John Wick Reviews] --> IP[Ingestion Pipeline]
-    IP --> SC[Semantic Chunking]
-    SC --> EB[Embedding Generation]
-    EB --> VC[Vector Collections]
-    VC --> RS[Retrieval Strategies]
+```python
+# src/integrations/redis_client.py - Multi-level caching
+class CacheStrategy:
+    """Production caching with TTL and memory management"""
     
-    classDef data fill:#fff3e0
-    classDef process fill:#e8f5e8
-    classDef storage fill:#f3e5f5
-    
-    class CSV data
-    class IP,SC,EB process
-    class VC,RS storage
+    def __init__(self, redis_client):
+        self.redis = redis_client
+        self.local_cache = {}  # In-memory L1 cache
+        
+    async def get_embedding_cache(self, text_hash: str) -> Optional[List[float]]:
+        # L1: Memory cache (fastest)
+        if text_hash in self.local_cache:
+            return self.local_cache[text_hash]
+            
+        # L2: Redis cache (distributed)
+        cached = await self.redis.get(f"embedding:{text_hash}")
+        if cached:
+            embedding = pickle.loads(cached)
+            self.local_cache[text_hash] = embedding  # Promote to L1
+            return embedding
+            
+        return None
+        
+    async def set_embedding_cache(self, text_hash: str, embedding: List[float]):
+        # Store in both levels
+        self.local_cache[text_hash] = embedding
+        await self.redis.setex(
+            f"embedding:{text_hash}", 
+            3600,  # 1 hour TTL
+            pickle.dumps(embedding)
+        )
 ```
 
-## Observability & Telemetry
+## Phoenix Telemetry Implementation
 
-### Phoenix Integration (AI Agent Observability)
-- **Automatic Tracing**: All retrieval operations and agent decision points
-- **Experiment Tracking**: `johnwick_golden_testset` for performance analysis
-- **Real-time Monitoring**: Agent behavior analysis and performance optimization
+### Automatic Instrumentation
+```python
+# src/integrations/phoenix_mcp.py - Phoenix tracing integration
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-### Telemetry Use Cases (Samuel Colvin's MCP Pattern)
-- **Agent Performance Analysis**: Retrieval strategy effectiveness measurement
-- **Debugging Agent Decisions**: Full context tracing through agent reasoning
-- **Performance Optimization**: Bottleneck identification in agent workflows
-- **Experiment Comparison**: Quantified metrics comparison across RAG strategies
+def setup_phoenix_tracing():
+    """Configure Phoenix telemetry for RAG operations"""
+    
+    # Phoenix OTLP endpoint
+    otlp_exporter = OTLPSpanExporter(
+        endpoint="http://localhost:6006/v1/traces",
+        insecure=True
+    )
+    
+    # Batch processor for performance
+    span_processor = BatchSpanProcessor(otlp_exporter)
+    
+    # Provider with project correlation
+    tracer_provider = TracerProvider(
+        resource=Resource.create({
+            "service.name": "advanced-rag",
+            "project.name": "johnwick_retrieval",
+            "version": "2.5"
+        })
+    )
+    
+    tracer_provider.add_span_processor(span_processor)
+    trace.set_tracer_provider(tracer_provider)
+    
+    return trace.get_tracer(__name__)
 
-## Schema Management (MCP 2025-03-26 Compliance)
-
-### Native Schema Discovery (Recommended)
-```bash
-# Streamable HTTP transport with native MCP discovery
-curl -X POST http://127.0.0.1:8000/mcp \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
+# Chain instrumentation
+@tracer.start_as_current_span("rag_chain_execution")
+def execute_instrumented_chain(chain: Runnable, input_data: dict) -> str:
+    span = trace.get_current_span()
+    span.set_attribute("retrieval.strategy", input_data.get("strategy"))
+    span.set_attribute("query.text", input_data.get("question"))
+    
+    # Execute with automatic tracing
+    result = chain.invoke(input_data)
+    
+    span.set_attribute("response.length", len(result))
+    span.set_attribute("documents.retrieved", input_data.get("doc_count", 0))
+    
+    return result
 ```
 
-### Configuration-Driven Management
-- **mcp_config.toml**: Central configuration for protocol compliance
-- **Tool Annotations**: Governance, trust & safety, resource management
-- **Validation Pipeline**: JSON Schema compliance against official MCP specification
+### Performance Monitoring Patterns
+```python
+# Retrieval strategy performance tracking
+class InstrumentedRetriever:
+    def __init__(self, base_retriever: BaseRetriever, strategy_name: str):
+        self.base_retriever = base_retriever
+        self.strategy_name = strategy_name
+        self.tracer = trace.get_tracer(__name__)
+    
+    @trace_method("vector_search")
+    def retrieve(self, query: str) -> List[Document]:
+        with self.tracer.start_as_current_span(f"retrieve_{self.strategy_name}") as span:
+            start_time = time.time()
+            
+            # Execute retrieval
+            documents = self.base_retriever.get_relevant_documents(query)
+            
+            # Record metrics
+            span.set_attribute("retrieval.latency_ms", (time.time() - start_time) * 1000)
+            span.set_attribute("retrieval.document_count", len(documents))
+            span.set_attribute("retrieval.strategy", self.strategy_name)
+            
+            return documents
+```
 
-## Security & Governance
+## Advanced Error Handling & Resilience
 
-### Model Context Protocol Security
-- **Read-Only Operations**: RAG retrieval tools are non-destructive
-- **Data Classification**: Public data (movie reviews) with appropriate annotations
-- **Content Filtering**: Built-in filtering with rate limiting
-- **Audit Logging**: Comprehensive operation tracking
+### Circuit Breaker Pattern for External Services
+```python
+# src/core/resilience.py - Production error handling
+from tenacity import retry, stop_after_attempt, wait_exponential
+import asyncio
+from typing import Optional, Callable
 
-### Access Control
-- **API Keys**: Required for OpenAI and Cohere integrations
-- **Environment Isolation**: Virtual environment enforcement
-- **Permission Management**: Claude Code CLI permission patterns for MCP tools
+class CircuitBreaker:
+    """Circuit breaker for external service calls"""
+    
+    def __init__(self, failure_threshold: int = 5, timeout: int = 60):
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.failure_count = 0
+        self.last_failure_time = 0
+        self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
+    
+    async def call(self, func: Callable, *args, **kwargs):
+        if self.state == "OPEN":
+            if time.time() - self.last_failure_time < self.timeout:
+                raise Exception("Circuit breaker is OPEN")
+            else:
+                self.state = "HALF_OPEN"
+        
+        try:
+            result = await func(*args, **kwargs)
+            if self.state == "HALF_OPEN":
+                self.state = "CLOSED"
+                self.failure_count = 0
+            return result
+        except Exception as e:
+            self.failure_count += 1
+            self.last_failure_time = time.time()
+            
+            if self.failure_count >= self.failure_threshold:
+                self.state = "OPEN"
+            
+            raise e
 
-## Performance Optimization
+# Usage in retrieval chains
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10))
+async def resilient_llm_call(llm: BaseChatModel, messages: List[BaseMessage]):
+    """LLM call with automatic retry and exponential backoff"""
+    circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=30)
+    
+    return await circuit_breaker.call(
+        llm.ainvoke,
+        messages
+    )
+```
 
-### Retrieval Performance
-- **Hybrid Search**: Configurable weight balancing (vector: 0.7, BM25: 0.3)
-- **Score Normalization**: Optimized result ranking across strategies
-- **Parallel Processing**: LCEL parallel retrieval and context preparation
+### Graceful Degradation Strategies
+```python
+# src/rag/fallback_chains.py - Production fallback patterns
+def create_resilient_retrieval_chain():
+    """Multi-tier fallback chain for production reliability"""
+    
+    # Primary: Semantic retrieval with reranking
+    primary_chain = (
+        semantic_retriever 
+        | CohereRerank(top_k=5)
+        | format_docs
+        | ChatPromptTemplate.from_template(DETAILED_PROMPT)
+        | ChatOpenAI(model="gpt-4.1-mini")
+        | StrOutputParser()
+    )
+    
+    # Secondary: Simple vector similarity
+    secondary_chain = (
+        naive_retriever
+        | format_docs  
+        | ChatPromptTemplate.from_template(SIMPLE_PROMPT)
+        | ChatOpenAI(model="gpt-4.1-mini", temperature=0.1)
+        | StrOutputParser()
+    )
+    
+    # Tertiary: Knowledge-based fallback
+    tertiary_chain = (
+        RunnablePassthrough()
+        | ChatPromptTemplate.from_template(KNOWLEDGE_PROMPT)
+        | ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
+        | StrOutputParser()
+    )
+    
+    # Combine with fallbacks
+    return RunnableWithFallbacks(
+        runnable=primary_chain,
+        fallbacks=[secondary_chain, tertiary_chain],
+        exception_key="error",
+        exception_to_string=lambda e: f"Error: {str(e)}"
+    )
+```
 
-### Caching Strategies
-- **Embedding Cache**: LRU cache for repeated queries
-- **Retrieval Cache**: Redis-based result caching with TTL
-- **Chain Cache**: LangChain built-in caching mechanisms
+## Performance Optimization Internals
 
-### Memory Management
-- **Resource Annotations**: Memory usage classification (low/medium/high)
-- **Intensive Operation Handling**: Longer cache TTL for complex operations
-- **Connection Pooling**: Optimized database connections for production workloads
+### Vector Index Optimization
+```python
+# src/rag/vectorstore.py - HNSW parameter tuning
+def optimize_qdrant_performance(collection_name: str, expected_queries_per_second: int):
+    """Optimize Qdrant HNSW parameters based on usage patterns"""
+    
+    # Calculate optimal parameters based on collection size and QPS
+    collection_info = client.get_collection(collection_name)
+    points_count = collection_info.points_count
+    
+    # Dynamic HNSW configuration
+    if points_count < 10000:
+        # Small collection: prioritize recall
+        hnsw_config = models.HnswConfig(
+            m=32,  # Higher connectivity for better recall
+            ef_construct=200,
+            full_scan_threshold=5000
+        )
+    elif expected_queries_per_second > 100:
+        # High QPS: prioritize speed
+        hnsw_config = models.HnswConfig(
+            m=16,  # Lower connectivity for faster search
+            ef_construct=100,
+            full_scan_threshold=1000
+        )
+    else:
+        # Balanced configuration
+        hnsw_config = models.HnswConfig(
+            m=24,
+            ef_construct=150,
+            full_scan_threshold=2000
+        )
+    
+    # Update collection with optimized parameters
+    client.update_collection(
+        collection_name=collection_name,
+        hnsw_config=hnsw_config
+    )
+```
 
-## Development Guidelines
+### Advanced Caching Implementation
+```python
+# src/integrations/redis_client.py - Multi-tier caching strategy
+class ProductionCacheManager:
+    """Production-grade caching with memory management"""
+    
+    def __init__(self, redis_client, max_memory_mb: int = 512):
+        self.redis = redis_client
+        self.local_cache = OrderedDict()  # LRU implementation
+        self.max_memory_bytes = max_memory_mb * 1024 * 1024
+        self.current_memory = 0
+    
+    async def get_with_compression(self, key: str) -> Optional[Any]:
+        """Get cached value with automatic compression"""
+        
+        # L1: Memory cache (fastest)
+        if key in self.local_cache:
+            self.local_cache.move_to_end(key)  # LRU update
+            return self.local_cache[key]
+        
+        # L2: Redis with compression
+        compressed_data = await self.redis.get(f"compressed:{key}")
+        if compressed_data:
+            # Decompress and promote to L1
+            data = pickle.loads(lz4.frame.decompress(compressed_data))
+            await self._add_to_local_cache(key, data)
+            return data
+        
+        return None
+    
+    async def set_with_compression(self, key: str, value: Any, ttl: int = 3600):
+        """Set cached value with automatic compression and memory management"""
+        
+        # Serialize and compress
+        serialized = pickle.dumps(value)
+        compressed = lz4.frame.compress(serialized)
+        
+        # Store in Redis with TTL
+        await self.redis.setex(f"compressed:{key}", ttl, compressed)
+        
+        # Add to local cache with memory management
+        await self._add_to_local_cache(key, value)
+    
+    async def _add_to_local_cache(self, key: str, value: Any):
+        """Add to local cache with memory limit enforcement"""
+        
+        value_size = sys.getsizeof(value)
+        
+        # Evict old entries if memory limit exceeded
+        while (self.current_memory + value_size) > self.max_memory_bytes and self.local_cache:
+            oldest_key, oldest_value = self.local_cache.popitem(last=False)
+            self.current_memory -= sys.getsizeof(oldest_value)
+        
+        # Add new entry
+        self.local_cache[key] = value
+        self.current_memory += value_size
+```
 
-### Adding New Retrieval Strategies
-1. **Add FastAPI endpoint** in `src/api/app.py` (auto-converts to MCP tool)
-2. **Implement retriever** in `src/rag/retriever.py` using factory pattern
-3. **Create LCEL chain** in `src/rag/chain.py` following established patterns
-4. **Never modify** existing retrieval logic - only add new strategies
-
-### MCP Integration Best Practices
-- **Use FastMCP.from_fastapi()** for zero duplication
-- **Preserve RAG patterns** - MCP is interface only
-- **Handle errors gracefully** with proper logging and fallbacks
-- **Test both FastAPI and MCP** endpoints for consistency
-
-### Testing Strategy
-- **Unit Tests**: Individual component isolation
-- **Integration Tests**: Cross-system validation and MCP conversion
-- **Performance Tests**: Retrieval strategy comparison and optimization
-- **Schema Compliance**: MCP protocol validation and governance
-
-This architecture enables production-ready RAG systems with comprehensive MCP integration, external ecosystem connectivity, and AI agent observability patterns.
+This implementation provides deep technical details for production optimization, performance monitoring, and advanced error handling patterns specific to the Advanced RAG system architecture.

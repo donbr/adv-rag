@@ -161,7 +161,7 @@ netstat -tulpn | grep 6024
 
 # Check Qdrant
 docker ps | grep qdrant
-curl http://localhost:6333/health
+curl http://localhost:6333
 ```
 
 **Memory Issues**:

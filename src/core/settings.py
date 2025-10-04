@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     redis_socket_keepalive: bool = True
     redis_health_check_interval: int = 30
     
+    # Cache Feature Flag - Enable/disable caching for A/B testing
+    cache_enabled: bool = Field(
+        default=True,
+        description="Enable/disable Redis caching for retrieval strategy comparison"
+    )
+    
     # MCP Configuration
     mcp_request_timeout: int = 30
     max_snippets: int = 5

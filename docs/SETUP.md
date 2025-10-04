@@ -1,114 +1,123 @@
 # Advanced RAG System - Complete Setup Guide
 
-## 🚀 Master Bootstrap Walkthrough
+## 🚀 Quick Start Reference
 
-**This is the authoritative setup guide** - all other documentation references this file for complete instructions.
+📖 **For development guidance after setup**: See **[CLAUDE.md](../CLAUDE.md)** - comprehensive developer guide  
+🚀 **For daily commands**: See **[docs/QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - essential commands by function  
+🚨 **If something breaks**: See **[docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - problem-solving guide
 
-This guide walks you through setting up the complete Advanced RAG system from scratch, including Docker infrastructure, data ingestion, FastAPI server, MCP integration, and telemetry-driven evaluation.
+This guide walks you through the **4-step bootstrap process** to get the Advanced RAG system running.
 
 ### Prerequisites
 - **Docker & Docker Compose** - Infrastructure services
-- **Python 3.13+** - Runtime requirement (specified in pyproject.toml)
+- **Python 3.13+** - Runtime requirement
 - **uv package manager** - Recommended for dependency management
 - **OpenAI API key** - Required for LLM and embeddings
 - **Cohere API key** - Required for reranking (optional for basic functionality)
 
-⚠️ **CRITICAL**: Virtual environment activation is REQUIRED for all development work
+⚠️ **CRITICAL**: Virtual environment activation is REQUIRED - see [CLAUDE.md](../CLAUDE.md) for details
 
-## 🔄 Step-by-Step Bootstrap Process
+## 🔄 4-Step Bootstrap Process
 
-### 1. **Infrastructure Foundation** (5 minutes)
+### 1. **Environment Setup** (2 minutes)
 ```bash
 # Clone and setup environment
 git clone <repository>
 cd adv-rag
 
 # Create and activate virtual environment (REQUIRED)
-uv venv
-source .venv/bin/activate  # Linux/Mac
-# OR
-# .venv\Scripts\activate  # Windows
-
-# Install dependencies
-uv sync --dev
+uv venv && source .venv/bin/activate && uv sync --dev
 
 # Configure environment
 cp .env.example .env
 # Edit .env with your API keys:
 # OPENAI_API_KEY=your_key_here
 # COHERE_API_KEY=your_key_here
-
-# Start supporting services
-docker-compose up -d
-
-# Reset docker environment (if needed)
-# docker compose down --volumes --rmi all
-
-# Verify infrastructure health
-curl http://localhost:6333/dashboard    # Qdrant
-curl http://localhost:6006           # Phoenix  
-curl http://localhost:5540           # RedisInsight
 ```
 
-### 2. **Data Ingestion Pipeline** (2-3 minutes)
+**✅ Success Check**: `which python` should show `.venv` path  
+**❌ If this fails**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md#tier-1-environment--dependencies-issues)
+
+### 2. **Infrastructure & Data** (3 minutes)
 ```bash
-# Run complete data ingestion
+# Start Docker services (Qdrant, Redis, Phoenix, RedisInsight)
+docker compose up -d
+
+# Load John Wick movie data
 python scripts/ingestion/csv_ingestion_pipeline.py
-
-# Verify vector stores created
-curl http://localhost:6333/collections
-# Should show: johnwick_baseline, johnwick_semantic
-
-# Evaluate retrieval mechanisms
-python scripts/evaluation/retrieval_method_comparison.py
-
-# Check Phoenix for ingestion telemetry
-open http://localhost:6006
 ```
 
-### 3. **FastAPI Server** (30 seconds)
+**✅ Success Check**: `curl http://localhost:6333/collections` shows `johnwick_baseline`, `johnwick_semantic`  
+**❌ If this fails**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md#tier-2-infrastructure-services-issues)
+
+### 3. **Start API Server** (30 seconds)  
 ```bash
-# Start the core RAG FastAPI server
+# Start FastAPI server with 6 retrieval endpoints
 python run.py
 
-# In another terminal - verify endpoints
-curl http://localhost:8000/docs
-
-# Test a retrieval endpoint
+# Test in another terminal
 curl -X POST "http://localhost:8000/invoke/semantic_retriever" \
      -H "Content-Type: application/json" \
      -d '{"question": "What makes John Wick movies popular?"}'
 ```
 
-### 4. **MCP Server Integration** (30 seconds)
+**✅ Success Check**: Should return JSON with `answer` and `context_document_count`  
+**❌ If this fails**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md#tier-4-mcp-interface-layer-issues)
+
+### 4. **MCP Integration** (60 seconds)
 ```bash
 # Start MCP server (converts FastAPI → MCP tools)
 python src/mcp/server.py
 
-# In another terminal - verify MCP tools
-PYTHONPATH=$(pwd) python tests/integration/verify_mcp.py
-
-# Expected: 6 retrieval tools available
+# Verify MCP tools
+python tests/integration/verify_mcp.py
 ```
 
-### 4b. **FastMCP Streamable Mode**
+**✅ Success Check**: Should show "All expected FastAPI endpoints converted to MCP tools"  
+**❌ If this fails**: See [MCP troubleshooting guide](MCP_COMMAND_LINE_GUIDE.md#troubleshooting)
 
-After stopping the server above, run this variant to enable streamable HTTP mode:
+### MCP Resources Server (CQRS Query Pattern)
+```bash
+# Start additional MCP resources server for direct data access
+python src/mcp/resources.py
+
+# Test resources
+python tests/integration/test_cqrs_resources.py
+```
+
+## ✅ Success Validation
+
+After completing the 4 steps, verify everything is working:
 
 ```bash
-# Activate virtual environment first
-source .venv/bin/activate
+# Quick system check (recommended)
+python scripts/status.py
 
-# Run with Python directly
-python src/mcp/server.py
-
-# Alternative: If fastmcp CLI is installed
-# fastmcp run src/mcp/server.py --transport streamable-http --host 127.0.0.1 --port 8001
+# Expected output - all tiers operational:
+# ✅ Tier 1 (Environment): Ready  
+# ✅ Tier 2 (Infrastructure): All Services Running
+# ✅ Tier 3 (Application): FastAPI Running
+# ✅ Tier 4 (MCP Interface): MCP Servers Available
+# ✅ Tier 5 (Data): Collections Loaded
 ```
 
-**Note**: The server will start on `http://127.0.0.1:8001/mcp` for schema discovery via native MCP `rpc.discover` method.
+## 🎯 What You Now Have
 
-### 5. **Claude Desktop Integration** (Optional)
+- ✅ **6 Retrieval Strategies** ready for testing
+- ✅ **Dual MCP Interfaces** (Tools + Resources) 
+- ✅ **Phoenix Telemetry** at http://localhost:6006
+- ✅ **John Wick Dataset** loaded for immediate testing
+
+## 🚀 Next Steps
+
+1. **Read [CLAUDE.md](../CLAUDE.md)** - comprehensive developer guide with commands and constraints
+2. **Try different retrieval strategies** - see [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for all endpoints
+3. **Explore Phoenix dashboard** - http://localhost:6006 for telemetry and performance analysis
+4. **Run benchmarks** - `python scripts/evaluation/retrieval_method_comparison.py`
+
+## 🔧 Optional Advanced Setup
+
+### Claude Desktop Integration
 ```json
 // Add to Claude Desktop MCP settings:
 {
@@ -125,101 +134,21 @@ python src/mcp/server.py
 }
 ```
 
-### 6. **System Status Verification** (NEW)
+## 🚨 If Something Goes Wrong
+
+**Quick Reset** (nuclear option):
 ```bash
-# Run comprehensive system status check
-python scripts/status.py
-
-# Should show all green checkmarks for:
-# - Tier 1 (Environment): ✅ Ready
-# - Tier 3 (Infrastructure): ✅ All Services Running  
-# - Tier 4 (Application): ✅ FastAPI Running
-# - Data: ✅ Collections Loaded
-```
-
-### 7. **Telemetry-Driven Evaluation** (2-3 minutes)
-```bash
-# Run comprehensive retrieval strategy evaluation
-python scripts/evaluation/retrieval_method_comparison.py
-
-# Analyze results in Phoenix dashboard
-open http://localhost:6006
-# Compare: naive, bm25, compression, multiquery, ensemble, semantic
-```
-
-## 📊 Key System Components
-
-| Component | Purpose | Port | Status Check |
-|-----------|---------|------|--------------|
-| **Qdrant** | Vector database storage | 6333 | `curl localhost:6333/health` |
-| **Phoenix** | Telemetry & monitoring | 6006 | `curl localhost:6006` |
-| **Redis** | Future caching layer | 6379 | `redis-cli ping` |
-| **FastAPI** | 6 retrieval endpoints | 8000 | `curl localhost:8000/health` |
-| **MCP Server** | Tool wrapper for Claude | stdio | `python verify_mcp.py` |
-
-## 🎯 Success Validation
-
-After complete bootstrap, you should have:
-- ✅ **4 Docker services** running (qdrant, phoenix, redis, redisinsight)
-- ✅ **2 Vector collections** populated with John Wick movie data
-- ✅ **6 FastAPI endpoints** responding to retrieval queries
-- ✅ **6 MCP tools** available for Claude Desktop integration
-- ✅ **Phoenix telemetry** tracking all operations automatically
-- ✅ **Test validation** passing for both FastAPI and MCP interfaces
-
-## 🚨 Troubleshooting Quick Reference
-
-```bash
-# Reset everything if issues occur
-docker-compose down -v && docker-compose up -d
+docker compose down -v && docker compose up -d
 python scripts/ingestion/csv_ingestion_pipeline.py
-python run.py &
-python src/mcp/server.py &
-
-# Check service health
-docker-compose ps          # All services Up
-curl localhost:6333/health # Qdrant OK  
-curl localhost:8000/health # FastAPI OK
-python tests/integration/verify_mcp.py       # MCP tools available
+python run.py
 ```
 
-## 🔗 Next Steps After Bootstrap
+**Specific Issues**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed problem-solving by component
 
-1. **Explore Phoenix telemetry** - Monitor real-time performance at http://localhost:6006
-2. **Test retrieval strategies** - Compare performance across all 6 methods
-3. **Integrate with Claude** - Use MCP tools in Claude Desktop
-4. **Optimize performance** - Use telemetry insights for improvements
-5. **Scale for production** - Apply production configurations
+---
 
-## 🧪 Advanced Testing & Development
-
-### MCP Development Tools
-```bash
-# Launch the MCP inspector for development
-DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/server.py
-
-DANGEROUSLY_OMIT_AUTH=true fastmcp dev src/mcp/resources.py
-
-# Test with external MCP tools
-DANGEROUSLY_OMIT_AUTH=true npx @modelcontextprotocol/inspector npx @arizeai/phoenix-mcp@latest --baseUrl http://localhost:6006
-
-# Test Redis integration
-python scripts/testing/test_redis_integration.py
-
-# Run semantic architecture benchmark
-python scripts/evaluation/semantic_architecture_benchmark.py
-```
-
-### Performance Testing
-```bash
-# Compare transport methods
-python scripts/mcp/compare_transports.py
-
-# Schema validation
-python scripts/mcp/validate_mcp_schema.py
-
-# Full integration test suite
-pytest tests/integration/ -v
-```
-
-This system provides a complete telemetry-driven RAG evaluation platform with seamless FastAPI ↔ MCP integration for both development and production use cases. 
+**📚 Documentation Navigation**:
+- **[CLAUDE.md](../CLAUDE.md)** - Main developer guide with all commands and constraints
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Daily command reference
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem solving guide
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Deep technical details 

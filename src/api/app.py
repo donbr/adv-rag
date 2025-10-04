@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 from src.core.settings import get_settings
 from src.integrations.redis_client import redis_client, get_redis
+from src.integrations.cache import get_cache, CacheInterface
 from redis import asyncio as aioredis
 
 from src.rag.chain import (
@@ -49,35 +50,33 @@ def generate_cache_key(endpoint: str, request_data: dict) -> str:
     cache_data = f"{endpoint}:{json.dumps(request_data, sort_keys=True)}"
     return f"mcp_cache:{hashlib.md5(cache_data.encode()).hexdigest()}"
 
-async def get_cached_response(cache_key: str, redis: aioredis.Redis) -> Optional[dict]:
-    """Get cached response if available"""
-    try:
-        cached = await redis.get(cache_key)
-        if cached:
-            logger.info(f"✅ Cache hit for key: {cache_key[:20]}...")
-            return json.loads(cached)
-    except Exception as e:
-        logger.warning(f"⚠️ Cache read error: {e}")
+async def get_cached_response(cache_key: str, cache: CacheInterface) -> Optional[dict]:
+    """Get cached response if available using cache abstraction"""
+    cached = await cache.get(cache_key)
+    if cached:
+        logger.info(f"✅ Cache hit for key: {cache_key[:20]}...")
+        return json.loads(cached)
     return None
 
-async def cache_response(cache_key: str, response_data: dict, redis: aioredis.Redis, ttl: int = None):
-    """Cache response with TTL (default from settings)"""
+async def cache_response(cache_key: str, response_data: dict, cache: CacheInterface, ttl: int = None):
+    """Cache response with TTL using cache abstraction"""
     if ttl is None:
         settings = get_settings()
         ttl = settings.redis_cache_ttl
-    try:
-        await redis.setex(
-            cache_key, 
-            ttl, 
-            json.dumps(response_data, default=str)
-        )
+    
+    success = await cache.set(
+        cache_key, 
+        json.dumps(response_data, default=str),
+        ttl
+    )
+    if success:
         logger.info(f"💾 Cached response for key: {cache_key[:20]}...")
-    except Exception as e:
-        logger.warning(f"⚠️ Cache write error: {e}")
+    else:
+        logger.warning(f"⚠️ Failed to cache response for key: {cache_key[:20]}...")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Modern FastAPI lifespan management with Redis and Phoenix tracing"""
+    """Modern FastAPI lifespan management with conditional Redis and Phoenix tracing"""
     # Startup with Phoenix tracing
     with tracer.start_as_current_span("FastAPI.application.startup") as span:
         logger.info("🚀 Starting FastAPI application with Phoenix tracing...")
@@ -88,8 +87,21 @@ async def lifespan(app: FastAPI):
         span.set_attribute("fastapi.app.phoenix_project", project_name)
         span.add_event("application.startup.start")
         
-        await redis_client.connect()
-        span.add_event("redis.connection.established")
+        # Check cache configuration
+        settings = get_settings()
+        span.set_attribute("fastapi.cache.enabled", settings.cache_enabled)
+        
+        if settings.cache_enabled:
+            try:
+                await redis_client.connect()
+                span.add_event("redis.connection.established")
+                logger.info("✅ Redis cache enabled and connected")
+            except Exception as e:
+                logger.warning(f"⚠️ Redis connection failed, using fallback cache: {e}")
+                span.add_event("redis.connection.failed", {"error": str(e)})
+        else:
+            logger.info("🚫 Cache disabled by configuration")
+            span.add_event("cache.disabled")
         
         # Initialize chains with tracing
         available_chains = {
@@ -134,8 +146,15 @@ async def lifespan(app: FastAPI):
     with tracer.start_as_current_span("FastAPI.application.shutdown") as span:
         logger.info("🛑 Shutting down FastAPI application...")
         span.add_event("application.shutdown.start")
-        await redis_client.disconnect()
-        span.add_event("redis.connection.closed")
+        
+        settings = get_settings()
+        if settings.cache_enabled:
+            try:
+                await redis_client.disconnect()
+                span.add_event("redis.connection.closed")
+            except Exception as e:
+                logger.warning(f"⚠️ Error disconnecting Redis: {e}")
+        
         span.add_event("application.shutdown.complete")
 
 app = FastAPI(
@@ -152,8 +171,11 @@ class AnswerResponse(BaseModel):
     answer: str
     context_document_count: int
 
-async def invoke_chain_logic(chain, question: str, chain_name: str, redis: aioredis.Redis = Depends(get_redis)):
-    """Enhanced chain invocation with Redis caching and Phoenix tracing"""
+async def invoke_chain_logic(chain, question: str, chain_name: str):
+    """Enhanced chain invocation with cache abstraction and Phoenix tracing"""
+    # Get cache instance based on configuration
+    cache = await get_cache()
+    
     # Enhanced chain invocation with explicit Phoenix tracing
     with tracer.start_as_current_span(f"FastAPI.chain.{chain_name.lower().replace(' ', '_')}") as span:
         if chain is None:
@@ -177,7 +199,7 @@ async def invoke_chain_logic(chain, question: str, chain_name: str, redis: aiore
         
         # Check cache first
         span.add_event("cache.lookup.start")
-        cached_response = await get_cached_response(cache_key, redis)
+        cached_response = await get_cached_response(cache_key, cache)
         if cached_response:
             span.set_attribute("fastapi.cache.hit", True)
             span.add_event("cache.lookup.hit", {
@@ -221,7 +243,7 @@ async def invoke_chain_logic(chain, question: str, chain_name: str, redis: aiore
             # Cache the response (TTL from settings)
             span.add_event("cache.store.start")
             settings = get_settings()
-            await cache_response(cache_key, response_data, redis)
+            await cache_response(cache_key, response_data, cache)
             span.add_event("cache.store.complete", {"ttl": settings.redis_cache_ttl})
             
             return AnswerResponse(**response_data)
@@ -238,34 +260,34 @@ async def invoke_chain_logic(chain, question: str, chain_name: str, redis: aiore
             raise HTTPException(status_code=500, detail=f"An error occurred while processing your request with {chain_name}.")
 
 @app.post("/invoke/naive_retriever", response_model=AnswerResponse, operation_id="naive_retriever")
-async def invoke_naive_endpoint(request: QuestionRequest, redis: aioredis.Redis = Depends(get_redis)):
+async def invoke_naive_endpoint(request: QuestionRequest):
     """Invokes the Naive Retriever chain for basic similarity search."""
-    return await invoke_chain_logic(NAIVE_RETRIEVAL_CHAIN, request.question, "Naive Retriever Chain", redis)
+    return await invoke_chain_logic(NAIVE_RETRIEVAL_CHAIN, request.question, "Naive Retriever Chain")
 
 @app.post("/invoke/bm25_retriever", response_model=AnswerResponse, operation_id="bm25_retriever")
-async def invoke_bm25_endpoint(request: QuestionRequest, redis: aioredis.Redis = Depends(get_redis)):
+async def invoke_bm25_endpoint(request: QuestionRequest):
     """Invokes the BM25 Retriever chain for keyword-based search."""
-    return await invoke_chain_logic(BM25_RETRIEVAL_CHAIN, request.question, "BM25 Retriever Chain", redis)
+    return await invoke_chain_logic(BM25_RETRIEVAL_CHAIN, request.question, "BM25 Retriever Chain")
 
 @app.post("/invoke/contextual_compression_retriever", response_model=AnswerResponse, operation_id="contextual_compression_retriever")
-async def invoke_contextual_compression_endpoint(request: QuestionRequest, redis: aioredis.Redis = Depends(get_redis)):
+async def invoke_contextual_compression_endpoint(request: QuestionRequest):
     """Invokes the Contextual Compression Retriever chain for compressed context."""
-    return await invoke_chain_logic(CONTEXTUAL_COMPRESSION_CHAIN, request.question, "Contextual Compression Chain", redis)
+    return await invoke_chain_logic(CONTEXTUAL_COMPRESSION_CHAIN, request.question, "Contextual Compression Chain")
 
 @app.post("/invoke/multi_query_retriever", response_model=AnswerResponse, operation_id="multi_query_retriever")
-async def invoke_multi_query_endpoint(request: QuestionRequest, redis: aioredis.Redis = Depends(get_redis)):
+async def invoke_multi_query_endpoint(request: QuestionRequest):
     """Invokes the Multi-Query Retriever chain for enhanced query expansion."""
-    return await invoke_chain_logic(MULTI_QUERY_CHAIN, request.question, "Multi-Query Chain", redis)
+    return await invoke_chain_logic(MULTI_QUERY_CHAIN, request.question, "Multi-Query Chain")
 
 @app.post("/invoke/ensemble_retriever", response_model=AnswerResponse, operation_id="ensemble_retriever")
-async def invoke_ensemble_endpoint(request: QuestionRequest, redis: aioredis.Redis = Depends(get_redis)):
+async def invoke_ensemble_endpoint(request: QuestionRequest):
     """Invokes the Ensemble Retriever chain combining multiple retrieval strategies."""
-    return await invoke_chain_logic(ENSEMBLE_CHAIN, request.question, "Ensemble Chain", redis)
+    return await invoke_chain_logic(ENSEMBLE_CHAIN, request.question, "Ensemble Chain")
 
 @app.post("/invoke/semantic_retriever", response_model=AnswerResponse, operation_id="semantic_retriever")
-async def invoke_semantic_endpoint(request: QuestionRequest, redis: aioredis.Redis = Depends(get_redis)):
+async def invoke_semantic_endpoint(request: QuestionRequest):
     """Invokes the Semantic Retriever chain for advanced semantic search."""
-    return await invoke_chain_logic(SEMANTIC_CHAIN, request.question, "Semantic Chain", redis)
+    return await invoke_chain_logic(SEMANTIC_CHAIN, request.question, "Semantic Chain")
 
 @app.get("/health")
 async def health_check():
@@ -286,27 +308,43 @@ async def health_check():
         }
 
 @app.get("/cache/stats")
-async def cache_stats(redis: aioredis.Redis = Depends(get_redis)):
+async def cache_stats():
     """Get cache statistics with Phoenix tracing"""
     with tracer.start_as_current_span("FastAPI.cache_stats") as span:
         try:
-            span.add_event("redis.info.start")
-            info = await redis.info()
-            keys_count = await redis.dbsize()
+            # Get cache instance and stats
+            cache = await get_cache()
+            cache_stats = cache.get_stats()
             
-            span.set_attribute("fastapi.cache.keys_count", keys_count)
-            span.set_attribute("fastapi.cache.connected_clients", info.get("connected_clients", 0))
-            span.add_event("redis.info.complete", {
-                "keys_count": keys_count,
-                "redis_version": info.get("redis_version", "unknown")
+            span.set_attribute("fastapi.cache.type", cache_stats.get("type", "unknown"))
+            span.set_attribute("fastapi.cache.enabled", cache_stats.get("enabled", True))
+            
+            # For Redis-based caches, try to get additional info
+            if cache_stats.get("type") == "redis" or "l2_stats" in cache_stats:
+                try:
+                    redis = await get_redis()
+                    info = await redis.info()
+                    keys_count = await redis.dbsize()
+                    
+                    cache_stats["redis_info"] = {
+                        "keys_count": keys_count,
+                        "connected_clients": info.get("connected_clients", 0),
+                        "used_memory_human": info.get("used_memory_human", "N/A")
+                    }
+                    
+                    span.set_attribute("fastapi.cache.keys_count", keys_count)
+                    span.set_attribute("fastapi.cache.connected_clients", info.get("connected_clients", 0))
+                except Exception as e:
+                    logger.warning(f"Could not fetch Redis info: {e}")
+            
+            span.add_event("cache.stats.complete", {
+                "type": cache_stats.get("type", "unknown")
             })
             
             return {
-                "redis_version": info.get("redis_version"),
-                "connected_clients": info.get("connected_clients"),
-                "used_memory_human": info.get("used_memory_human"),
-                "total_keys": keys_count,
-                "cache_prefix": "mcp_cache:",
+                "cache_enabled": get_settings().cache_enabled,
+                "cache_type": cache_stats.get("type"),
+                "cache_stats": cache_stats,
                 "phoenix_integration": {
                     "project": project_name,
                     "trace_id": span.get_span_context().trace_id
