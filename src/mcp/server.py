@@ -5,11 +5,48 @@ from datetime import datetime
 import logging
 import sys
 from pathlib import Path
+from logging.handlers import RotatingFileHandler
 from fastmcp import FastMCP
 
-# Configure centralized logging
-from src.core.logging_config import setup_logging
-setup_logging()
+# Configure logging for MCP Tools Server
+LOGS_DIR = "logs"
+LOG_FILENAME = os.path.join(LOGS_DIR, "mcp_tools.log")
+
+def setup_mcp_tools_logging():
+    """Configure logging specifically for MCP Tools Server"""
+    os.makedirs(LOGS_DIR, exist_ok=True)
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    # Check if already configured
+    if any(isinstance(h, RotatingFileHandler) and h.baseFilename == os.path.abspath(LOG_FILENAME) for h in logger.handlers):
+        return
+
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+
+    # File handler with rotation: 1MB per file, keep 5 backup files
+    file_handler = RotatingFileHandler(LOG_FILENAME, maxBytes=1*1024*1024, backupCount=5)
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+
+    # Add handlers if not already present
+    if not any(isinstance(h, logging.StreamHandler) and not isinstance(h, RotatingFileHandler) for h in logger.handlers):
+        logger.addHandler(console_handler)
+    if not any(isinstance(h, RotatingFileHandler) and h.baseFilename == os.path.abspath(LOG_FILENAME) for h in logger.handlers):
+        logger.addHandler(file_handler)
+
+    # Configure third-party loggers
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("uvicorn").setLevel(logging.WARNING)
+    logging.getLogger("fastapi").setLevel(logging.WARNING)
+
+setup_mcp_tools_logging()
 logger = logging.getLogger(__name__)
 
 from phoenix.otel import register
