@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **System Version**: Advanced RAG with CQRS MCP Resources v2.5  
-**Last Updated**: 2025-06-25  
+**Last Updated**: 2025-06-27  
 **Status**: ✅ FULLY OPERATIONAL - All components tested and working  
 **Key Feature**: Dual MCP interface (Tools + Resources) with zero duplication + external MCP ecosystem + comprehensive observability  
 **Python Requirement**: Python >=3.13 (runtime), py311 target (tooling compatibility)
@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a production-ready RAG system with **dual MCP interfaces** and comprehensive telemetry:
 - **6 Retrieval Strategies**: naive, semantic, bm25, compression, multiquery, ensemble
-- **Dual MCP Architecture**: Tools (8 endpoints) + Resources (5 URI patterns) with zero code duplication
+- **Dual MCP Architecture**: Tools (8 endpoints) + Resources (7 URI patterns) with zero code duplication
 - **Phoenix Telemetry Integration**: Complete AI agent observability and experiment tracking
 - **FastAPI→MCP Conversion**: Automatic tools generation via FastMCP
 - **CQRS Pattern**: Command (full processing) vs Query (direct data access) optimization
@@ -38,7 +38,7 @@ This system follows strict **tier-based modification rules**. Understanding thes
 
 ### Non-Negotiable Rules
 - **Model Pinning**: Always use `ChatOpenAI(model="gpt-4.1-mini")` and `OpenAIEmbeddings(model="text-embedding-3-small")`
-- **Virtual Environment**: REQUIRED for all development - system will fail without `.venv` activation
+- **Dependency Management**: Use `uv sync --dev` (never pip) - uv manages virtual environments automatically
 - **MCP Interface Layer**: MCP serves as interface only - never modify core RAG business logic
 - **Import Convention**: Use absolute imports from `src` package structure consistently
 
@@ -50,15 +50,15 @@ Is your change in Tier 4-5? → ✅ PROCEED - Add to interface/tooling layers
 
 ## 🚀 Essential Commands
 
-⚠️ **CRITICAL**: Always activate virtual environment first: `source .venv/bin/activate`
+⚠️ **Note**: uv manages virtual environments automatically - activation optional
 
 ### Quick Start (4 Steps)
 ```bash
 # 1. Environment Setup
-source .venv/bin/activate && uv sync --dev
+uv sync --dev
 
 # 2. Infrastructure & Configuration  
-docker-compose up -d && cp .env.example .env
+docker compose up -d && cp .env.example .env
 # Edit .env with your API keys (OPENAI_API_KEY, COHERE_API_KEY)
 
 # 3. Data & Server
@@ -84,20 +84,29 @@ python src/mcp/resources.py
 
 ### Testing & Validation
 ```bash
-# Run all tests with markers from pytest.ini
-pytest tests/ -v                    # All tests
-pytest tests/ -m unit -v            # Unit tests only
-pytest tests/ -m integration -v     # Integration tests
-pytest tests/ -m requires_llm -v    # Tests needing API keys
+# Option 1: Use uv run (no activation needed)
+uv run pytest tests/ -v                    # All tests
+uv run pytest tests/ -m unit -v            # Unit tests only (fast, no external deps)
+
+# Option 2: Activate environment then run directly
+source .venv/bin/activate
+pytest tests/ -v                           # All tests
+pytest tests/ -m unit -v                   # Unit tests (fast, isolated)
+pytest tests/ -m integration -v            # Integration tests (requires external services)
+pytest tests/ -m requires_llm -v           # Tests needing API keys
+pytest tests/ -m requires_vectordb -v      # Tests needing Qdrant
+pytest tests/ -m slow -v                   # Long-running tests (>5 seconds)
+pytest tests/ -m "not integration" -v      # Skip integration tests (useful for quick checks)
 
 # Test specific components
-pytest tests/rag/test_chain.py::test_semantic_retriever -v
+pytest tests/rag/test_chain.py -v
 bash tests/integration/test_api_endpoints.sh
 python tests/integration/verify_mcp.py
 
 # System health validation
-python scripts/validation/system_health_check.py
-python scripts/status.py --verbose
+python scripts/validation/system_health_check.py  # Comprehensive health check
+python scripts/status.py --verbose         # Enhanced with cache status
+python scripts/status.py                   # Compact 5-tier status check
 ```
 
 ### Code Quality (from pyproject.toml)
@@ -115,6 +124,9 @@ uv sync --dev
 # Ingest sample data (John Wick movie reviews)
 python scripts/ingestion/csv_ingestion_pipeline.py
 
+# Management commands for collections, data operations
+python scripts/manage.py
+
 # Compare all 6 retrieval strategies
 python scripts/evaluation/retrieval_method_comparison.py
 
@@ -125,7 +137,7 @@ python scripts/evaluation/semantic_architecture_benchmark.py
 ### Infrastructure Health Checks
 ```bash
 # Start services
-docker-compose up -d
+docker compose up -d
 
 # Verify all services
 curl http://localhost:6333           # Qdrant: {"title":"qdrant - vector search engine"}
@@ -133,18 +145,14 @@ curl http://localhost:6006           # Phoenix: HTML response
 curl http://localhost:8000/health    # FastAPI: {"status":"healthy"}
 curl http://localhost:6379           # Redis: +PONG
 
+# Check cache status and performance
+curl http://localhost:8000/cache/stats  # Cache configuration and hit rates
+
 # Check collections
 curl http://localhost:6333/collections
 ```
 
 ## 🏗️ Architecture Overview
-
-### Core Components
-- **`src/api/app.py`** - FastAPI server with 6 retrieval endpoints
-- **`src/mcp/server.py`** - MCP Tools via `FastMCP.from_fastapi()` conversion
-- **`src/mcp/resources.py`** - Native FastMCP Resources for CQRS data access
-- **`src/rag/`** - Core RAG components (IMMUTABLE: Tier 3)
-- **`src/core/settings.py`** - Centralized configuration (IMMUTABLE: Tier 1)
 
 ### 6 Retrieval Strategies Available
 | Strategy | Endpoint | Use Case |
@@ -202,15 +210,25 @@ python tests/integration/verify_mcp.py
 # Start resources server
 python src/mcp/resources.py
 
-# Available resources (5 URI patterns):
-# - retriever://semantic_retriever/{query}
-# - retriever://ensemble_retriever/{query}  
+# Available resources (7 total: 6 retrievers + 1 health):
 # - retriever://naive_retriever/{query}
+# - retriever://bm25_retriever/{query}
+# - retriever://contextual_compression_retriever/{query}
+# - retriever://multi_query_retriever/{query}
+# - retriever://ensemble_retriever/{query}
+# - retriever://semantic_retriever/{query}
 # - system://health
 
 # Test resources (OPERATIONAL - All tests pass)
 python tests/integration/test_cqrs_resources.py
 ```
+
+### Critical Architecture Pattern: Zero-Duplication MCP
+The system implements **automatic FastAPI→MCP conversion** using `FastMCP.from_fastapi()`:
+- **Single Source**: FastAPI endpoints define the logic once
+- **Automatic Tools**: MCP Tools server auto-generates from FastAPI routes  
+- **Direct Resources**: MCP Resources server bypasses LLM for speed
+- **No Maintenance**: Changes to FastAPI automatically propagate to MCP Tools
 
 ### 3. External MCP Ecosystem Integration
 Access external MCP services via Claude Code CLI:
@@ -236,7 +254,8 @@ curl -X POST http://127.0.0.1:8000/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"rpc.discover","params":{}}'
 
 # Legacy schema export (development only)
-python scripts/mcp/export_mcp_schema.py
+python scripts/mcp/export_mcp_schema_native.py
+python scripts/mcp/export_mcp_schema_stdio.py
 python scripts/mcp/validate_mcp_schema.py
 ```
 
@@ -261,6 +280,14 @@ open http://localhost:6006
 ```
 
 ## 🔄 Development Patterns
+
+### Key Architectural Insights
+**Understanding these patterns is critical for productive development:**
+
+1. **Dependency Injection Pattern**: All external services (Redis, cache, settings) use FastAPI's dependency injection
+2. **Factory Pattern**: Retrievers are created via factory functions, allowing runtime strategy selection
+3. **Chain Composition**: LangChain LCEL patterns are immutable - extend via new chains, don't modify existing
+4. **Interface Segregation**: `CacheInterface`, `QdrantResourceProvider` abstract implementations for testability
 
 ### Adding New Retrieval Strategies (Tier 4 - Safe)
 1. **Add FastAPI endpoint** in `src/api/app.py` (auto-converts to MCP tool)
@@ -309,46 +336,76 @@ OPENAI_API_KEY=your_key_here
 COHERE_API_KEY=your_key_here
 
 # Service Endpoints (defaults provided)
-QDRANT_URL=http://localhost:6333  
+QDRANT_URL=http://localhost:6333
 REDIS_URL=redis://localhost:6379
 PHOENIX_ENDPOINT=http://localhost:6006
 
-# Cache Configuration (for A/B testing)
-CACHE_ENABLED=true  # Set to false to disable caching
+# Cache Configuration (for A/B testing and experimentation)
+# Toggle cache without code changes for performance comparisons
+CACHE_ENABLED=true  # Set to false to disable caching entirely
 
-# Model Configuration (pinned for stability)  
+# Model Configuration (pinned for stability - DO NOT MODIFY)
 OPENAI_MODEL_NAME=gpt-4.1-mini
 EMBEDDING_MODEL_NAME=text-embedding-3-small
 ```
+
+### MCP Server Configuration (.mcp.json)
+The system integrates with external MCP servers configured in `.mcp.json`:
+- **mcp-server-time**: Time zone utilities
+- **sequential-thinking**: Enhanced reasoning for complex problems
+- **ai-docs-server**: Documentation access (MCP Protocol, FastMCP, LangChain, LangGraph, Anthropic)
+- **ai-docs-server-full**: Full documentation with comprehensive coverage
+
+See `.mcp.json` for complete MCP server configuration and usage patterns.
 
 ### Key Dependencies (from pyproject.toml)
 - **FastAPI + FastMCP**: API server and MCP conversion (fastapi>=0.115.12, fastmcp>=2.8.0)
 - **LangChain**: RAG pipeline (langchain>=0.3.25, langchain-core>=0.3.65)
 - **Qdrant**: Vector database (qdrant-client>=1.11.0)
 - **Phoenix**: Telemetry (arize-phoenix>=10.12.0)
+- **Claude Agent SDK**: Multi-agent orchestration framework (claude-agent-sdk>=0.1.0)
 - **uv**: Package management (recommended over pip)
+
+### Development Dependencies Configuration
+The project uses modern **PEP 735 dependency-groups** for dev dependencies:
+```toml
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0", 
+    "pytest-timeout>=2.1.0",
+    "httpx>=0.24.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+```
+⚠️ **Critical**: Must use `uv sync --dev` (not `pip install`) - uv handles virtual environment automatically  
+⚠️ **Note**: Uses `[dependency-groups]` (modern) not `[project.optional-dependencies]` (legacy)
 
 ## 💾 Cache Configuration & A/B Testing
 
-### Cache Toggle for Strategy Evaluation
+### Two Distinct Cache Systems
 
-The system supports dynamic cache toggling for A/B testing retrieval strategies:
+**1. Multi-Level Cache Architecture** (Production Performance)
+The system uses a **multi-level cache abstraction** via `src/integrations/cache.py`:
+- **L1 Local Cache**: In-memory with TTL (fast, small capacity)
+- **L2 Redis Cache**: Persistent with TTL (slower, large capacity)
+- **Interface**: `CacheInterface` allows swapping implementations without code changes
+- **Integration**: FastAPI uses dependency injection: `cache: CacheInterface = Depends(get_cache)`
 
+**2. Cache Toggle for Experimentation** (A/B Testing)
+Dynamic cache enable/disable for comparing retrieval strategy performance:
 ```bash
-# Enable cache (default)
+# Enable cache (default - uses L1 + L2 multi-level cache)
 export CACHE_ENABLED=true
 
-# Disable cache for testing
+# Disable cache completely (NoOp cache - for baseline measurements)
 export CACHE_ENABLED=false
 ```
 
-### Cache Architecture
-
-The system uses a **multi-level cache abstraction**:
-
-- **L1 Local Cache**: In-memory with TTL (fast, small capacity)
-- **L2 Redis Cache**: Persistent with TTL (slower, large capacity)  
-- **NoOp Cache**: When caching disabled (for testing)
+**Use Cases**:
+- **Multi-level cache**: Production deployments with optimal performance
+- **Cache toggle**: Research and benchmarking to measure true cache impact
 
 ### Running Cache A/B Tests
 
@@ -439,8 +496,8 @@ which python  # Should show .venv path
 python src/core/settings.py  # Verify environment
 
 # Services not running
-docker-compose ps  # Check service status
-docker-compose up -d  # Restart services
+docker compose ps  # Check service status
+docker compose up -d  # Restart services
 
 # MCP permission errors (Claude Code CLI)
 claude -p --allowedTools "qdrant-store" "Store this pattern..."
@@ -449,17 +506,22 @@ claude --verbose  # Interactive mode with prompts
 
 ### Environment Validation Checklist
 ```bash
+# Comprehensive 5-tier status check (RECOMMENDED)
+python scripts/status.py  # Shows all tiers + cache functionality
+
+# Individual tier validation
 # Tier 1: Core Environment
 which python  # Must show .venv path
 python --version  # Should be Python >= 3.13
 python -c "from src.core.settings import get_settings; s=get_settings(); print(f'OpenAI: {bool(s.openai_api_key)}')"
 
 # Tier 2: Infrastructure
-docker-compose ps  # All services Up
+docker compose ps  # All services Up
 curl http://localhost:6333 && curl http://localhost:6379 && curl http://localhost:6006
 
 # Tier 3: Application  
 curl http://localhost:8000/health  # {"status":"healthy"}
+curl http://localhost:8000/cache/stats  # Cache configuration and performance
 
 # Tier 4: MCP Interface
 python tests/integration/verify_mcp.py  # All 8 tools working
@@ -469,21 +531,54 @@ python tests/integration/test_cqrs_resources.py  # All resources pass
 curl http://localhost:6333/collections  # Should show johnwick collections
 ```
 
+## 📂 Repository Analyzer Framework
+
+### Multi-Agent Orchestration System
+
+The `ra_*` directories contain a **portable, drop-in framework** for comprehensive repository analysis using multi-agent orchestration:
+
+**Framework Components**:
+- **`ra_orchestrators/`** - Multi-domain orchestrators (architecture, UX, DevOps, testing)
+- **`ra_agents/`** - Reusable agent definitions (JSON-based)
+- **`ra_tools/`** - Tool integrations (MCP registry, Figma, etc.)
+- **`ra_output/`** - Timestamped analysis outputs (e.g., `architecture_20251003_122754/`)
+
+**Usage**:
+```bash
+# Run architecture analysis
+python -m ra_orchestrators.architecture_orchestrator "Project Name"
+
+# Run UX design workflow
+python -m ra_orchestrators.ux_orchestrator "Project Name"
+
+# Outputs generated in: ra_output/{domain}_{timestamp}/
+```
+
+**Key Features**:
+- **Timestamped outputs**: Multiple analyses don't overwrite each other
+- **Agent reusability**: Share agents across domains
+- **Extensible**: Add new domain orchestrators in <1 day
+- **Standalone**: Framework can be dropped into any repository
+
+📖 **For complete details**: See `ra_orchestrators/README.md` and `ra_orchestrators/CLAUDE.md`
+
 ## 📚 Documentation References
 
 **Quick Start & Setup**:
 - [docs/SETUP.md](docs/SETUP.md) - Complete bootstrap walkthrough
 - [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) - Essential commands by function
 
-**Architecture & Implementation**:  
+**Architecture & Implementation**:
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Complete system design
-- [docs/CQRS_IMPLEMENTATION_SUMMARY.md](docs/CQRS_IMPLEMENTATION_SUMMARY.md) - MCP Resources details
-- [docs/project-structure.md](docs/project-structure.md) - Detailed architecture reference
+- [docs/FUNCTIONAL_OVERVIEW.md](docs/FUNCTIONAL_OVERVIEW.md) - System components and functionality overview
 
 **Operations & Validation**:
-- [docs/SYSTEM_VALIDATION.md](docs/SYSTEM_VALIDATION.md) - Evidence-based validation results
-- [docs/MCP_COMMAND_LINE_GUIDE.md](docs/MCP_COMMAND_LINE_GUIDE.md) - MCP testing patterns
+- [docs/CACHE_TOGGLE_VALIDATION.md](docs/CACHE_TOGGLE_VALIDATION.md) - Cache configuration and A/B testing validation
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Common issues and solutions
+
+**Multi-Agent Framework**:
+- [ra_orchestrators/README.md](ra_orchestrators/README.md) - Repository analyzer usage guide
+- [ra_orchestrators/CLAUDE.md](ra_orchestrators/CLAUDE.md) - Framework development guide
 
 ---
 
@@ -493,6 +588,7 @@ curl http://localhost:6333/collections  # Should show johnwick collections
 |------|------|----------|----------|------|
 | Add new retrieval strategy | Tier 4 | FastAPI endpoint → auto-converts to MCP | `src/api/app.py` + `src/rag/` | ✅ Safe |
 | Direct data access for LLMs | Tier 4 | CQRS Resource | `src/mcp/resources.py` | ✅ Safe |
+| Add orchestration workflow | Tier 5 | Repository analyzer framework | `ra_orchestrators/` | ✅ Safe |
 | Modify existing retrieval logic | Tier 3 | **FORBIDDEN** | `src/rag/` | ❌ Never |
 | Change model configurations | Tier 1 | **FORBIDDEN** | `src/core/settings.py` | ❌ Never |
 | Cache integration | Tier 2 | Redis client | `src/integrations/redis_client.py` | ✅ Safe |
@@ -607,9 +703,4 @@ sequenceDiagram
 
 ---
 
-## 📚 Documentation References
-
-- **[docs/SETUP.md](docs/SETUP.md)** - Complete bootstrap walkthrough
-- **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Daily commands and validation
-- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Problem-solving guide
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Deep technical implementation details
+**Note**: Documentation references consolidated above. See "📚 Documentation References" section for complete list.

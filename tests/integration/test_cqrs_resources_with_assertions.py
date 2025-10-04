@@ -10,6 +10,7 @@ import sys
 import logging
 import re
 from pathlib import Path
+import pytest
 
 # Setup project path
 current_file = Path(__file__).resolve()
@@ -74,6 +75,8 @@ class TestResults:
         print(f"{'='*50}")
         return self.failed == 0
 
+@pytest.mark.integration
+@pytest.mark.requires_vectordb
 async def test_list_collections():
     """Test collection listing with assertions."""
     print("\n📋 Test 1: List Collections")
@@ -105,6 +108,8 @@ async def test_list_collections():
     
     return results
 
+@pytest.mark.integration
+@pytest.mark.requires_vectordb
 async def test_collection_info():
     """Test collection info with assertions."""
     print("\n📊 Test 2: Collection Info")
@@ -138,6 +143,8 @@ async def test_collection_info():
     
     return results
 
+@pytest.mark.integration
+@pytest.mark.requires_vectordb
 async def test_collection_search():
     """Test collection search with assertions."""
     print("\n🔍 Test 3: Collection Search")
@@ -170,6 +177,8 @@ async def test_collection_search():
     
     return results
 
+@pytest.mark.integration
+@pytest.mark.requires_vectordb
 async def test_collection_stats():
     """Test collection statistics with assertions."""
     print("\n📈 Test 4: Collection Statistics")
@@ -203,6 +212,8 @@ async def test_collection_stats():
     
     return results
 
+@pytest.mark.integration
+@pytest.mark.requires_vectordb
 async def test_error_handling():
     """Test error handling with assertions."""
     print("\n❌ Test 5: Error Handling")
@@ -232,6 +243,8 @@ async def test_error_handling():
     
     return results
 
+@pytest.mark.integration
+@pytest.mark.requires_vectordb
 async def test_document_retrieval():
     """Test document retrieval with assertions."""
     print("\n📄 Test 6: Document Retrieval")
@@ -265,6 +278,8 @@ async def test_document_retrieval():
     
     return results
 
+@pytest.mark.integration
+@pytest.mark.requires_vectordb
 async def test_cqrs_compliance():
     """Test CQRS pattern compliance."""
     print("\n🎯 Test 7: CQRS Compliance Validation")

@@ -13,6 +13,7 @@ from unittest.mock import patch, MagicMock
 from src.core.settings import Settings, get_settings, get_env_variable, setup_env_vars
 
 
+@pytest.mark.unit
 class TestSettings:
     """Test settings functionality and configuration management."""
     

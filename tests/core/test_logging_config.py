@@ -15,6 +15,7 @@ from unittest.mock import patch, MagicMock
 from src.core.logging_config import setup_logging, ConsoleFilter, LOGS_DIR, LOG_FILENAME
 
 
+@pytest.mark.unit
 class TestLoggingConfig:
     """Test logging configuration functionality."""
     

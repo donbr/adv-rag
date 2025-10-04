@@ -18,6 +18,7 @@ def mock_dependencies():
             "qdrant_vs": mock_qdrant_vs
         }
 
+@pytest.mark.requires_vectordb
 def test_get_main_vectorstore_success(mock_dependencies):
     """Test successful creation of the main vector store."""
     vs = get_main_vectorstore()
@@ -29,6 +30,7 @@ def test_get_main_vectorstore_success(mock_dependencies):
     args, kwargs = mock_dependencies["qdrant_vs"].call_args
     assert kwargs["collection_name"] == "johnwick_baseline"
 
+@pytest.mark.requires_vectordb
 def test_get_semantic_vectorstore_success(mock_dependencies):
     """Test successful creation of the semantic vector store."""
     vs = get_semantic_vectorstore()
@@ -40,6 +42,7 @@ def test_get_semantic_vectorstore_success(mock_dependencies):
     args, kwargs = mock_dependencies["qdrant_vs"].call_args
     assert kwargs["collection_name"] == "johnwick_semantic"
 
+@pytest.mark.requires_vectordb
 def test_vectorstore_creation_failure(mock_dependencies, caplog):
     """Test graceful failure of vector store creation."""
     mock_dependencies["qdrant_client"].side_effect = Exception("Qdrant connection failed")

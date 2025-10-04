@@ -29,6 +29,7 @@ from src.core.exceptions import (
 )
 
 
+@pytest.mark.unit
 class TestRAGException:
     """Test the base RAGException class."""
     
@@ -66,6 +67,7 @@ class TestRAGException:
         assert isinstance(exc, Exception)
 
 
+@pytest.mark.unit
 class TestConfigurationError:
     """Test ConfigurationError exception class."""
     
@@ -81,6 +83,7 @@ class TestConfigurationError:
         assert str(exc) == "[Settings] Missing API key"
 
 
+@pytest.mark.unit
 class TestRAGErrors:
     """Test RAG-related exception classes."""
     
@@ -114,6 +117,7 @@ class TestRAGErrors:
         assert isinstance(exc, RAGException)
 
 
+@pytest.mark.unit
 class TestMCPErrors:
     """Test MCP-related exception classes."""
     
@@ -141,6 +145,7 @@ class TestMCPErrors:
         assert isinstance(exc, RAGException)
 
 
+@pytest.mark.unit
 class TestIntegrationErrors:
     """Test integration-related exception classes."""
     
@@ -162,6 +167,7 @@ class TestIntegrationErrors:
         assert isinstance(exc, RAGException)
 
 
+@pytest.mark.unit
 class TestConvenienceFunctions:
     """Test convenience functions for raising errors."""
     
@@ -238,6 +244,7 @@ class TestConvenienceFunctions:
         assert exc.details["server_type"] == "FastAPI"
 
 
+@pytest.mark.unit
 class TestExceptionIntegration:
     """Integration tests for exception behavior."""
     

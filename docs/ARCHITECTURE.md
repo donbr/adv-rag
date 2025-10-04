@@ -95,42 +95,39 @@ def create_retriever(strategy: str, vectorstore: VectorStore, **kwargs) -> BaseR
 ### Core Chain Architecture
 
 ```python
-# src/rag/chain.py - LCEL implementation pattern
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableWithFallbacks
-from langchain_core.output_parsers import StrOutputParser
+# src/rag/chain.py - Actual LCEL implementation
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from operator import itemgetter
 
-def create_rag_chain(retriever: BaseRetriever, llm: BaseChatModel) -> Runnable:
-    """Production LCEL chain with parallel processing and error handling"""
-    
-    # Parallel execution for performance
-    context_chain = RunnableParallel({
-        "context": retriever | format_docs,
-        "question": RunnablePassthrough(),
-        "metadata": retriever | extract_metadata
-    })
-    
-    # Main processing chain
-    main_chain = (
-        context_chain
-        | ChatPromptTemplate.from_template(RAG_PROMPT_TEMPLATE)
-        | llm
-        | StrOutputParser()
-    )
-    
-    # Fallback chain for error resilience
-    fallback_chain = (
-        RunnableParallel({"question": RunnablePassthrough()})
-        | ChatPromptTemplate.from_template(FALLBACK_PROMPT_TEMPLATE)
-        | llm
-        | StrOutputParser()
-    )
-    
-    # Combined resilient chain
-    return RunnableWithFallbacks(
-        runnable=main_chain,
-        fallbacks=[fallback_chain],
-        exception_key="error"
-    )
+def create_rag_chain(retriever):
+    """Simple LCEL chain implementation"""
+    if retriever is None:
+        return None
+        
+    try:
+        chain = (
+            {"context": itemgetter("question") | retriever, "question": itemgetter("question")}
+            | RunnablePassthrough.assign(context=itemgetter("context")) 
+            | {"response": RAG_PROMPT | get_chat_model_lazy(), "context": itemgetter("context")}
+        )
+        return chain
+    except Exception as e:
+        logger.error(f"Failed to create RAG chain: {e}")
+        return None
+
+# Template used in actual implementation
+RAG_TEMPLATE_STR = """\
+You are a helpful and kind assistant. Use the context provided below to answer the question.
+
+If you do not know the answer, or are unsure, say you don't know.
+
+Query:
+{question}
+
+Context:
+{context}
+"""
 ```
 
 ### Advanced Chain Features
@@ -310,99 +307,64 @@ class InstrumentedRetriever:
             return documents
 ```
 
-## Advanced Error Handling & Resilience
+## Error Handling & Resilience (Current Implementation)
 
-### Circuit Breaker Pattern for External Services
+### Simple Error Handling Pattern
 ```python
-# src/core/resilience.py - Production error handling
-from tenacity import retry, stop_after_attempt, wait_exponential
-import asyncio
-from typing import Optional, Callable
-
-class CircuitBreaker:
-    """Circuit breaker for external service calls"""
-    
-    def __init__(self, failure_threshold: int = 5, timeout: int = 60):
-        self.failure_threshold = failure_threshold
-        self.timeout = timeout
-        self.failure_count = 0
-        self.last_failure_time = 0
-        self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
-    
-    async def call(self, func: Callable, *args, **kwargs):
-        if self.state == "OPEN":
-            if time.time() - self.last_failure_time < self.timeout:
-                raise Exception("Circuit breaker is OPEN")
-            else:
-                self.state = "HALF_OPEN"
+# src/rag/chain.py - Actual error handling implementation
+def create_rag_chain(retriever):
+    """Simple chain creation with basic error handling"""
+    if retriever is None:
+        # Return None if retriever is not available
+        return None
         
-        try:
-            result = await func(*args, **kwargs)
-            if self.state == "HALF_OPEN":
-                self.state = "CLOSED"
-                self.failure_count = 0
-            return result
-        except Exception as e:
-            self.failure_count += 1
-            self.last_failure_time = time.time()
-            
-            if self.failure_count >= self.failure_threshold:
-                self.state = "OPEN"
-            
-            raise e
+    try:
+        # Create basic LCEL chain
+        chain = (
+            {"context": itemgetter("question") | retriever, "question": itemgetter("question")}
+            | RunnablePassthrough.assign(context=itemgetter("context")) 
+            | {"response": RAG_PROMPT | get_chat_model_lazy(), "context": itemgetter("context")}
+        )
+        logger.info(f"RAG chain created successfully")
+        return chain
+    except Exception as e:
+        # Log error and return None
+        logger.error(f"Failed to create RAG chain: {e}", exc_info=True)
+        return None
 
-# Usage in retrieval chains
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10))
-async def resilient_llm_call(llm: BaseChatModel, messages: List[BaseMessage]):
-    """LLM call with automatic retry and exponential backoff"""
-    circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=30)
-    
-    return await circuit_breaker.call(
-        llm.ainvoke,
-        messages
-    )
+# Chain initialization in src/rag/chain.py
+NAIVE_RETRIEVAL_CHAIN = create_rag_chain(get_naive_retriever())
+BM25_RETRIEVAL_CHAIN = create_rag_chain(get_bm25_retriever())
+CONTEXTUAL_COMPRESSION_CHAIN = create_rag_chain(get_contextual_compression_retriever())
+MULTI_QUERY_CHAIN = create_rag_chain(get_multi_query_retriever())
+ENSEMBLE_CHAIN = create_rag_chain(get_ensemble_retriever())
+SEMANTIC_CHAIN = create_rag_chain(get_semantic_retriever())
 ```
 
-### Graceful Degradation Strategies
+### FastAPI Error Handling
 ```python
-# src/rag/fallback_chains.py - Production fallback patterns
-def create_resilient_retrieval_chain():
-    """Multi-tier fallback chain for production reliability"""
+# src/api/app.py - HTTP error handling pattern
+async def invoke_chain_logic(chain, question: str, chain_name: str):
+    """Chain invocation with error handling"""
+    if chain is None:
+        logger.error(f"Chain '{chain_name}' is not available")
+        raise HTTPException(
+            status_code=503, 
+            detail=f"The '{chain_name}' is currently unavailable"
+        )
     
-    # Primary: Semantic retrieval with reranking
-    primary_chain = (
-        semantic_retriever 
-        | CohereRerank(top_k=5)
-        | format_docs
-        | ChatPromptTemplate.from_template(DETAILED_PROMPT)
-        | ChatOpenAI(model="gpt-4.1-mini")
-        | StrOutputParser()
-    )
-    
-    # Secondary: Simple vector similarity
-    secondary_chain = (
-        naive_retriever
-        | format_docs  
-        | ChatPromptTemplate.from_template(SIMPLE_PROMPT)
-        | ChatOpenAI(model="gpt-4.1-mini", temperature=0.1)
-        | StrOutputParser()
-    )
-    
-    # Tertiary: Knowledge-based fallback
-    tertiary_chain = (
-        RunnablePassthrough()
-        | ChatPromptTemplate.from_template(KNOWLEDGE_PROMPT)
-        | ChatOpenAI(model="gpt-4.1-mini", temperature=0.0)
-        | StrOutputParser()
-    )
-    
-    # Combine with fallbacks
-    return RunnableWithFallbacks(
-        runnable=primary_chain,
-        fallbacks=[secondary_chain, tertiary_chain],
-        exception_key="error",
-        exception_to_string=lambda e: f"Error: {str(e)}"
-    )
+    try:
+        result = await chain.ainvoke({"question": question})
+        return AnswerResponse(
+            answer=result.get("response", {}).content,
+            context_document_count=len(result.get("context", []))
+        )
+    except Exception as e:
+        logger.error(f"Error invoking '{chain_name}': {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, 
+            detail=f"An error occurred while processing your request"
+        )
 ```
 
 ## Performance Optimization Internals

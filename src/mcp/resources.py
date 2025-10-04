@@ -9,11 +9,9 @@ from fastmcp import FastMCP
 from typing import Dict, Any, List, Union
 from html import escape
 
-# Configure structured logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# Configure centralized logging
+from src.core.logging_config import setup_logging
+setup_logging()
 logger = logging.getLogger(__name__)
 
 from phoenix.otel import register

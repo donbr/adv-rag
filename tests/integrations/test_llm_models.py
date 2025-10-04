@@ -17,6 +17,7 @@ def mock_settings():
         mock.return_value = settings
         yield mock
 
+@pytest.mark.requires_llm
 @patch('src.integrations.llm_models.RedisCache')
 @patch('src.integrations.llm_models.set_llm_cache')
 def test_get_chat_openai_initialization(mock_set_llm_cache, mock_redis_cache, mock_settings):
@@ -32,6 +33,7 @@ def test_get_chat_openai_initialization(mock_set_llm_cache, mock_redis_cache, mo
     assert chat_model.model_name == "test-gpt-model"
     assert chat_model.temperature == 0.5
 
+@pytest.mark.requires_llm
 @patch('src.integrations.llm_models.ChatOpenAI')
 @patch('src.integrations.llm_models.set_llm_cache')
 def test_get_chat_openai_parameters_passed(mock_set_cache, mock_chat_openai, mock_settings):
@@ -46,12 +48,14 @@ def test_get_chat_openai_parameters_passed(mock_set_cache, mock_chat_openai, moc
         request_timeout=45,
     )
 
+@pytest.mark.requires_llm
 def test_get_chat_model_alias(mock_settings):
     """Test the backward compatibility alias get_chat_model."""
     with patch('src.integrations.llm_models.get_chat_openai') as mock_get_chat:
         get_chat_model()
         mock_get_chat.assert_called_once()
 
+@pytest.mark.requires_llm
 @patch('src.integrations.llm_models.set_llm_cache', side_effect=Exception("Redis connection failed"))
 def test_get_chat_openai_cache_failure(mock_set_cache, mock_settings, caplog):
     """Test that the function handles Redis cache initialization failure gracefully."""

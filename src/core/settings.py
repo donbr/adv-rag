@@ -1,9 +1,9 @@
 # settings.py
 import os
 import logging # For more structured logging
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, field_validator
 
 # Initialize logging as the very first thing
 # This ensures that even early messages (like dotenv loading status or errors) are logged.
@@ -184,20 +184,36 @@ class Settings(BaseSettings):
         description="Interval between Phoenix data synchronizations in hours"
     )
     
-    phoenix_sync_datasets: List[str] = Field(
-        default_factory=lambda: ["johnwick_golden_testset_v1", "johnwick_golden_testset_v2"],
-        description="List of dataset names to synchronize from Phoenix"
+    phoenix_sync_datasets: Union[str, List[str]] = Field(
+        default="johnwick_golden_testset",
+        description="List of dataset names to synchronize from Phoenix (comma-separated string or list)"
     )
     
     phoenix_sync_max_age_days: int = Field(
         default=30,
         description="Maximum age of experiments to synchronize in days"
     )
+    
+    @field_validator('phoenix_sync_datasets', mode='after')
+    @classmethod
+    def parse_phoenix_sync_datasets(cls, v):
+        """Parse phoenix_sync_datasets from comma-separated string or list"""
+        if isinstance(v, str):
+            # Handle comma-separated string from environment variable
+            return [dataset.strip() for dataset in v.split(',') if dataset.strip()]
+        elif isinstance(v, list):
+            # Already a list, return as-is
+            return v
+        else:
+            # Default to single item list for other types
+            return [str(v)] if v else []
 
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False,
-        extra="ignore"  # Ignore extra environment variables
+        extra="ignore",  # Ignore extra environment variables
+        env_nested_delimiter="__",
+        env_parse_none_str="None"
     )
 
 # Global settings instance

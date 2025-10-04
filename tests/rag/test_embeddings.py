@@ -12,6 +12,7 @@ def mock_settings():
         mock.return_value = settings
         yield mock
 
+@pytest.mark.unit
 @patch('src.rag.embeddings.OpenAIEmbeddings')
 def test_get_openai_embeddings_success(mock_openai_embeddings, mock_settings):
     """Test successful initialization of OpenAIEmbeddings."""
@@ -23,6 +24,7 @@ def test_get_openai_embeddings_success(mock_openai_embeddings, mock_settings):
     mock_openai_embeddings.assert_called_once_with(model="test-embedding-model")
     assert embeddings == mock_instance
 
+@pytest.mark.unit
 @patch('src.rag.embeddings.OpenAIEmbeddings', side_effect=Exception("API Key Error"))
 def test_get_openai_embeddings_failure(mock_openai_embeddings, mock_settings, caplog):
     """Test failure during OpenAIEmbeddings initialization."""

@@ -135,9 +135,11 @@ python tests/integration/verify_mcp.py
 
 ```bash
 # Quick tests
-pytest tests/ -v                           # All tests
-pytest tests/ -m unit -v                   # Unit tests only
-pytest tests/ -m integration -v            # Integration tests
+pytest tests/ -v                           # All tests (190 total)
+pytest tests/ -m unit -v                   # Unit tests only (59 fast tests)
+pytest tests/ -m integration -v            # Integration tests requiring services (9 tests)
+pytest tests/ -m requires_llm -v           # LLM tests (4 tests needing API keys)
+pytest tests/ -m requires_vectordb -v      # Vector DB tests needing Qdrant (10 tests)
 
 # System validation  
 python tests/integration/verify_mcp.py     # MCP functionality

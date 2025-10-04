@@ -25,6 +25,7 @@ def mock_redis_dependencies():
             "pool_instance": mock_pool_instance
         }
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_redis_client_connection(mock_redis_dependencies):
     """Test RedisClient connect and disconnect."""
@@ -39,6 +40,7 @@ async def test_redis_client_connection(mock_redis_dependencies):
     mock_redis_dependencies["redis_instance"].aclose.assert_awaited_once()
     mock_redis_dependencies["pool_instance"].aclose.assert_awaited_once()
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_get_redis_dependency(mock_redis_dependencies):
     """Test get_redis dependency injection and auto-reconnect."""

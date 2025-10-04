@@ -4,12 +4,12 @@ import os
 from datetime import datetime
 import logging
 import sys
-import os
 from pathlib import Path
 from fastmcp import FastMCP
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure centralized logging
+from src.core.logging_config import setup_logging
+setup_logging()
 logger = logging.getLogger(__name__)
 
 from phoenix.otel import register

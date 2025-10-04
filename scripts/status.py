@@ -44,6 +44,7 @@ class TierStatus:
             "tier1_environment": {},
             "tier2_infrastructure": {},
             "tier3_application": {},
+            "cache_functionality": {},
             "tier4_mcp_interface": {},
             "tier5_data": {},
             "timestamp": datetime.now().isoformat()
@@ -57,6 +58,7 @@ class TierStatus:
         self._check_tier1_environment()
         self._check_tier2_infrastructure()
         self._check_tier3_application()
+        self._check_cache_functionality()
         self._check_tier4_mcp_interface()
         self._check_tier5_data()
         
@@ -237,6 +239,126 @@ class TierStatus:
                 print(f"     Health check passed on port {config['port']}")
             elif port_status and not status["running"]:
                 print(f"     Note: Port {config['port']} in use by different service")
+    
+    def _check_cache_functionality(self):
+        """Check Cache Configuration & Functionality"""
+        print(f"\n{Colors.BLUE}Cache Configuration & Functionality{Colors.RESET}")
+        
+        cache_info = {
+            "cache_enabled": False,
+            "cache_type": "unknown",
+            "cache_stats": {},
+            "endpoints_cached": [],
+            "cache_layer": "none",
+            "environment_setting": None,
+            "config_source": "unknown"
+        }
+        
+        # Check environment variable first
+        env_cache = os.environ.get('CACHE_ENABLED', '').lower()
+        if env_cache:
+            cache_info["environment_setting"] = env_cache
+            cache_info["config_source"] = "environment_variable"
+        
+        # Check settings if available
+        if SETTINGS_AVAILABLE:
+            try:
+                settings = get_settings()
+                cache_info["cache_enabled"] = settings.cache_enabled
+                cache_info["config_source"] = "settings_module"
+                
+                # Override with env setting if present
+                if env_cache:
+                    cache_info["cache_enabled"] = env_cache in ['true', '1', 'yes', 'on']
+                    cache_info["config_source"] = "environment_override"
+                    
+            except Exception as e:
+                cache_info["error"] = f"Could not load settings: {e}"
+        else:
+            # Fallback to environment
+            cache_info["cache_enabled"] = env_cache in ['true', '1', 'yes', 'on'] if env_cache else True
+            cache_info["config_source"] = "environment_fallback"
+        
+        # Check cache stats endpoint if FastAPI is running
+        fastapi_running = self.status["tier3_application"].get("fastapi", {}).get("running", False)
+        if fastapi_running:
+            try:
+                result = subprocess.run(
+                    ["curl", "-s", "-f", "http://localhost:8000/cache/stats"],
+                    capture_output=True,
+                    text=True,
+                    timeout=3
+                )
+                if result.returncode == 0:
+                    cache_stats = json.loads(result.stdout)
+                    cache_info["cache_stats"] = cache_stats
+                    cache_info["cache_type"] = cache_stats.get("cache_type", "unknown")
+                    cache_info["cache_enabled"] = cache_stats.get("cache_enabled", False)
+                    
+                    # Determine cache layer
+                    if cache_info["cache_type"] == "noop":
+                        cache_info["cache_layer"] = "disabled"
+                    elif cache_info["cache_type"] == "multi_level":
+                        cache_info["cache_layer"] = "L1 (Local) + L2 (Redis)"
+                    elif cache_info["cache_type"] == "local_memory":
+                        cache_info["cache_layer"] = "L1 (Local Memory Only)"
+                    elif cache_info["cache_type"] == "redis":
+                        cache_info["cache_layer"] = "L2 (Redis Only)"
+                else:
+                    cache_info["cache_stats_error"] = "Cache stats endpoint not accessible"
+            except Exception as e:
+                cache_info["cache_stats_error"] = f"Could not fetch cache stats: {e}"
+        
+        # Define what endpoints are cached (from app.py analysis)
+        cached_endpoints = [
+            "/invoke/naive_retriever",
+            "/invoke/bm25_retriever", 
+            "/invoke/semantic_retriever",
+            "/invoke/contextual_compression_retriever",
+            "/invoke/multi_query_retriever",
+            "/invoke/ensemble_retriever"
+        ]
+        cache_info["endpoints_cached"] = cached_endpoints
+        
+        self.status["cache_functionality"] = cache_info
+        
+        # Print results
+        status_icon = "✅" if cache_info["cache_enabled"] else "🚫"
+        cache_status = "Enabled" if cache_info["cache_enabled"] else "Disabled"
+        print(f"  {status_icon} Cache Status: {cache_status}")
+        
+        if cache_info.get("environment_setting"):
+            print(f"     Environment Variable: CACHE_ENABLED={cache_info['environment_setting']}")
+        
+        print(f"     Configuration Source: {cache_info['config_source']}")
+        
+        if cache_info["cache_enabled"]:
+            cache_type = cache_info.get("cache_type", "unknown")
+            cache_layer = cache_info.get("cache_layer", "unknown")
+            print(f"     Cache Type: {cache_type}")
+            print(f"     Cache Layer: {cache_layer}")
+            
+            # Show cache stats if available
+            if "cache_stats" in cache_info and cache_info["cache_stats"]:
+                stats = cache_info["cache_stats"]
+                if "cache_stats" in stats:
+                    inner_stats = stats["cache_stats"]
+                    hit_rate = inner_stats.get("hit_rate", 0)
+                    print(f"     Hit Rate: {hit_rate:.2%}")
+                    
+                    if inner_stats.get("type") == "multi_level":
+                        l1_stats = inner_stats.get("l1_stats", {})
+                        l2_stats = inner_stats.get("l2_stats", {})
+                        print(f"     L1 Size: {l1_stats.get('size', 0)}/{l1_stats.get('max_size', 0)}")
+                        print(f"     L2 Operations: {l2_stats.get('operations', 0)}")
+        
+        print(f"  📊 Cached Endpoints: {len(cached_endpoints)} retrieval endpoints")
+        print(f"     Cache Layer: FastAPI Response Level")
+        print(f"     Cache Key: MD5(endpoint + request_data)")
+        print(f"     TTL: 300 seconds (5 minutes)")
+        
+        if cache_info.get("cache_stats_error"):
+            print(f"     ⚠️ {cache_info['cache_stats_error']}")
     
     def _check_tier4_mcp_interface(self):
         """Check Tier 4: MCP Interface Layer"""
