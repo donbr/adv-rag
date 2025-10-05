@@ -72,8 +72,8 @@
   ],
   "dependencies": {
     "python": ">=3.13",
-    "type": "pyproject",
-    "file": "pyproject.toml"
+    "type": "requirements",
+    "file": "requirements.txt"
   },
   "cloud": {
     "fastmcp-cloud": {
