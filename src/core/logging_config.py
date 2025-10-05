@@ -3,7 +3,9 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-LOGS_DIR = "logs"
+# Use /tmp for Lambda/cloud environments (read-only filesystem)
+# FastMCP Cloud runs on AWS Lambda with Lambda Web Adapter
+LOGS_DIR = os.getenv("LOGS_DIR", "/tmp" if os.getenv("AWS_LAMBDA_FUNCTION_NAME") else "logs")
 LOG_FILENAME = os.path.join(LOGS_DIR, "app.log")
 
 # Create a filter to allow specific loggers' INFO messages to show in console
