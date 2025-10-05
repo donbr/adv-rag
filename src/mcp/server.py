@@ -9,7 +9,8 @@ from logging.handlers import RotatingFileHandler
 from fastmcp import FastMCP
 
 # Configure logging for MCP Tools Server
-LOGS_DIR = "logs"
+# Use /tmp for Lambda/cloud environments (read-only filesystem)
+LOGS_DIR = os.getenv("LOGS_DIR", "/tmp" if os.getenv("AWS_LAMBDA_FUNCTION_NAME") else "logs")
 LOG_FILENAME = os.path.join(LOGS_DIR, "mcp_tools.log")
 
 def setup_mcp_tools_logging():

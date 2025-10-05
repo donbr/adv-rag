@@ -11,7 +11,8 @@ from typing import Dict, Any, List, Union
 from html import escape
 
 # Configure logging for MCP Resources Server
-LOGS_DIR = "logs"
+# Use /tmp for Lambda/cloud environments (read-only filesystem)
+LOGS_DIR = os.getenv("LOGS_DIR", "/tmp" if os.getenv("AWS_LAMBDA_FUNCTION_NAME") else "logs")
 LOG_FILENAME = os.path.join(LOGS_DIR, "mcp_resources.log")
 
 def setup_mcp_resources_logging():
