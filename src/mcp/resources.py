@@ -737,4 +737,23 @@ def main():
     mcp.run()
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    # Check for cloud deployment mode (streamable-http transport)
+    if len(sys.argv) > 1 and sys.argv[1] == "--transport":
+        transport = sys.argv[2] if len(sys.argv) > 2 else "stdio"
+
+        if transport == "streamable-http":
+            # Cloud deployment mode with streamable-http
+            port = int(os.getenv("MCP_PORT", "8002"))
+            host = os.getenv("MCP_HOST", "0.0.0.0")
+
+            logger.info(f"Starting MCP resource server in cloud mode: streamable-http on {host}:{port}")
+            mcp.run(transport="streamable-http", port=port, host=host)
+        else:
+            # Local stdio mode
+            logger.info("Starting MCP resource server in local mode: stdio")
+            main()
+    else:
+        # Default: stdio mode for local development
+        main()

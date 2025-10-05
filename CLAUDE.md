@@ -80,6 +80,10 @@ python src/mcp/server.py
 
 # Start MCP Resources server (Query Pattern - separate terminal)
 python src/mcp/resources.py
+
+# Cloud deployment mode (streamable-http transport)
+python src/mcp/server.py --transport streamable-http      # Port 8001
+python src/mcp/resources.py --transport streamable-http   # Port 8002
 ```
 
 ### Testing & Validation
@@ -358,6 +362,15 @@ The system integrates with external MCP servers configured in `.mcp.json`:
 
 See `.mcp.json` for complete MCP server configuration and usage patterns.
 
+### Cloud Deployment Configuration (fastmcp.json)
+The system supports cloud deployment via **FastMCP Cloud**, **Google Cloud Run**, or **AWS Bedrock**:
+- **Transport**: Streamable HTTP for cloud, stdio for local
+- **Dual Servers**: Tools (port 8001) and Resources (port 8002)
+- **Auto-Deploy**: Git push triggers deployment on FastMCP Cloud
+- **Environment**: Uses `.env.cloud` template for cloud-specific variables
+
+See `fastmcp.json` for declarative deployment configuration and `docs/FASTMCP_CLOUD_DEPLOYMENT.md` for complete guide.
+
 ### Key Dependencies (from pyproject.toml)
 - **FastAPI + FastMCP**: API server and MCP conversion (fastapi>=0.115.12, fastmcp>=2.8.0)
 - **LangChain**: RAG pipeline (langchain>=0.3.25, langchain-core>=0.3.65)
@@ -576,6 +589,11 @@ python -m ra_orchestrators.ux_orchestrator "Project Name"
 - [docs/CACHE_TOGGLE_VALIDATION.md](docs/CACHE_TOGGLE_VALIDATION.md) - Cache configuration and A/B testing validation
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
+**Cloud Deployment**:
+- [docs/FASTMCP_CLOUD_DEPLOYMENT.md](docs/FASTMCP_CLOUD_DEPLOYMENT.md) - FastMCP Cloud, Google Cloud Run, AWS Bedrock deployment guide
+- [fastmcp.json](fastmcp.json) - Declarative cloud deployment configuration
+- [.env.cloud](.env.cloud) - Cloud environment variable template
+
 **Multi-Agent Framework**:
 - [ra_orchestrators/README.md](ra_orchestrators/README.md) - Repository analyzer usage guide
 - [ra_orchestrators/CLAUDE.md](ra_orchestrators/CLAUDE.md) - Framework development guide
@@ -588,6 +606,7 @@ python -m ra_orchestrators.ux_orchestrator "Project Name"
 |------|------|----------|----------|------|
 | Add new retrieval strategy | Tier 4 | FastAPI endpoint → auto-converts to MCP | `src/api/app.py` + `src/rag/` | ✅ Safe |
 | Direct data access for LLMs | Tier 4 | CQRS Resource | `src/mcp/resources.py` | ✅ Safe |
+| Deploy to cloud | Tier 4 | Update `fastmcp.json`, push to main | `fastmcp.json`, `.env.cloud` | ✅ Safe |
 | Add orchestration workflow | Tier 5 | Repository analyzer framework | `ra_orchestrators/` | ✅ Safe |
 | Modify existing retrieval logic | Tier 3 | **FORBIDDEN** | `src/rag/` | ❌ Never |
 | Change model configurations | Tier 1 | **FORBIDDEN** | `src/core/settings.py` | ❌ Never |

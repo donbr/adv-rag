@@ -1,0 +1,118 @@
+{
+  "question": "Did people generally like John Wick?",
+  "experiment_id": "exp_20251004_170240",
+  "cache_enabled_results": {
+    "naive": {
+      "response": "Yes, people generally liked John Wick. The reviews describe the first John Wick film as a slick, stylish, and fun action movie with brilliant action sequences and a strong performance by Keanu Reeves. It is praised for its intense and well-choreographed action scenes, cool character dynamics, and overall entertainment value. Many reviewers highly recommend it to action fans and acknowledge it as one of the best action films in recent years. While there are a few mixed opinions noting it as somewhat generic, the overwhelming sentiment is positive.",
+      "latency_ms": 1939.4989013671875,
+      "context_count": 10,
+      "cache_mode": "enabled",
+      "timestamp": "2025-10-04T17:02:42.072236"
+    },
+    "semantic": {
+      "response": "Yes, people generally liked John Wick. The reviews praise the film for its stylish and well-choreographed action sequences, Keanu Reeves' performance, and the unique, fast-paced nature of the movie. Reviewers describe the first film as special, slick, violently brutal, and very entertaining. The franchise as a whole is noted for maintaining consistent quality, with sequels being well received and appreciated by fans. While there are some critiques, particularly of John Wick 3, the overall sentiment is very positive, especially for the original film and the series as a whole.",
+      "latency_ms": 2550.9517192840576,
+      "context_count": 10,
+      "cache_mode": "enabled",
+      "timestamp": "2025-10-04T17:02:44.623202"
+    },
+    "bm25": {
+      "response": "Based on the provided reviews, opinions about the John Wick movies vary:\n\n- The original John Wick (2014) received very positive reviews, praised for its stylish, kinetic action and clear, simple plot. Reviewers found it special, fun, and a must-see for action fans.\n- John Wick 3 received negative feedback from at least one reviewer who found it boring, dull, too violent, and lacking plot.\n- John Wick 4 was described as the weakest in the series by one reviewer, criticizing it for long gunfights, meaningless dialogue, and no meaningful additions to the story.\n\nOverall, while the first John Wick movie was generally well-liked, later installments received mixed to negative reviews from these samples. So, people generally liked the original John Wick but opinions on the sequels were more divided.",
+      "latency_ms": 1834.6333503723145,
+      "context_count": 4,
+      "cache_mode": "enabled",
+      "timestamp": "2025-10-04T17:02:46.457846"
+    },
+    "compression": {
+      "response": "Yes, people generally liked John Wick. The reviews describe it as a slick, fun, and brilliantly choreographed action film with excellent performances, especially by Keanu Reeves. It was praised for its intense action sequences, style, and fresh take on the genre. One reviewer even calls it \"the coolest action film you'll see all year\" and \"a must see for action fans.\" However, by the third film, some feel \"the magic is gone,\" indicating that the original film was particularly well-received compared to later installments.",
+      "latency_ms": 2414.7825241088867,
+      "context_count": 3,
+      "cache_mode": "enabled",
+      "timestamp": "2025-10-04T17:02:48.872637"
+    },
+    "multiquery": {
+      "response": "Based on the provided reviews, people generally liked the original **John Wick** movie. Many reviews praise Keanu Reeves' performance, the stylish and well-choreographed action sequences, and the film\u2019s brisk pacing and unique tone. Reviews mention it as \"the best action film of the year,\" \"a must see for action fans,\" and \"slick, violent fun.\" \n\nHowever, there are a few who found it more generic or less impressive but these opinions are in the minority. For example, one reviewer gave it a rating of 6 and described it as \"just kind of a generic action thriller,\" but still acknowledged good cinematography and fight choreography.\n\nIn contrast, opinions on later films in the series, like John Wick 3 and 4, are more mixed, with some expressing disappointment, but the original John Wick film was generally very well-liked.\n\n**Summary:** Yes, people generally liked John Wick, especially the first film, with high ratings and positive comments about its action, style, and Keanu Reeves\u2019 performance.",
+      "latency_ms": 4142.470598220825,
+      "context_count": 15,
+      "cache_mode": "enabled",
+      "timestamp": "2025-10-04T17:02:53.015115"
+    },
+    "ensemble": {
+      "response": "Based on the provided reviews and context, people generally liked the first John Wick movie and the series overall, especially the earlier films. The first film received many positive comments praising its stylish, smooth, and well-choreographed action sequences, Keanu Reeves' performance, and the unique and engaging world it created. Reviews gave high ratings like 8, 9, and 10 out of 10, describing it as fun, brutal, and a standout action film.\n\nHowever, some later films in the series, particularly the third and fourth installments, received mixed to negative reviews from certain viewers who felt the action became over-the-top, the plots weaker or nonsensical, or the movies too long or repetitive. Despite this, there are still positive reviews for later films stating they remain entertaining and set new standards for action movies.\n\nIn summary, the general reception to John Wick, especially the first film, was highly favorable and well-liked by many. The franchise as a whole is mostly popular and praised for its action, though some installments have their detractors.\n\n**Answer:** Yes, people generally liked John Wick, especially the first film, which was praised for its stylish action and Keanu Reeves' performance.",
+      "latency_ms": 4128.890752792358,
+      "context_count": 19,
+      "cache_mode": "enabled",
+      "timestamp": "2025-10-04T17:02:57.144014"
+    }
+  },
+  "cache_disabled_results": {
+    "naive": {
+      "response": "Yes, people generally liked John Wick. Multiple reviews praise the film highly, highlighting Keanu Reeves' performance, stylish and well-choreographed action sequences, and the film's slick, violent fun. It is described as one of the best action films of its year and even of the past decade. Reviewers recommend it especially for action fans and mention that it offers something fresh and entertaining within the genre. While there are a few less enthusiastic opinions, the overall reception is very positive.",
+      "latency_ms": 2629.0340423583984,
+      "context_count": 10,
+      "cache_mode": "disabled",
+      "timestamp": "2025-10-04T17:02:59.773163"
+    },
+    "semantic": {
+      "response": "Yes, people generally liked John Wick. The reviews highlight that the first John Wick film was well-received for its smooth and stylish action sequences, brisk pacing, and Keanu Reeves' cool performance. It was praised as a special and remarkable action film with a simple yet effective plot and impressive choreography. Although some later installments received mixed or average feedback, the overall sentiment towards the franchise, especially the original film, is positive, with fans appreciating the unique style, intense action, and the world-building around the character.",
+      "latency_ms": 2316.668748855591,
+      "context_count": 10,
+      "cache_mode": "disabled",
+      "timestamp": "2025-10-04T17:03:02.089843"
+    },
+    "bm25": {
+      "response": "The general opinion about the John Wick movies appears to be mixed based on the context provided. \n\n- The first John Wick movie was very well-received, with reviewers praising its stylish action, smooth sequences, and engaging world-building. One reviewer called it \"something special\" and a \"must-see for action fans,\" while another described it as \"kinetic, concise, and stylish,\" highlighting its simplicity and effective action.\n\n- However, later installments received more criticism. For example, John Wick: Chapter 3 was described as \"boring, dull, and full of stereotypes\" with \"zero plot\" and excessive violence. Similarly, John Wick: Chapter 4 was called the weakest of the series by one reviewer who criticized it for meaningless dialogue and lack of contribution to the overall narrative, despite the action scenes.\n\nIn summary, people generally liked the original John Wick movie, but opinions on the sequels, especially the later ones, became more negative.",
+      "latency_ms": 2253.772258758545,
+      "context_count": 4,
+      "cache_mode": "disabled",
+      "timestamp": "2025-10-04T17:03:04.343626"
+    },
+    "compression": {
+      "response": "Yes, people generally liked John Wick. The reviews praise Keanu Reeves' performance, the slick and meticulously choreographed action sequences, and the unique criminal underworld the film presents. It is described as one of the best action films of the year and highly recommended for action fans and those looking for something different. The film is noted for being fun, intense, and stylish, with smooth action scenes and a strong supporting cast.",
+      "latency_ms": 2355.5355072021484,
+      "context_count": 3,
+      "cache_mode": "disabled",
+      "timestamp": "2025-10-04T17:03:06.699171"
+    },
+    "multiquery": {
+      "response": "Yes, people generally liked John Wick, especially the first film. Many reviews praise Keanu Reeves' performance, the slick and stylish action sequences, and the overall fun, fast-paced nature of the movie. Reviews describe it as \"the best action film of the year,\" \"slick, violent fun,\" and \"remarkably consistent and well received.\" While some later entries in the series received mixed reviews, the original John Wick is widely appreciated and considered a standout action film from 2014.",
+      "latency_ms": 3070.5082416534424,
+      "context_count": 14,
+      "cache_mode": "disabled",
+      "timestamp": "2025-10-04T17:03:09.769688"
+    },
+    "ensemble": {
+      "response": "Yes, people generally liked the first John Wick movie. The reviews show strong positive reactions, praising the film for its stylish, fast-paced action, Keanu Reeves's performance, and its fresh take on the action genre. Many reviewers called it fun, slick, brutally entertaining, and one of the best action films in recent years. For example:\n\n- One reviewer gave it a 10/10, calling it the \"smoothest action film to come around in a long time\" and a \"must see for action fans.\"\n- Another rated it 9/10, praising the action sequences and calling it \"the coolest action film you'll see all year.\"\n- An 8/10 review compared it favorably to \"Taken\" but noted it succeeds in its simplicity with \"awesome action, stylish stunts, kinetic chaos, and a relatable hero.\"\n- Several others noted the film's originality, effective choreography, and the compelling world it creates.\n\nWhile there were a few less enthusiastic views (ratings around 5 or 6) considering it generic or over-hyped, the majority of detailed reviews and high ratings indicate overall strong appreciation for John Wick.",
+      "latency_ms": 7673.515319824219,
+      "context_count": 20,
+      "cache_mode": "disabled",
+      "timestamp": "2025-10-04T17:03:17.443213"
+    }
+  },
+  "comparison_metrics": {
+    "naive": {
+      "cache_speedup": 689.5351409912109,
+      "cache_speedup_percentage": 26.227699218860522
+    },
+    "semantic": {
+      "cache_speedup": -234.2829704284668,
+      "cache_speedup_percentage": -10.112924885968269
+    },
+    "bm25": {
+      "cache_speedup": 419.13890838623047,
+      "cache_speedup_percentage": 18.59721658909346
+    },
+    "compression": {
+      "cache_speedup": -59.24701690673828,
+      "cache_speedup_percentage": -2.515224955242154
+    },
+    "multiquery": {
+      "cache_speedup": -1071.9623565673828,
+      "cache_speedup_percentage": -34.91156096002336
+    },
+    "ensemble": {
+      "cache_speedup": 3544.6245670318604,
+      "cache_speedup_percentage": 46.192969184207726
+    }
+  }
+}

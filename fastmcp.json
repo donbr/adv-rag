@@ -1,0 +1,139 @@
+{
+  "$schema": "https://gofastmcp.com/schemas/fastmcp.json",
+  "version": "2.0",
+  "name": "adv-rag",
+  "description": "Advanced RAG system with dual MCP interface - Tools (Command Pattern) and Resources (Query Pattern)",
+  "servers": [
+    {
+      "name": "adv-rag-tools",
+      "description": "MCP Tools Server - Full RAG pipeline with LLM synthesis (Command Pattern)",
+      "entrypoint": "src/mcp/server.py:mcp",
+      "transport": {
+        "type": "auto",
+        "stdio": {
+          "enabled": true
+        },
+        "streamable-http": {
+          "enabled": true,
+          "port": 8001,
+          "host": "0.0.0.0"
+        }
+      },
+      "environment": {
+        "PYTHONUNBUFFERED": "1",
+        "PHOENIX_COLLECTOR_ENDPOINT": "${PHOENIX_ENDPOINT}",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "COHERE_API_KEY": "${COHERE_API_KEY}",
+        "QDRANT_URL": "${QDRANT_URL}",
+        "REDIS_URL": "${REDIS_URL}"
+      },
+      "metadata": {
+        "version": "2.2.0",
+        "pattern": "CQRS Command",
+        "tools_count": 6,
+        "resources_count": 5,
+        "performance": "~20-30 seconds",
+        "output": "Formatted answer + context",
+        "logs": "logs/mcp_tools.log"
+      }
+    },
+    {
+      "name": "adv-rag-resources",
+      "description": "MCP Resources Server - Direct data access bypassing LLM (Query Pattern - 3-5x faster)",
+      "entrypoint": "src/mcp/resources.py:mcp",
+      "transport": {
+        "type": "auto",
+        "stdio": {
+          "enabled": true
+        },
+        "streamable-http": {
+          "enabled": true,
+          "port": 8002,
+          "host": "0.0.0.0"
+        }
+      },
+      "environment": {
+        "PYTHONUNBUFFERED": "1",
+        "PHOENIX_COLLECTOR_ENDPOINT": "${PHOENIX_ENDPOINT}",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "COHERE_API_KEY": "${COHERE_API_KEY}",
+        "QDRANT_URL": "${QDRANT_URL}",
+        "REDIS_URL": "${REDIS_URL}"
+      },
+      "metadata": {
+        "version": "2.2.0",
+        "pattern": "CQRS Query",
+        "resources_count": 7,
+        "performance": "~3-5 seconds",
+        "output": "Raw documents + metadata",
+        "logs": "logs/mcp_resources.log"
+      }
+    }
+  ],
+  "dependencies": {
+    "python": ">=3.13",
+    "type": "pyproject",
+    "file": "pyproject.toml"
+  },
+  "cloud": {
+    "fastmcp-cloud": {
+      "enabled": true,
+      "authentication": "org-only",
+      "auto_deploy": {
+        "branch": "main",
+        "pr_previews": true
+      },
+      "servers": [
+        {
+          "name": "adv-rag-tools",
+          "url_path": "/tools",
+          "public_endpoint": true
+        },
+        {
+          "name": "adv-rag-resources",
+          "url_path": "/resources",
+          "public_endpoint": true
+        }
+      ]
+    },
+    "self-hosted": {
+      "google-cloud-run": {
+        "enabled": false,
+        "region": "us-central1",
+        "authentication": "required",
+        "min_instances": 0,
+        "max_instances": 10
+      },
+      "aws-bedrock": {
+        "enabled": false,
+        "region": "us-east-1"
+      }
+    }
+  },
+  "observability": {
+    "phoenix": {
+      "enabled": true,
+      "endpoint": "${PHOENIX_ENDPOINT}",
+      "auto_instrument": true,
+      "projects": {
+        "tools": "advanced-rag-mcp-server",
+        "resources": "advanced-rag-resource-server"
+      }
+    }
+  },
+  "architecture": {
+    "pattern": "CQRS (Command Query Responsibility Segregation)",
+    "command_server": "adv-rag-tools",
+    "query_server": "adv-rag-resources",
+    "zero_duplication": true,
+    "fastapi_integration": "FastMCP.from_fastapi()",
+    "retrieval_strategies": [
+      "naive",
+      "bm25",
+      "semantic",
+      "contextual_compression",
+      "multi_query",
+      "ensemble"
+    ]
+  }
+}
