@@ -21,8 +21,8 @@ else:
 class Settings(BaseSettings):
     """Application settings using Pydantic BaseSettings (v2 compatible)"""
     
-    # Core API Keys
-    openai_api_key: str
+    # Core API Keys (Optional for build/inspection, required at runtime)
+    openai_api_key: Optional[str] = None
     openai_model_name: str = "gpt-4.1-mini"  # Required for llm_models.py
     cohere_api_key: Optional[str] = None
     
